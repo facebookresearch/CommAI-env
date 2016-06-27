@@ -131,14 +131,9 @@ class MovingTask(Task):
     @on_init()
     def on_init(self, event):
         self.state.initial_pos = self.get_world().state.learner_pos
-        if self.get_world().state.learner_direction == 'north':
-            self.state.dest_pos = self.state.initial_pos - Span(0, 1)
-        if self.get_world().state.learner_direction == 'south':
-            self.state.dest_pos = self.state.initial_pos + Span(0, 1)
-        if self.get_world().state.learner_direction == 'west':
-            self.state.dest_pos = self.state.initial_pos - Span(1, 0)
-        if self.get_world().state.learner_direction == 'east':
-            self.state.dest_pos = self.state.initial_pos + Span(1, 0)
+        dp = self.get_world().valid_directions[
+            self.get_world().state.learner_direction]
+        self.state.dest_pos = self.state.initial_pos + dp
 
     @on_start()
     def on_start(self, event):

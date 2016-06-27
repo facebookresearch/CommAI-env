@@ -47,7 +47,12 @@ class GridWorld(World):
         super(GridWorld, self).__init__(env)
         self._init_pos = init_pos
         self._init_direction = init_direction
-        self.valid_directions = ['north', 'east', 'south', 'west']
+        self.valid_directions = {
+            'north': Span(0, -1),
+            'east': Span(1, 0),
+            'south': Span(0, 1),
+            'west': Span(-1, 0)
+        }
         self.logger = logging.getLogger(__name__)
 
     def put_entity(self, position, name, pickable, traversable):
