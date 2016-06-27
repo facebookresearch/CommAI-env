@@ -165,8 +165,7 @@ class Environment:
         '''
         # deregister previous event managers
         if self._current_task:
-            for trigger in self._current_task.get_triggers():
-                self.event_manager.deregister(self._current_task, trigger)
+            self._deregister_task_triggers(self._current_task)
 
         # pick a new task
         self._current_task = self.task_scheduler.get_next_task()
@@ -186,13 +185,11 @@ class Environment:
             # if we had an ongoing world, end it.
             if self._current_world:
                 self._current_world.end()
-                for trigger in self._current_world.get_triggers():
-                    self.event_manager.deregister(self._current_world, trigger)
+                self._deregister_task_triggers(self._current_world)
             self._current_world = self._current_task.get_world()
             if self._current_world:
                 # register new event handlers for the world
-                for trigger in self._current_world.get_triggers():
-                    self.event_manager.register(self._current_world, trigger)
+                self._register_task_triggers(self._current_world)
                 # initialize the new world
                 self._current_world.init()
                 # spin the wheel
@@ -205,10 +202,24 @@ class Environment:
         self._output_channel.clear()
         self._output_channel_listener.clear()
         # register new event handlers
-        for trigger in self._current_task.get_triggers():
-            self.event_manager.register(self._current_task, trigger)
+        self._register_task_triggers(self._current_task)
         # we reset the state of the task
         self._current_task.init()
         # raise the Start event
         self._current_task.start()
         self.task_updated(self._current_task)
+
+    def _deregister_task_triggers(self, task):
+        for trigger in task.get_triggers():
+            try:
+                self.event_manager.deregister(task, trigger)
+            except ValueError:
+                # if the trigger was not registered, we don't worry about it
+                pass
+            except KeyError:
+                # if the trigger was not registered, we don't worry about it
+                pass
+
+    def _register_task_triggers(self, task):
+        for trigger in task.get_triggers():
+            self.event_manager.register(task, trigger)

@@ -15,6 +15,7 @@ from core.events import Trigger, Start, StateChanged, MessageReceived, \
     Init, WorldStart, WorldInit
 from collections import Counter
 import logging
+import itertools
 import re
 # Event handlers are annotated through decorators and are automatically
 # registered by the environment on Task startup
@@ -147,9 +148,16 @@ def on_timeout():
 
 
 def handler_to_trigger(f):
-    if f in global_event_handlers:
-        return global_event_handlers[f]
-    else:
+    '''checks whether f is a function and it was registered to a Trigger.
+    If so, it returns the trigger.
+    '''
+    try:
+        if f in global_event_handlers:
+            return global_event_handlers[f]
+        else:
+            return None
+    except TypeError:
+        # if f is unhashable, it's definetly not a funciton
         return None
 
 
@@ -241,9 +249,16 @@ class ScriptSet(object):
     def end(self):
         self._ended = True
 
+    def update_registered_triggers(self):
+        '''deregisters and registers back all the triggers in the task
+        in case some have been updated/removed/added'''
+        self._env._deregister_task_triggers(self)
+        self._env._register_task_triggers(self)
+
     def get_triggers(self):
         triggers = []
-        for fname, f in self.__class__.__dict__.items():
+        for fname, f in itertools.chain(self.__class__.__dict__.items(),
+                                        self.__dict__.items()):
             trigger = handler_to_trigger(f)
             if trigger:
                 triggers.append(trigger)
