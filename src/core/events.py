@@ -19,6 +19,7 @@ Trigger = namedtuple('Trigger', ('type', 'condition', 'event_handler'))
 
 # These are the possible types of events (with their parameters, if any)
 Start = namedtuple('Start', ())
+Ended = namedtuple('Ended', ())
 WorldStart = namedtuple('WorldStart', ())
 Init = namedtuple('Init', ())
 WorldInit = namedtuple('WorldInit', ())

@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 from core.aux.observer import Observable
 from core.events import Trigger, Start, StateChanged, MessageReceived, \
     SequenceReceived, Timeout, OutputSequenceUpdated, OutputMessageUpdated, \
-    Init, WorldStart, WorldInit
+    Init, WorldStart, WorldInit, Ended
 from collections import Counter
 import logging
 import itertools
@@ -27,7 +27,7 @@ import re
 global_event_handlers = {}
 
 
-# Decorator for the Start event handler
+# Decorator for the Start of Task event handler
 def on_start():
     def register(f):
         # The filtering condition is always True
@@ -36,7 +36,16 @@ def on_start():
     return register
 
 
-# Decorator for the Start event handler
+# Decorator for the End of Task event handler
+def on_ended():
+    def register(f):
+        # The filtering condition is always True
+        global_event_handlers[f] = Trigger(Ended, lambda e: True, f)
+        return f
+    return register
+
+
+# Decorator for the World Start event handler
 def on_world_start():
     def register(f):
         # The filtering condition is always True
@@ -322,3 +331,6 @@ class Task(ScriptSet):
     def init(self):
         super(Task, self).init()
         self._env.raise_event(Init())
+
+    def deinit(self):
+        self._env.raise_event(Ended())

@@ -165,6 +165,7 @@ class Environment:
         '''
         # deregister previous event managers
         if self._current_task:
+            self._current_task.deinit()
             self._deregister_task_triggers(self._current_task)
 
         # pick a new task

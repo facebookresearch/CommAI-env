@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init
+    on_state_changed, on_timeout, on_output_message, on_init, on_ended
 from worlds.grid_world import Point, Span
 import random
 
@@ -156,14 +156,23 @@ class PickAnApple(Task):
         self.state.starting_apples = \
             self.get_world().state.learner_inventory['apple']
         # drop an apple
-        apple_pos = self.get_world().state.learner_pos + Span(
+        self.apple_pos = self.get_world().state.learner_pos + Span(
             random.randint(-d, d), random.randint(-d, d))
-        self.get_world().put_entity(apple_pos, 'apple', True, True)
+        self.get_world().put_entity(self.apple_pos, 'apple', True, True)
         # drop an untraversable block
         # drop an apple
-        block_pos = self.get_world().state.learner_pos + Span(
+        self.block_pos = self.get_world().state.learner_pos + Span(
             random.randint(-d, d), random.randint(-d, d))
-        self.get_world().put_entity(block_pos, 'block', False, False)
+        if self.block_pos == self.apple_pos:
+            self.block_pos = self.block_pos + Span(0, 1)
+        self.get_world().put_entity(self.block_pos, 'block', False, False)
+
+    @on_ended()
+    def cleanup(self, event):
+        # remove the objects that were laid by this task
+        # (the apple may not be there anymore, but it doesn't matter)
+        self.get_world().remove_entity(self.block_pos)
+        self.get_world().remove_entity(self.apple_pos)
 
     @on_start()
     def on_start(self, event):

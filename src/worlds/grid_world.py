@@ -53,13 +53,23 @@ class GridWorld(World):
             'south': Span(0, 1),
             'west': Span(-1, 0)
         }
+        self.clockwise_directions = ['north', 'east', 'south', 'west']
         self.logger = logging.getLogger(__name__)
 
     def put_entity(self, position, name, pickable, traversable):
-        self.logger.info('Setting entity in {0}'.format(self.state.entities))
         self.state.entities[position] = GWEntity(name, pickable, traversable)
         self.logger.info('Droped an entity {0} at position {1}'.format(
             name, position))
+
+    def remove_entity(self, position):
+        if position in self.state.entities:
+            entity_name = self.state.entities[position].name
+            del(self.state.entities[position])
+            self.logger.info('Removed an entity {0} at position {1}'.format(
+                entity_name, position))
+        else:
+            self.logger.warn("Asked to remove a non-existent entity "
+                             "at position {0}".format(position))
 
     def get_entity(self, position):
         try:
@@ -131,8 +141,9 @@ class GridWorld(World):
             self.state.learner_direction = self.get_clockwise_direction(d)
 
     def get_clockwise_direction(self, d):
-        return self.valid_directions[
-            (self.valid_directions.index(self.state.learner_direction) + d) % 4]
+        return self.clockwise_directions[
+            (self.clockwise_directions.index(
+                self.state.learner_direction) + d) % 4]
 
     def move_forward(self, dz):
         if self.state.learner_direction == 'east':
@@ -162,7 +173,7 @@ class GridWorld(World):
         '''
         Creates a grid world representation as a string
         '''
-        grid_h = 11
+        grid_h = 5
         grid_w = 5
         # there should be cell in the center to show the learner
         assert grid_w % 2 == 1 and grid_h % 2 == 1
