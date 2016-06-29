@@ -11,7 +11,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import World, on_world_start, on_message, on_sequence,\
     on_state_changed, on_timeout, on_output_message, on_world_init
-from collections import namedtuple, Counter
+from collections import namedtuple, defaultdict
 import logging
 import re
 
@@ -86,7 +86,7 @@ class GridWorld(World):
         # dictionary of entities in the world
         self.state.entities = {}
         # inventory of the learner (a multiset)
-        self.state.learner_inventory = Counter()
+        self.state.learner_inventory = defaultdict(int)
 
     @on_message(r"I turn left\.$")
     def on_turn_left(self, event):

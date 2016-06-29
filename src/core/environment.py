@@ -151,12 +151,16 @@ class Environment:
             in the state of the world or the tasks changed (but we
             don't keep track what)
         '''
-        # tasks that have a world should also set the world state as an argument
-        if self._current_world:
-            self.raise_event(StateChanged(
-                self._current_world.state, self._current_task.state))
-        else:
-            self.raise_event(StateChanged(self._current_task.state))
+        # state changed events can only be raised if the current task is
+        # started
+        if self._current_task and self._current_task.has_started():
+            # tasks that have a world should also take the world state as
+            # an argument
+            if self._current_world:
+                self.raise_event(StateChanged(
+                    self._current_world.state, self._current_task.state))
+            else:
+                self.raise_event(StateChanged(self._current_task.state))
 
     def _switch_new_task(self):
         '''

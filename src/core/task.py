@@ -13,7 +13,7 @@ from core.aux.observer import Observable
 from core.events import Trigger, Start, StateChanged, MessageReceived, \
     SequenceReceived, Timeout, OutputSequenceUpdated, OutputMessageUpdated, \
     Init, WorldStart, WorldInit, Ended
-from collections import Counter
+from collections import defaultdict
 import logging
 import itertools
 import re
@@ -170,16 +170,17 @@ def handler_to_trigger(f):
         return None
 
 
-class StateTrackingCounterWrapper(Counter):
+class StateTrackingDefaultdictWrapper(defaultdict):
     '''This is a wrapper for variables stored in a State object so
     if something in them change, the original State also gets changed'''
     def __init__(self, obj, owner):
         '''owner here is the State or a parent StateVariable'''
-        super(StateTrackingCounterWrapper, self).__init__(obj)
+        super(StateTrackingDefaultdictWrapper, self).__init__(
+            obj.default_factory, obj)
         self._owner = owner
 
     def __setitem__(self, name, value):
-        super(StateTrackingCounterWrapper, self).__setitem__(name, value)
+        super(StateTrackingDefaultdictWrapper, self).__setitem__(name, value)
         self._raise_state_changed()
 
     def _raise_state_changed(self):
@@ -217,9 +218,10 @@ class State(object):
         '''intercept every time a value is updated to raise the associated event
         '''
         # wrap the variable in an StateVariable to report whether it changes
-        if isinstance(value, Counter):
-            self.logger.info("Wrapping variable {0} as a Counter".format(value))
-            value = StateTrackingCounterWrapper(value, self)
+        if isinstance(value, defaultdict):
+            self.logger.info("Wrapping variable {0} as a defaultdict"
+                             .format(value))
+            value = StateTrackingDefaultdictWrapper(value, self)
         elif isinstance(value, dict):
             self.logger.info("Wrapping variable {0} as a dict".format(value))
             value = StateTrackingDictionaryWrapper(value, self)
@@ -274,9 +276,8 @@ class ScriptSet(object):
         return triggers
 
     def _raise_state_changed(self):
-        if self.has_started():
-            self._env.raise_state_changed()
-            # notify (outside) observers
+        self._env.raise_state_changed()
+        # notify (outside) observers
         self.state_updated(self)
 
     def __str__(self):
