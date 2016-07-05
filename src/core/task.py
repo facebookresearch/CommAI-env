@@ -260,11 +260,12 @@ class ScriptSet(object):
     def end(self):
         self._ended = True
 
-    def update_registered_triggers(self):
+    def dyn_add_handler(self, handler):
         '''deregisters and registers back all the triggers in the task
         in case some have been updated/removed/added'''
-        self._env._deregister_task_triggers(self)
-        self._env._register_task_triggers(self)
+        trigger = handler_to_trigger(handler)
+        if trigger:
+            self._env._register_task_trigger(self, trigger)
 
     def get_triggers(self):
         triggers = []

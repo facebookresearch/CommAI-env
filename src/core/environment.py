@@ -227,4 +227,7 @@ class Environment:
 
     def _register_task_triggers(self, task):
         for trigger in task.get_triggers():
-            self.event_manager.register(task, trigger)
+            self._register_task_trigger(task, trigger)
+
+    def _register_task_trigger(self, task, trigger):
+        self.event_manager.register(task, trigger)
