@@ -268,11 +268,15 @@ class ScriptSet(object):
 
     def get_triggers(self):
         triggers = []
-        for fname, f in itertools.chain(self.__class__.__dict__.items(),
-                                        self.__dict__.items()):
-            trigger = handler_to_trigger(f)
-            if trigger:
-                triggers.append(trigger)
+        for fname in dir(self):
+            try:
+                # We try to extract the function object that was registered
+                f = getattr(self, fname).im_func
+                trigger = handler_to_trigger(f)
+                if trigger:
+                    triggers.append(trigger)
+            except AttributeError:
+                pass
         return triggers
 
     def _raise_state_changed(self):
