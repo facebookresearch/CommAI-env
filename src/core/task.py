@@ -323,8 +323,9 @@ class Task(ScriptSet):
         return self._world
 
     def check_timeout(self, t):
-        assert t <= self._max_time, '{0} > {1}'.format(t, self._max_time)
-        if t == self._max_time:
+        # if we are still in the process of outputting a message,
+        # let it finish
+        if t >= self._max_time and self._env._output_channel.is_empty():
             self._env.event_manager.raise_event(Timeout())
             self._ended = True
             return True
