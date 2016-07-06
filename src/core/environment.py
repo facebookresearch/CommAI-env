@@ -14,7 +14,6 @@ from core.events import EventManager, StateChanged, MessageReceived, \
 from core.aux.observer import Observable
 from core.channels import InputChannel, OutputChannel
 import logging
-SILENCE = '0'
 
 
 class Environment:
@@ -25,6 +24,7 @@ class Environment:
         self.event_manager = EventManager()
         self._current_task = None
         self._current_world = None
+        self._serializer = serializer
         # input channel
         self._input_channel = InputChannel(serializer)
         # output channel
@@ -37,6 +37,9 @@ class Environment:
         self._reward = None
         # Current task time
         self._task_time = None
+        # Task separator issued
+        self._task_separator_issued = False
+        # Internal logger
         self.logger = logging.getLogger(__name__)
 
         # signals
@@ -78,13 +81,19 @@ class Environment:
             reward = None
         else:
             # If the task is ended and there is nothing else to say,
-            # return reward and move to next task
-
+            # issue a silence and then return reward and move to next task
             if self._output_channel.is_empty():
-                # Have nothing more to say
-                # reward the learner if necessary and switch to new task
-                reward = self._reward if self._reward is not None else 0
-                self._switch_new_task()
+                if self._task_separator_issued:
+                    # Have nothing more to say
+                    # reward the learner if necessary and switch to new task
+                    reward = self._reward if self._reward is not None else 0
+                    self._switch_new_task()
+                    self._task_separator_issued = False
+                else:
+                    self._output_channel.set_message(
+                        self._serializer.SILENCE_TOKEN)
+                    self._task_separator_issued = True
+                    reward = None
             else:
                 # TODO: decide what to do here.
                 # Should we consume the bit or not?
@@ -92,10 +101,10 @@ class Environment:
                 # If there is still something to say, continue saying it
                 reward = None
         # Get one bit from the output buffer and ship it
-        if not self._output_channel.is_empty():
-            output = self._output_channel.consume_bit()
-        else:
-            output = SILENCE
+        if self._output_channel.is_empty():
+            self._output_channel.set_message(self._serializer.SILENCE_TOKEN)
+        output = self._output_channel.consume_bit()
+
         # we hear to ourselves
         self._output_channel_listener.consume_bit(output)
         # advance time
@@ -126,6 +135,11 @@ class Environment:
         to the learner once the task has sent all the remaining message'''
         self._reward = reward
         self._current_task.end()
+        self.logger.debug('Setting reward {0} with message "{1}"'
+                          ' and priority {2}'
+                          .format(reward, message, priority))
+        # adds a final space to the final message of the task
+        # to separate the next task instructions
         self.set_message(message, priority)
 
     def set_message(self, message, priority=0):
@@ -133,6 +147,8 @@ class Environment:
         bit by bit. It overwrites any previous content.
         '''
         if self._output_channel.is_empty() or priority >= self._output_priority:
+            self.logger.debug('Setting message "{0}" with priority {1}'
+                               .format(message, priority))
             self._output_channel.set_message(message)
             self._output_priority = priority
         else:

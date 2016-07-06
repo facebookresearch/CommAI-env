@@ -13,6 +13,11 @@ class ConsoleView:
         # TODO: Move environment and session outside of the class
         self._env = env
         self._session = session
+        # for visualization purposes, we keep an internal buffer of the
+        # input and output stream so when they are cleared from task to
+        # task, we can keep the history intact.
+        self.input_buffer = ''
+        self.output_buffer = ''
         env._input_channel.sequence_updated.register(
             self.on_learner_sequence_updated)
         env._input_channel.message_updated.register(
@@ -32,22 +37,33 @@ class ConsoleView:
         self.info = {'reward': 0, 'time': 0}
 
     def on_learner_message_updated(self, message):
-        learner_input = self.channel_to_str(self._env._input_channel)
+        # we use the fact that messages arrive character by character
+        self.input_buffer += self._env._input_channel.get_text()[-1]
+        self.input_buffer = self.input_buffer[-self._scroll_msg_length:]
+        learner_input = self.channel_to_str(
+            self.input_buffer, self._env._input_channel.get_undeserialized())
         self._win.addstr(self._learner_seq_y, 0, learner_input)
         self._win.refresh()
 
     def on_learner_sequence_updated(self, sequence):
-        learner_input = self.channel_to_str(self._env._input_channel)
+        learner_input = self.channel_to_str(
+            self.input_buffer, self._env._input_channel.get_undeserialized())
         self._win.addstr(self._learner_seq_y, 0, learner_input)
         self._win.refresh()
 
     def on_env_message_updated(self, message):
-        env_output = self.channel_to_str(self._env._output_channel_listener)
+        self.output_buffer += self._env._output_channel_listener.get_text()[-1]
+        self.output_buffer = self.output_buffer[-self._scroll_msg_length:]
+        env_output = self.channel_to_str(
+            self.output_buffer,
+            self._env._output_channel_listener.get_undeserialized())
         self._win.addstr(self._teacher_seq_y, 0, env_output)
         self._win.refresh()
 
     def on_env_sequence_updated(self, sequence):
-        env_output = self.channel_to_str(self._env._output_channel_listener)
+        env_output = self.channel_to_str(
+            self.output_buffer,
+            self._env._output_channel_listener.get_undeserialized())
         self._win.addstr(self._teacher_seq_y, 0, env_output)
         self._win.refresh()
 
@@ -141,12 +157,7 @@ class ConsoleView:
         self._user_input_win.clear()
         return input
 
-    def channel_to_str(self, channel):
+    def channel_to_str(self, text, bits):
         length = self._scroll_msg_length - 10
-        if not channel.get_undeserialized():
-            return "{0:_>{length}}".format(
-                channel.get_text()[-length:], length=length)
-        else:
-            return "{1:_>{length}}[{0: <8}]".format(
-                channel.get_undeserialized(),
-                channel.get_text()[-length:], length=length)
+        return "{0:_>{length}}[{1: <8}]".format(
+            text[-length:], bits, length=length)

@@ -289,10 +289,10 @@ class ScriptSet(object):
         return str(self.__class__.__name__)
 
     # ### API for the scripts ###
-    def set_reward(self, reward, message='', priority=1):
+    def set_reward(self, reward, message='', priority=0):
         self._env.set_reward(reward, message, priority)
 
-    def set_message(self, message, priority=1):
+    def set_message(self, message, priority=0):
         self._env.set_message(message, priority)
 
     def clear_input_channel(self):
@@ -341,3 +341,10 @@ class Task(ScriptSet):
 
     def deinit(self):
         self._env.raise_event(Ended())
+
+    # ### API for the scripts ###
+    def set_reward(self, reward, message='', priority=1):
+        super(Task, self).set_reward(reward, message, priority)
+
+    def set_message(self, message, priority=1):
+        super(Task, self).set_message(message, priority)
