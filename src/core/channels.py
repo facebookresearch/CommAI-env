@@ -82,7 +82,7 @@ class InputChannel:
         '''
         if self._deserialized_buffer != new_buffer:
             self._deserialized_buffer = new_buffer
-            self.sequence_updated(self._deserialized_buffer)
+            self.message_updated(self._deserialized_buffer)
 
 
 class OutputChannel:
