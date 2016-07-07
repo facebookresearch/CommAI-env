@@ -10,15 +10,20 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import logging
+import codecs
 
 
 class StandardSerializer:
     def __init__(self):
         self.SILENCE_TOKEN = ' '
-        self.SILENCE_BITS = '00000000'
+        self.SILENCE_ENCODING = '\0'
         self.logger = logging.getLogger(__name__)
 
     def to_binary(self, message):
+        # All spaces are encoded as null bytes:
+        message = message.replace(self.SILENCE_TOKEN, self.SILENCE_ENCODING)
+        # handle unicode
+        message = codecs.encode(message, 'utf-8')
         data = []
         for c in message:
             # convert to binary
@@ -31,18 +36,27 @@ class StandardSerializer:
         return ''.join(data)
 
     def to_text(self, data):
-        # special silence case
-        if data == self.SILENCE_BITS:
-            return self.SILENCE_TOKEN
-        message = ''
-        assert self.can_deserialize(data)
-        for i in range(int(len(data) / 8)):
-            b = data[i * 8:(i + 1) * 8]
+        for skip in range(int(len(data) / 8)):
             try:
-                message += chr(int(b, 2))
+                message = str('')
+                sub_data = data[skip * 8:]
+                for i in range(int(len(sub_data) / 8)):
+                    b = sub_data[i * 8:(i + 1) * 8]
+                    message += chr(int(b, 2))
+                message = codecs.decode(message, 'utf-8')
+                message = message.replace(self.SILENCE_ENCODING,
+                                          self.SILENCE_TOKEN)
+                if skip > 0:
+                    self.logger.warn("Skipping {0} bytes to find a valid "
+                                     "unicode character".format(skip))
+
+                return message
             except UnicodeDecodeError:
-                self.logger.error('Couldn\'t deserialize byte "{0}"'.format(b))
-        return message
+                pass
+
+        return None
 
     def can_deserialize(self, data):
-        return len(data) % 8 == 0
+        if len(data) < 8:
+            return False
+        return self.to_text(data) is not None

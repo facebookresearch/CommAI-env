@@ -40,7 +40,7 @@ class HumanLearner:
         if self._output_channel.is_empty():
             self.logger.debug("Output buffer is empty, filling with silence")
             # Add one silence token to the buffer
-            self._output_channel._set_buffer(self._serializer.SILENCE_BITS)
+            self._output_channel.set_message(self._serializer.SILENCE_TOKEN)
         # Get the bit to return
         output = self._output_channel.consume_bit()
         # Interpret the bit from the learner

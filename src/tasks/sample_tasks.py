@@ -1,3 +1,5 @@
+# -*- coding: utf-8
+
 # Copyright (c) 2016-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -209,3 +211,17 @@ class PickAnApple(Task):
                       ts.starting_apples)
     def on_apple_picked(self, event):
         self.set_reward(1, 'Enjoy!')
+
+
+class UnicodeTask(Task):
+    def __init__(self, env):
+        super(UnicodeTask, self).__init__(env=env, max_time=1000)
+
+    @on_start()
+    def on_start(self, event):
+        self.set_message('a in Hebrew is א. How do you say a in Hebrew?')
+
+    # on non-silent character
+    @on_message(u"א$")
+    def on_message(self, event):
+        self.set_reward(1, "Correct!")

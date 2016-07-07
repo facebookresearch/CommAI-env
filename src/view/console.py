@@ -5,7 +5,10 @@ from __future__ import unicode_literals
 import curses
 import curses.textpad
 import logging
+import locale
 
+locale.setlocale(locale.LC_ALL, '')
+code = locale.getpreferredencoding()
 
 class ConsoleView:
 
@@ -38,33 +41,37 @@ class ConsoleView:
 
     def on_learner_message_updated(self, message):
         # we use the fact that messages arrive character by character
-        self.input_buffer += self._env._input_channel.get_text()[-1]
-        self.input_buffer = self.input_buffer[-self._scroll_msg_length:]
-        learner_input = self.channel_to_str(
-            self.input_buffer, self._env._input_channel.get_undeserialized())
-        self._win.addstr(self._learner_seq_y, 0, learner_input)
-        self._win.refresh()
+        if self._env._input_channel.get_text():
+            self.input_buffer += self._env._input_channel.get_text()[-1]
+            self.input_buffer = self.input_buffer[-self._scroll_msg_length:]
+            learner_input = self.channel_to_str(
+                self.input_buffer,
+                self._env._input_channel.get_undeserialized())
+            self._win.addstr(self._learner_seq_y, 0, learner_input.encode(code))
+            self._win.refresh()
 
     def on_learner_sequence_updated(self, sequence):
         learner_input = self.channel_to_str(
             self.input_buffer, self._env._input_channel.get_undeserialized())
-        self._win.addstr(self._learner_seq_y, 0, learner_input)
+        self._win.addstr(self._learner_seq_y, 0, learner_input.encode(code))
         self._win.refresh()
 
     def on_env_message_updated(self, message):
-        self.output_buffer += self._env._output_channel_listener.get_text()[-1]
-        self.output_buffer = self.output_buffer[-self._scroll_msg_length:]
-        env_output = self.channel_to_str(
-            self.output_buffer,
-            self._env._output_channel_listener.get_undeserialized())
-        self._win.addstr(self._teacher_seq_y, 0, env_output)
-        self._win.refresh()
+        if self._env._output_channel_listener.get_text():
+            self.output_buffer += \
+                self._env._output_channel_listener.get_text()[-1]
+            self.output_buffer = self.output_buffer[-self._scroll_msg_length:]
+            env_output = self.channel_to_str(
+                self.output_buffer,
+                self._env._output_channel_listener.get_undeserialized())
+            self._win.addstr(self._teacher_seq_y, 0, env_output.encode(code))
+            self._win.refresh()
 
     def on_env_sequence_updated(self, sequence):
         env_output = self.channel_to_str(
             self.output_buffer,
             self._env._output_channel_listener.get_undeserialized())
-        self._win.addstr(self._teacher_seq_y, 0, env_output)
+        self._win.addstr(self._teacher_seq_y, 0, env_output.encode(code))
         self._win.refresh()
 
     def on_total_reward_updated(self, reward):
@@ -152,13 +159,16 @@ class ConsoleView:
     def get_input(self):
         self._user_input_label_win.addstr(0, 0, 'input:')
         self._user_input_label_win.refresh()
-        tb = curses.textpad.Textbox(self._user_input_win)
-        tb.stripspaces = True
-        input = tb.edit().strip()
+        curses.echo()
+        inputstr = self._user_input_win.getstr(
+            0,
+            0,
+            self.width - self._user_input_win_x).decode(code)
+        curses.noecho()
         self._user_input_win.clear()
-        return input
+        return inputstr
 
     def channel_to_str(self, text, bits):
         length = self._scroll_msg_length - 10
         return "{0:_>{length}}[{1: <8}]".format(
-            text[-length:], bits, length=length)
+            text[-length:], bits[-7:], length=length)

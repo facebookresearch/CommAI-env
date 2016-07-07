@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from worlds.grid_world import GridWorld
-from tasks.sample_tasks import RepeatingCharTask, YesNoTask, PickAnApple, MovingTask
+from tasks.sample_tasks import PickAnApple, MovingTask
 from core.scheduler import RandomTaskScheduler
 
 
@@ -18,6 +18,5 @@ def create_tasks(env):
     # a world for some tasks
     grid_world = GridWorld(env)
     # we get today's task menu
-    return RandomTaskScheduler([RepeatingCharTask(env), YesNoTask(env),
-                                PickAnApple(env, grid_world),
+    return RandomTaskScheduler([PickAnApple(env, grid_world),
                                 MovingTask(env, grid_world)])

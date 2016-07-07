@@ -21,7 +21,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(' ', slzr.to_text(slzr.to_binary(' ')))
 
         # greek letter \alpha (not working in current ascii serialization)
-        # self.assertEqual(u"\u03B1", slzr.to_text(slzr.to_binary(u"\u03B1")))
+        self.assertEqual(u"\u03B1", slzr.to_text(slzr.to_binary(u"\u03B1")))
 
 
 def main():
