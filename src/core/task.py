@@ -10,13 +10,46 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.aux.observer import Observable
-from core.events import Trigger, Start, StateChanged, MessageReceived, \
-    SequenceReceived, Timeout, OutputSequenceUpdated, OutputMessageUpdated, \
-    Init, WorldStart, WorldInit, Ended
-from collections import defaultdict
+from core.events import Trigger
+from collections import defaultdict, namedtuple
 import logging
-import itertools
 import re
+
+# These are the possible types of events (with their parameters, if any)
+Start = namedtuple('Start', ())
+Ended = namedtuple('Ended', ())
+WorldStart = namedtuple('WorldStart', ())
+Init = namedtuple('Init', ())
+WorldInit = namedtuple('WorldInit', ())
+Timeout = namedtuple('Timeout', ())
+
+SequenceReceived = namedtuple('SequenceReceived', ('sequence',))
+OutputSequenceUpdated = namedtuple('OutputSequenceUpdated',
+                                   ('output_sequence',))
+OutputMessageUpdated = namedtuple('OutputMessageUpdated',
+                                   ('output_message',))
+
+
+# horrible way of making second_state optional
+class StateChanged(namedtuple('StateChanged', ('state', 'second_state'))):
+    def __new__(cls, state, second_state=None):
+        return super(StateChanged, cls).__new__(cls, state, second_state)
+
+
+# helper methods for handling received messages
+class MessageReceived():
+    def __init__(self, message):
+        self.message = message
+        # this instance variable gets assigned the outcome of the
+        # trigger's condition
+        self.condition_outcome = None
+
+    def is_message(self, msg):
+        return self.message[-len(msg):] == msg
+
+    def get_match(self, ngroup=0):
+        return self.condition_outcome.group(ngroup)
+
 # Event handlers are annotated through decorators and are automatically
 # registered by the environment on Task startup
 
@@ -185,7 +218,7 @@ class StateTrackingDefaultdictWrapper(defaultdict):
 
     def _raise_state_changed(self):
         '''recursively forwards the call to the owner'''
-        self._owner._raise_state_changed()
+        return self._owner._raise_state_changed()
 
 
 class StateTrackingDictionaryWrapper(dict):
@@ -202,7 +235,7 @@ class StateTrackingDictionaryWrapper(dict):
 
     def _raise_state_changed(self):
         '''recursively forwards the call to the owner'''
-        self._owner._raise_state_changed()
+        return self._owner._raise_state_changed()
 
 
 class State(object):
@@ -231,7 +264,7 @@ class State(object):
         self._raise_state_changed()
 
     def _raise_state_changed(self):
-        self._owner._raise_state_changed()
+        return self._owner._raise_state_changed()
 
 
 class ScriptSet(object):
@@ -281,9 +314,11 @@ class ScriptSet(object):
         return triggers
 
     def _raise_state_changed(self):
-        self._env.raise_state_changed()
-        # notify (outside) observers
-        self.state_updated(self)
+        ret = self._env.raise_state_changed()
+        if self.has_started():
+            # notify (outside) observers
+            self.state_updated(self)
+        return ret
 
     def __str__(self):
         return str(self.__class__.__name__)

@@ -9,7 +9,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from core.events import EventManager, StateChanged, MessageReceived, \
+from core.events import EventManager
+from core.task import StateChanged, MessageReceived, \
     SequenceReceived, OutputSequenceUpdated, OutputMessageUpdated
 from core.aux.observer import Observable
 from core.channels import InputChannel, OutputChannel
@@ -177,6 +178,8 @@ class Environment:
                     self._current_world.state, self._current_task.state))
             else:
                 self.raise_event(StateChanged(self._current_task.state))
+            return True
+        return False
 
     def _switch_new_task(self):
         '''
@@ -190,6 +193,9 @@ class Environment:
 
         # pick a new task
         self._current_task = self.task_scheduler.get_next_task()
+        # the task could be in the ended state, let's reinitialize it
+        self._current_task.init()
+        assert not self._current_task.has_started()
         try:
             # This is to check whether the user didn't mess up in instantiating
             # the class

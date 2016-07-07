@@ -15,9 +15,9 @@ from worlds.grid_world import Point, Span
 import random
 
 
-class RepeatingTask(Task):
+class RepeatingCharTask(Task):
     def __init__(self, env):
-        super(RepeatingTask, self).__init__(env=env, max_time=1000)
+        super(RepeatingCharTask, self).__init__(env=env, max_time=100)
 
     @on_start()
     def on_start(self, event):
@@ -27,7 +27,34 @@ class RepeatingTask(Task):
     # on non-silent character
     @on_message("[^ ]")
     def on_message(self, event):
-        if event.message[-1] == self.target_char:
+        if event.is_message(self.target_char):
+            self.set_reward(1, "")
+        else:
+            self.set_reward(0, "")
+
+
+class YesNoTask(Task):
+    def __init__(self, env):
+        super(YesNoTask, self).__init__(env=env, max_time=1000)
+
+    @on_start()
+    def on_start(self, event):
+        random_obj = ''.join(chr(ord('a') + random.randint(0, 26))
+                             for i in range(5))
+        random_prop = ''.join(chr(ord('a') + random.randint(0, 26))
+                              for i in range(5))
+        self.coin_toss = random.randint(0, 1)
+        self.set_message("{0} is {1}. Is {0} {2}?".format(
+            random_obj, random_prop if self.coin_toss else "not " + random_prop,
+            random_prop
+        ))
+
+    # on non-silent character
+    @on_message("yes|no")
+    def on_message(self, event):
+        if self.coin_toss and event.get_match() == 'yes':
+            self.set_reward(1, "")
+        elif not self.coin_toss and event.get_match() == 'no':
             self.set_reward(1, "")
         else:
             self.set_reward(0, "")
@@ -176,7 +203,7 @@ class PickAnApple(Task):
 
     @on_start()
     def on_start(self, event):
-        self.set_message("Pick an apple")
+        self.set_message("Pick up an apple")
 
     @on_state_changed(lambda ws, ts: ws.learner_inventory['apple'] >
                       ts.starting_apples)

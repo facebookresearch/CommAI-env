@@ -17,28 +17,6 @@ import logging
 # filtering condition, it will call the specified event_handler function
 Trigger = namedtuple('Trigger', ('type', 'condition', 'event_handler'))
 
-# These are the possible types of events (with their parameters, if any)
-Start = namedtuple('Start', ())
-Ended = namedtuple('Ended', ())
-WorldStart = namedtuple('WorldStart', ())
-Init = namedtuple('Init', ())
-WorldInit = namedtuple('WorldInit', ())
-Timeout = namedtuple('Timeout', ())
-
-
-# horrible way of making second_state optional
-class StateChanged(namedtuple('StateChanged', ('state', 'second_state'))):
-    def __new__(cls, state, second_state=None):
-        return super(StateChanged, cls).__new__(cls, state, second_state)
-
-
-MessageReceived = namedtuple('MessageReceived', ('message',))
-SequenceReceived = namedtuple('SequenceReceived', ('sequence',))
-OutputSequenceUpdated = namedtuple('OutputSequenceUpdated',
-                                   ('output_sequence',))
-OutputMessageUpdated = namedtuple('OutputMessageUpdated',
-                                   ('output_message',))
-
 
 class EventManager:
     def __init__(self):
@@ -77,7 +55,15 @@ class EventManager:
             # for all the triggers registered for this type of event
             for observer, trigger in self.triggers[event.__class__]:
                 # check if the filtering condition is a go
-                if trigger.condition(event):
+                condition_outcome = trigger.condition(event)
+                if condition_outcome:
+                    # save, if the event expects it, the outcome of the
+                    # condition checking
+                    try:
+                        event.condition_outcome = condition_outcome
+                    except AttributeError:
+                        self.logger.warn("Couldn't save condition outcome for "
+                                         "event {0}".format(event))
                     self.logger.debug('{0} handled by {1}'.format(
                         event, trigger.event_handler))
                     # call the event handler

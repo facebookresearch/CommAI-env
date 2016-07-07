@@ -32,8 +32,6 @@ class HumanLearner:
 
     def reward(self, reward):
         self.logger.info("Reward received: {0}".format(reward))
-        # makes a pause before moving to the next task
-        self.ask_for_input()
         self._input_channel.clear()
         self._output_channel.clear()
 

@@ -96,6 +96,7 @@ class ConsoleView:
         if world:
             world.state_updated.register(self.on_world_state_updated)
             self._worldwin.addstr(0, 0, str(world))
+            self._worldwin.refresh()
         else:
             self._worldwin.clear()
         self._worldwin.refresh()

@@ -114,9 +114,9 @@ class GridWorld(World):
         else:
             self.set_message("There is nothing here.")
 
-    @on_message(r"I pick up the \w+\.$")
+    @on_message(r"I pick up the (\w+)\.$")
     def on_pick_up(self, event):
-        obj_name = re.match(r".*I pick up the (\w+).$", event.message).group(1)
+        obj_name = event.get_match(1)
         if self.state.learner_pos in self.state.entities and \
                 obj_name == self.state.entities[self.state.learner_pos].name:
             # There is an object with the given name here
