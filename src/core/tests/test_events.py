@@ -12,6 +12,8 @@ from __future__ import unicode_literals
 import unittest
 import core.events as events
 
+class MyEvent(object):
+    pass
 
 class TestEvents(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -25,8 +27,8 @@ class TestEvents(unittest.TestCase):
 
         em = events.EventManager()
         em.register(self,
-                    events.Trigger(events.Start, lambda e: True, on_start))
-        em.raise_event(events.Start())
+                    events.Trigger(MyEvent, lambda e: True, on_start))
+        em.raise_event(MyEvent())
         self.failUnless(self.event_raised)
 
 

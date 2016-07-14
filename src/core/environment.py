@@ -160,7 +160,7 @@ class Environment:
             )
 
     def raise_event(self, event):
-        self.event_manager.raise_event(event)
+        return self.event_manager.raise_event(event)
 
     def raise_state_changed(self):
         '''
@@ -246,6 +246,7 @@ class Environment:
             except KeyError:
                 # if the trigger was not registered, we don't worry about it
                 pass
+        task.clean_dynamic_handlers()
 
     def _register_task_triggers(self, task):
         for trigger in task.get_triggers():

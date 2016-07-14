@@ -273,12 +273,19 @@ class ScriptSet(object):
         self.init()
         # a bit ugly, but there are worse things in life
         self.state_updated = Observable()
+        # remember dynamically register handlers to destroy their triggers
+        self.dyn_handlers = set()
 
     def init(self):
         self._started = False
         self._ended = False
         # this is where all the state variables should be kept
         self.state = State(self)
+
+    def clean_dynamic_handlers(self):
+        for h in self.dyn_handlers:
+            del global_event_handlers[h]
+        self.dyn_handlers = set()
 
     def has_started(self):
         return self._started
@@ -299,6 +306,7 @@ class ScriptSet(object):
         trigger = handler_to_trigger(handler)
         if trigger:
             self._env._register_task_trigger(self, trigger)
+            self.dyn_handlers.add(handler)
 
     def get_triggers(self):
         triggers = []

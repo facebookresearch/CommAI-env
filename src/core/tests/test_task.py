@@ -11,7 +11,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import unittest
 import core.task as task
-import core.events as events
 
 
 class EnvironmentMock():
@@ -57,13 +56,13 @@ class TestEvents(unittest.TestCase):
         self.failUnless(TestTask.timeout_handler.im_func in handlers)
         self.failUnless(TestTask.ended_handler.im_func in handlers)
         types = {t.event_handler: t.type for t in triggers}
-        self.assertEqual(events.Init, types[TestTask.init_handler.im_func])
-        self.assertEqual(events.Start, types[TestTask.start_handler.im_func])
-        self.assertEqual(events.MessageReceived,
+        self.assertEqual(task.Init, types[TestTask.init_handler.im_func])
+        self.assertEqual(task.Start, types[TestTask.start_handler.im_func])
+        self.assertEqual(task.MessageReceived,
                          types[TestTask.message_handler.im_func])
-        self.assertEqual(events.Timeout,
+        self.assertEqual(task.Timeout,
                          types[TestTask.timeout_handler.im_func])
-        self.assertEqual(events.Ended, types[TestTask.ended_handler.im_func])
+        self.assertEqual(task.Ended, types[TestTask.ended_handler.im_func])
 
     def testInheritance(self):
         class BaseTask(task.Task):
@@ -123,7 +122,7 @@ class TestEvents(unittest.TestCase):
         env = EnvironmentMock(triggers)
         tt = TestTask(env, max_time=10)
         # raise the init event
-        tt.init_handler(events.Init())
+        tt.init_handler(task.Init())
         triggers.extend(tt.get_triggers())
         handlers = map(lambda t: t.event_handler, triggers)
         self.assertEqual(2, len(triggers))
