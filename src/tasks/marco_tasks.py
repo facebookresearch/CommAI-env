@@ -18,6 +18,7 @@ global_properties =  {'john' :
                 'beet':['red','dirty','hard','old','cheap','sweet','healthy','local','large'],
                 'carrot':['orange','hard','fresh','local','healthy','sweet','crunchy'],
                 'cucumber':['green','fresh','juicy','local','cheap','healthy','frozen','crunchy'],
+                'mango':['brown','rotten'],
                 'onion':['white','pungent','smelly','cheap','local','healthy'],
                 'pear':['brown','sweet','dry','cheap','local','big'],
                 'pineapple':['yellow','sweet','hard','exotic','brown','rough'],
@@ -33,7 +34,8 @@ global_properties =  {'john' :
                 'onion':['yellow','old','cheap','dry','local','large'],
                 'mango':['red','green','yellow','juicy','sweet','expensive'],
                 'pear':['green','tasteless','hard','local','cheap','big'],
-                'pineapple':['yellow','sweet','dry','fresh','expensive','exotic']}
+                'pineapple':['yellow','sweet','dry','fresh','expensive','exotic'],
+                'tomato':['red','soft','sour','local','cheap']}
            }
 
 # it's handy to have a reverse dictionary with the properties in the
@@ -189,7 +191,9 @@ class ListPropertiesofAnObjectTask(Task):
 
     @on_timeout()
     def give_away_answer(self,event):
-        self.set_message('the right answer is: ' + " ".join(object_properties) + '.')
+        correct_properties = list(self.object_properties)
+        random.shuffle(correct_properties)
+        self.set_message('the right properties are: ' + " ".join(correct_properties) + '.')
 
 class NameAPropertyOfAnObject(Task):
     def __init__(self, env):
@@ -413,7 +417,9 @@ class ListObjectsWithACertainPropertyTask(Task):
 
     @on_timeout()
     def give_away_answer(self,event):
-        self.set_message('the right answer is: ' + "".join(self.objects) + '.')
+        correct_objects=list(self.objects)
+        random.shuffle(correct_objects)
+        self.set_message('the right objects are: ' + "".join(correct_objects) + '.')
 
 
 class NameAnObjectWithAProperty(Task):
@@ -543,9 +549,9 @@ class WhoHasACertainObjectWithACertainPropertyTask(Task):
         objects_set=set()
         properties_set=set()
         object_property_combinations={}
-        for basket in global_properties.keys():
+        for basket in global_properties:
             object_property_combinations[basket]=set()
-            for object in global_properties[basket].keys():
+            for object in global_properties[basket]:
                 objects_set.add(object)
                 for property in global_properties[basket][object]:
                     properties_set.add(property)
@@ -556,7 +562,7 @@ class WhoHasACertainObjectWithACertainPropertyTask(Task):
         property = random.choice(list(properties_set))
         # we build a list of baskets that have the relevant object property combination
         self.basket_set=set()
-        for basket in global_properties.keys():
+        for basket in global_properties:
             if ((object, property) in object_property_combinations[basket]):
                 self.basket_set.add(basket)
         # at this point, if baskets list is empty we add "nobody" as
@@ -609,7 +615,174 @@ class WhoHasACertainObjectWithACertainPropertyTask(Task):
 
     @on_timeout()
     def give_away_answer(self,event):
-        self.set_message('the right answer is: ' + " ".join(self.basket_set) + '.')
+        correct_baskets=list(self.basket_set)
+        random.shuffle(correct_baskets)
+        self.set_message('the right baskets are: ' + " ".join(correct_baskets) + '.')
+
+
+class ListThePropertiesThatAnObjectHasInABasketOnlyTask(Task):
+    def __init__(self, env):
+        super(ListThePropertiesThatAnObjectHasInABasketOnlyTask, self).__init__(
+            env, max_time=3500)
+
+    @on_start()
+    def give_instructions(self, event):
+        # we traverse the baskets recording, for each object, the baskets it is in
+        baskets_with_object={}
+        for basket in global_properties:
+            for object in global_properties[basket]:
+                if (not object in baskets_with_object):
+                    baskets_with_object[object]=[basket]
+                else:
+                    baskets_with_object[object].append(basket)
+
+        # traverse baskets_with_object, keeping track of those objects
+        # that occur in more than one basket (otherwise the "only"
+        # question does not make sense due to a presuppostion
+        # violation)
+        legit_objects = [object for object in baskets_with_object if len(baskets_with_object[object])>1] 
+        # now we pick a random object from this list, and a random basket for that object
+        object = random.choice(legit_objects)
+        # we treat the first item in the shuffled list of baskets with the object as the target basket:
+        random.shuffle(baskets_with_object[object])
+        basket = baskets_with_object[object][0]
+        # we get the set of properties of the object in the other baskets
+        properties_in_other_baskets = set()
+        for other_basket in baskets_with_object[object][1:]:
+            properties_in_other_baskets=properties_in_other_baskets.union(set(global_properties[other_basket][object]))
+        # we finally the set of properties that the object only has in the selected basket
+        self.distinctive_properties_set = set(global_properties[basket][object]) - properties_in_other_baskets
+        # if distinctive properties set is empty we add "none" as
+        # the only item in it
+        if (not self.distinctive_properties_set):
+            self.distinctive_properties_set.add('none')
+
+        # building the regexp query
+        re_string = '.*?'
+        # each property name but the last could be followed by:
+        # ', ', ' and ', or ', and ' or ' '
+        
+        for i in range(len(self.distinctive_properties_set)-1):
+            re_string += '([a-z]+)(, | and |, and | )'
+        # final string must be delimited by period
+        re_string += '([a-z]+)\.$'
+
+        # compiling into a proper regexp
+        self.re_query = re.compile(re_string)
+
+        # preparing the message
+        message_string = "which properties does " + object + " have in " +  basket + "'s basket only?"
+        self.set_message(message_string)
+        self.instructions_completed = False
+
+
+    @on_output_message(r"\?$")
+    def check_ending(self, event):
+        self.instructions_completed = True
+
+    @on_message()
+    def check_response(self, event):
+        if not self.instructions_completed:
+            self.clear_input_channel()
+        else:
+            # does end of agent message match regexp?
+            matches=self.re_query.match(event.message)
+            # if it does, let's parse the parts of the match
+            potential_properties=set()
+            if (matches):
+                for chunk in matches.groups():
+                    # the delimiters all involve white space
+                    if (not re.search(' ',chunk)):
+                        potential_properties.add(chunk)
+                if (self.distinctive_properties_set == potential_properties):
+                    self.set_reward(1,random.choice(congratulations_messages))
+
+    @on_timeout()
+    def give_away_answer(self,event):
+        correct_properties=list(self.distinctive_properties_set)
+        random.shuffle(correct_properties)
+        self.set_message('the right properties are: ' + " ".join(correct_properties) + '.')
+
+
+########################
+
+class ListThePropertiesThatAnObjectHasInAllBasketsTask(Task):
+    def __init__(self, env):
+        super(ListThePropertiesThatAnObjectHasInAllBasketsTask, self).__init__(
+            env, max_time=3500)
+
+    @on_start()
+    def give_instructions(self, event):
+        # we traverse the baskets recording and the objects,
+        # recording, for each object, how many baskets it is in
+        basket_count={}
+        baskets=global_properties.keys()
+        for basket in baskets:
+            for object in global_properties[basket]:
+                if (not object in basket_count):
+                    basket_count[object]=1
+                else:
+                    basket_count[object]+=1
+        
+        # traversing the basket counts, keeping only those objects that occur in all baskets
+        legit_objects = [object for object in basket_count if basket_count[object]==len(baskets)]
+        # now we pick a random object from this list
+        object = random.choice(legit_objects)
+        # ... and we accumulate the objects it shares across baskets
+        for i in range(len(baskets)):
+            if (i==0):
+                self.shared_properties_set=set(global_properties[baskets[i]][object])
+            else:
+                self.shared_properties_set=self.shared_properties_set.intersection(set(global_properties[baskets[i]][object]))
+        # if set is empty, we put 'none' in it
+        if (not self.shared_properties_set):
+            self.shared_properties_set.add('none')
+
+        # building the regexp query
+        re_string = '.*?'
+        # each property name but the last could be followed by:
+        # ', ', ' and ', or ', and ' or ' '
+
+        for i in range(len(self.shared_properties_set)-1):
+            re_string += '([a-z]+)(, | and |, and | )'
+        # final string must be delimited by period
+        re_string += '([a-z]+)\.$'
+
+        # compiling into a proper regexp
+        self.re_query = re.compile(re_string)
+
+        # preparing the message
+        message_string = "which properties does " + object + " have in " + "all baskets?"
+        self.set_message(message_string)
+        self.instructions_completed = False
+
+
+    @on_output_message(r"\?$")
+    def check_ending(self, event):
+        self.instructions_completed = True
+
+    @on_message()
+    def check_response(self, event):
+        if not self.instructions_completed:
+            self.clear_input_channel()
+        else:
+            # does end of agent message match regexp?
+            matches=self.re_query.match(event.message)
+            # if it does, let's parse the parts of the match
+            potential_properties=set()
+            if (matches):
+                for chunk in matches.groups():
+                    # the delimiters all involve white space
+                    if (not re.search(' ',chunk)):
+                        potential_properties.add(chunk)
+                if (self.shared_properties_set == potential_properties):
+                    self.set_reward(1,random.choice(congratulations_messages))
+
+    @on_timeout()
+    def give_away_answer(self,event):
+        correct_properties=list(self.shared_properties_set)
+        random.shuffle(correct_properties)
+        self.set_message('the right properties are: ' + " ".join(correct_properties) + '.')
 
 
 # OLD STUFF FROM HERE
