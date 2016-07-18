@@ -53,7 +53,7 @@ def main():
 
 
 def setup_logging(
-    default_path='logging.json',
+    default_path='logging.ini',
     default_level=logging.INFO,
     env_key='LOG_CFG'
 ):
@@ -65,9 +65,7 @@ def setup_logging(
     if value:
         path = value
     if os.path.exists(path):
-        with open(path, 'rt') as f:
-            config = json.load(f)
-        logging.config.dictConfig(config)
+        logging.config.fileConfig(default_path)
     else:
         logging.basicConfig(level=default_level)
 
