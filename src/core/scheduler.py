@@ -24,6 +24,10 @@ class RandomTaskScheduler:
         # pick a random task
         return random.choice(self.tasks)
 
+    def reward(self):
+        # whatever
+        pass
+
 
 class SequentialTaskScheduler:
     '''
@@ -39,3 +43,28 @@ class SequentialTaskScheduler:
         ret = self.tasks[self.i]
         self.i = (self.i + 1) % len(self.tasks)
         return ret
+
+    def reward(self):
+        # whatever
+        pass
+
+class IncrementalTaskScheduler:
+    '''
+    Switches to the next task type sequentially
+    After the current task was successfully learned N times
+    '''
+
+    def __init__(self, tasks, success_threshold=2):
+        self.tasks = tasks
+        self.task_ptr = 0
+        self.reward_count = 0
+        self.success_threshold = success_threshold
+
+    def get_next_task(self):
+        if self.reward_count == self.success_threshold:
+            self.reward_count = 0
+            self.task_ptr = (self.task_ptr + 1) % len(self.tasks)
+        return self.tasks[self.task_ptr]
+
+    def reward(self):
+        self.reward_count += 1

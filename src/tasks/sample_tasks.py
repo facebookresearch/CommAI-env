@@ -174,6 +174,63 @@ class MovingTask(Task):
         self.set_reward(1)
 
 
+class TurnLeftTask(Task):
+    def __init__(self, env, world):
+            super(TurnLeftTask, self).__init__(
+            env, max_time=1000, world=world)
+            self.cd = ['north', 'east', 'south', 'west']
+
+    @on_init()
+    def on_init(self, event):
+        self.state.init_direction = self.get_world().state.learner_direction
+        dest_index = ((self.cd.index(self.state.init_direction)) - 1) % 4
+        self.state.dest_direction = self.cd[dest_index]
+
+    @on_start()
+    def on_start(self, event):
+        self.set_message("Say 'I turn left.'")
+
+    @on_state_changed(lambda ws, ts: ws.learner_direction == ts.dest_direction)
+    def on_turned(self, event):
+        self.set_reward(1)
+
+
+class TurnRightTask(Task):
+    def __init__(self, env, world):
+        super(TurnRightTask, self).__init__(
+            env, max_time=1000, world=world)
+        self.cd = ['north', 'east', 'south', 'west']
+
+    @on_init()
+    def on_init(self, event):
+        self.state.init_direction = self.get_world().state.learner_direction
+        dest_index = ((self.cd.index(self.state.init_direction)) + 1) % 4
+        self.state.dest_direction = self.cd[dest_index]
+
+    @on_start()
+    def on_start(self, event):
+        self.set_message("Say 'I turn right.'")
+
+    @on_state_changed(lambda ws, ts: ws.learner_direction == ts.dest_direction)
+    def on_turned(self, event):
+        self.set_reward(1)
+
+
+class LookAroundTask(Task):
+    def __init__(self, env, world):
+        super(LookAroundTask, self).__init__(
+                env, max_time=1000, world=world)
+
+    @on_start()
+    def on_start(self, event):
+        self.set_message("Look around.")
+
+    @on_message(u"I look.")
+    def on_message(self, event):
+        self.set_reward(1)
+
+
+
 class PickAnApple(Task):
     def __init__(self, env, world):
         super(PickAnApple, self).__init__(

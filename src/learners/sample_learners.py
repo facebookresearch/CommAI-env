@@ -9,7 +9,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-
+import random
+from core.serializer import StandardSerializer
 
 class SampleRepeatingLearner:
     def reward(self, reward):
@@ -55,4 +56,59 @@ class SampleMemorizingLearner:
             output = '0'
         # memorize what the teacher said
         self.memory.append(input)
+        return output
+
+
+class SampleRandomWordsLearner:
+    def __init__(self, min_length=2, max_length=3):
+        # recording the last word
+        self.memory = []
+        # responses are queued here
+        self.output_buf = []
+        # recording unique words used by teacher
+        self.words = []
+        self.teacher_stopped_talking = False
+        self.serializer = StandardSerializer()
+
+        # response construction configs
+        self.min_length = min_length
+        self.max_length = max_length
+
+    def reward(self, reward):
+        self.teacher_stopped_talking = False
+        # also cleaning the phrases queue
+        self.output_buf = []
+
+    def build_random_phrase(self):
+        size = random.randint(self.min_length, self.max_length)
+        N = len(self.words)
+        resp = ''
+        for _ in range(size):
+            resp += self.words[random.randint(0, N - 1)] + ' '
+        return self.serializer.to_binary(resp)
+
+    def next(self, input):
+        self.teacher_stopped_talking = False
+        # checking for silence byte
+        if len(self.memory) > 0 and len(self.memory) % 8 == 0 and \
+                all(map(lambda x: x == '0', self.memory[-8:])):
+            self.teacher_stopped_talking = True
+
+        if self.teacher_stopped_talking:
+            # Learning new words and filtering out the case when the word is empty
+            # (because the teacher is silent)
+            binary_text = ''.join(self.memory[:-8])
+            word = self.serializer.to_text(binary_text)
+            if word is not None:
+                word = str(word)
+                if word not in self.words:
+                    self.words.append(word)
+            phrase_bin = self.build_random_phrase()
+            self.output_buf.extend(phrase_bin)
+            self.memory = []
+        self.memory.append(input)
+        if len(self.output_buf) > 0:
+            output, self.output_buf = self.output_buf[0], self.output_buf[1:]
+        else:
+            output = '0'
         return output
