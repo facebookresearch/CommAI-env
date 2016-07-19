@@ -6,6 +6,7 @@ described in A Roadmap towards Machine Intelligence
 
 ## Running
 
+cp tasks_config.py.sample tasks_config.py
 python run_tournament.py
 
 ## Requirements
