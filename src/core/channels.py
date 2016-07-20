@@ -118,3 +118,15 @@ class OutputChannel:
 
     def is_empty(self):
         return len(self._binary_buffer) == 0
+
+    def is_silent(self):
+        ''' All the bits in the output token are the result of serializing
+        silence tokens'''
+        buf = self._binary_buffer
+        silent_bits = self.serializer.to_binary(self.serializer.SILENCE_TOKEN)
+        token_size = len(silent_bits)
+        while len(buf) > token_size:
+            buf_suffix, buf = buf[-token_size:], buf[:-token_size]
+            if buf_suffix != silent_bits:
+                return False
+        return len(buf) == 0 or buf == silent_bits[-len(buf):]
