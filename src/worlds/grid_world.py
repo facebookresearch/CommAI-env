@@ -104,12 +104,14 @@ class GridWorld(World):
 
     @on_message(r"I look\.$")
     def on_looking(self, event):
+        look_pos = self.state.learner_pos + \
+            self.valid_directions[self.state.learner_direction]
         self.logger.debug("Looking at position {0} with entities {1}".format(
-            self.state.learner_pos, self.state.entities
+            look_pos, self.state.entities
         ))
-        if self.state.learner_pos in self.state.entities:
+        if look_pos in self.state.entities:
             self.set_message("There is a {0}.".format(
-                self.state.entities[self.state.learner_pos]
+                self.state.entities[look_pos]
             ))
         else:
             self.set_message("There is nothing here.")
@@ -117,13 +119,15 @@ class GridWorld(World):
     @on_message(r"I pick up the (\w+)\.$")
     def on_pick_up(self, event):
         obj_name = event.get_match(1)
-        if self.state.learner_pos in self.state.entities and \
-                obj_name == self.state.entities[self.state.learner_pos].name:
+        obj_pos = self.state.learner_pos + \
+            self.valid_directions[self.state.learner_direction]
+        if obj_pos in self.state.entities and \
+                obj_name == self.state.entities[obj_pos].name:
             # There is an object with the given name here
-            if self.state.entities[self.state.learner_pos].pickable:
+            if self.state.entities[obj_pos].pickable:
                 # We pick it up
                 self.state.learner_inventory[obj_name] += 1
-                del self.state.entities[self.state.learner_pos]
+                del self.state.entities[obj_pos]
                 self.set_message("You picked up the {0}.".format(obj_name))
             else:
                 self.set_message("You can't pick up the {0}.".format(obj_name))
