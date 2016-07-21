@@ -95,7 +95,7 @@ class AssociateObjectWithPropertyTask(Task):
 
     @on_timeout()
     def give_away_answer(self,event):
-        self.set_message('the right answer is: ' + self.property + '.')
+        self.set_message('the right answer is: ' + self.property)
 
 class VerifyThatObjectHasPropertyTask(Task):
     def __init__(self, env):
@@ -202,6 +202,7 @@ class ListPropertiesofAnObjectTask(Task):
         random.shuffle(correct_properties)
         self.set_message('the right properties are: ' + " ".join(correct_properties) + '.')
 
+# FIXME: add Task suffix
 class NameAPropertyOfAnObject(Task):
     def __init__(self, env):
         super(NameAPropertyOfAnObject, self).__init__(
@@ -425,7 +426,7 @@ class ListObjectsWithACertainPropertyTask(Task):
     def give_away_answer(self,event):
         correct_objects=list(self.objects)
         random.shuffle(correct_objects)
-        self.set_message('the right objects are: ' + "".join(correct_objects) + '.')
+        self.set_message('the right objects are: ' + " ".join(correct_objects) + '.')
 
 
 class NameAnObjectWithAProperty(Task):
@@ -646,7 +647,7 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(Task):
         # that occur in more than one basket (otherwise the "only"
         # question does not make sense due to a presuppostion
         # violation)
-        legit_objects = [object for object in baskets_with_object if len(baskets_with_object[object])>1] 
+        legit_objects = [object for object in baskets_with_object if len(baskets_with_object[object])>1]
         # now we pick a random object from this list, and a random basket for that object
         object = random.choice(legit_objects)
         # we treat the first item in the shuffled list of baskets with the object as the target basket:
@@ -667,7 +668,7 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(Task):
         re_string = '.*?'
         # each property name but the last could be followed by:
         # ', ', ' and ', or ', and ' or ' '
-        
+
         for i in range(len(self.distinctive_properties_set)-1):
             re_string += '([a-z]+)(, | and |, and | )'
         # final string must be delimited by period
@@ -727,7 +728,7 @@ class ListThePropertiesThatAnObjectHasInAllBasketsTask(Task):
                     basket_count[object]=1
                 else:
                     basket_count[object]+=1
-        
+
         # traversing the basket counts, keeping only those objects that occur in all baskets
         legit_objects = [object for object in basket_count if basket_count[object]==len(baskets)]
         # now we pick a random object from this list
@@ -812,7 +813,7 @@ class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
         for question in number_questions:
             escaped_number_questions.append(re.sub(r'([\.\?])',r'\\\1',question))
         self.re_query = re.compile(r".*(" + "|".join(escaped_number_questions) + ")$")
-        
+
 
         # preparing the message
         message_string = "guess the " + str(self.digits) +"-digit number I am thinking of; you can ask me: " + random.choice(number_questions)
@@ -858,7 +859,7 @@ class GuessTheNumberAskingQuestionsTask(Task):
         for question in number_questions:
             escaped_number_questions.append(re.sub(r'([\.\?])',r'\\\1',question))
         self.re_query = re.compile(r".*(" + "|".join(escaped_number_questions) + ")$")
-        
+
 
         # preparing the message
         message_string = "guess the " + str(self.digits) +"-digit number I am thinking of; you can ask me for the number."
@@ -889,7 +890,7 @@ class GuessTheNumberAskingForDigitsExplicitModelTask(Task):
 
     @on_start()
     def give_instructions(self, event):
-        
+
         # we need to edit the number_questions list by replacing
         # "number" with "next digit"; we will keep two versions of the
         # resulting list: one with just the relevant string replaced,
@@ -953,7 +954,7 @@ class GuessTheNumberAskingForDigitsTask(Task):
 
     @on_start()
     def give_instructions(self, event):
-        
+
         # we need to edit the number_questions list by replacing
         # "number" with "next digit"; we will keep two versions of the
         # resulting list: one with just the relevant string replaced,

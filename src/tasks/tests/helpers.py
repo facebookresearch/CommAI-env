@@ -13,6 +13,7 @@ import core.environment as environment
 import core.serializer as serializer
 import core.channels as channels
 import contextlib
+import re
 
 
 class EnvironmentMessenger:
@@ -33,9 +34,26 @@ class EnvironmentMessenger:
         return self._env._output_channel.is_silent()
 
     def read(self):
-        '''Sends silence until the end of the teacher has stopped speaking'''
+        '''Sends silence until the teacher has stopped speaking'''
         nbits = 0
         while not self.is_silent():
+            # Keep on putting silence in the output channel
+            nbits += self.send(self._serializer.SILENCE_TOKEN)
+        return nbits
+
+    def read_until(self, condition):
+        '''Sends silence until a given condition holds true.
+        Args:
+            condition: a function that takes an EnvironmentMessenger
+        '''
+        # wrap the condition to catch exceptions
+        def safe_condition_eval():
+            try:
+                return condition(self)
+            except BaseException:
+                return False
+        nbits = 0
+        while not self.is_silent() and not safe_condition_eval():
             # Keep on putting silence in the output channel
             nbits += self.send(self._serializer.SILENCE_TOKEN)
         return nbits
@@ -67,13 +85,27 @@ class EnvironmentMessenger:
         between the end of the input stream and the point after n_silence
         silent tokens where issued.
         '''
+        # get the input text
         input_text = self._input_channel.get_text()
+        # remove the trailing silences
+        input_text = input_text.rstrip(self._serializer.SILENCE_TOKEN)
+        # find the point where the last message started
+        # (after at least n_silence tokens)
         last_silence = input_text.rfind(self._serializer.SILENCE_TOKEN *
                                         n_silence)
         if last_silence == -1:
             return input_text
         else:
             return input_text[last_silence + n_silence:]
+
+    def search_last_message(self, pattern):
+        message = self.get_last_message()
+        match = re.search(pattern, message)
+        if match is None:
+            raise RuntimeError("'{0}' did not find any match on '{1}'".format(
+                pattern, message
+            ))
+        return match.groups()
 
     def get_cumulative_reward(self):
         return self.cum_reward
