@@ -10,6 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import unittest
+import tasks.messages as msg
 import tasks.marco_tasks as marco_tasks
 from tasks.tests.helpers import task_messenger
 import random
@@ -22,10 +23,9 @@ class TestMarcoTasks(unittest.TestCase):
     #
     def check_positive_feedback(self, m, instructions, answer):
         # hear the congratulations
-        m.read()
-        feedback = m.get_last_message()
+        feedback_blen = m.read()
         # there is some feedback
-        self.assertGreater(len(feedback), 0)
+        self.assertGreater(feedback_blen, 0)
         m.send()
         self.assertEqual(m.get_cumulative_reward(), 1,
                          "answering '{0}' to query '{1}' didn't work.".format(
@@ -173,8 +173,8 @@ class TestMarcoTasks(unittest.TestCase):
                     object_ in marco_tasks.global_properties[basket]:
                 props = marco_tasks.global_properties[basket][object_]
                 all_answers = [str(len(props))]
-                if len(props) <= len(marco_tasks.numbers_in_words):
-                    all_answers.append(marco_tasks.numbers_in_words[len(props)])
+                if len(props) <= len(msg.numbers_in_words):
+                    all_answers.append(msg.numbers_in_words[len(props)])
             else:
                 all_answers = ["0", "zero"]
             answer = random.choice(all_answers)
@@ -224,9 +224,9 @@ class TestMarcoTasks(unittest.TestCase):
                             marco_tasks.global_properties[basket][object_]]
             num_objects = len(objects)
             all_answers = [str(num_objects)]
-            if num_objects <= len(marco_tasks.numbers_in_words):
+            if num_objects <= len(msg.numbers_in_words):
                 all_answers.append(
-                    marco_tasks.numbers_in_words[num_objects])
+                    msg.numbers_in_words[num_objects])
             answer = random.choice(all_answers)
             return answer, all_answers
         self.do_test_battery(marco_tasks.HowManyObjectsHaveACertainPropertyTask,

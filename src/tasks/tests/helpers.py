@@ -79,6 +79,9 @@ class EnvironmentMessenger:
             nbits += 1
         return nbits
 
+    def get_text(self):
+        return self._input_channel.get_text()
+
     def get_last_message(self, n_silence=2):
         '''
         Returns the last message sent by the teacher. The message is delimited

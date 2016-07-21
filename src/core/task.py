@@ -44,8 +44,9 @@ class MessageReceived():
         # trigger's condition
         self.condition_outcome = None
 
-    def is_message(self, msg):
-        return self.message[-len(msg):] == msg
+    def is_message(self, msg, suffix=''):
+        return self.message[-(len(msg) + len(suffix)):-len(suffix)] == msg and\
+            suffix == self.message[-len(suffix):]
 
     def get_match(self, ngroup=0):
         return self.condition_outcome.group(ngroup)

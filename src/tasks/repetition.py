@@ -11,59 +11,69 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
     on_state_changed, on_timeout, on_output_message, on_init
+from tasks.base import BaseTask
 import random
+import tasks.messages as msg
 
-from marco_tasks import congratulations_messages
 
 verbs = ["say", "repeat"]
-words = ["apple", "banana", "cat", "hello world"]
+phrases = ["apple", "banana", "cat", "hello world"]
 context = ["and you will get a reward",
            "and a reward is yours",
            "and you will pass this task",
            "and you will solve this problem"]
+
 
 class BeSilentTask(Task):
     def __init__(self, env):
         super(BeSilentTask, self).__init__(env=env,
                                            max_time=random.randint(100, 1000))
 
+    # give instructions at the beginning of the task
     @on_start()
     def on_start(self, event):
-        self.set_message("be silent now")
+        self.set_message("be silent now.")
 
+    # catch any bit 1 sent by the learner
     @on_sequence("1")
     def on_message(self, event):
         # if the learner produces bit 1, it receives reward 0 and the task is
         # over.
         self.set_reward(0, '')
 
+    # when the maximum amount of time set for the task has elapsed
     @on_timeout()
     def on_timeout(self, event):
         # if the learner has been silent, it receives reward +1 and the task is
         # over.
-        self.set_reward(1, random.choice(congratulations_messages))
+        self.set_reward(1, random.choice(msg.congratulations))
 
 
-class RepeatWhatISayTask(Task):
+class RepeatWhatISayTask(BaseTask):
     def __init__(self, env):
         super(RepeatWhatISayTask, self).__init__(env=env, max_time=1000)
 
     @on_start()
     def on_start(self, event):
-        # sample a random verb
-        message = random.choice(verbs) + " "
+        # randomly sample a phrase
+        self.cur_phrase = random.choice(phrases)
+        # ask the learner to repeat a phrase randomly choosing the verb
+        self.set_message(random.choice(verbs) + " " + self.cur_phrase + ".")
 
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word
-
-        self.set_message(message)
-
+    # we wait for the learner to send a message finalized by a full stop.
     @on_message(r'\.$')
     def on_message(self, event):
-        # if the suffix of the learner's message equals to the teacher's word
-        if event.is_message(self.cur_word):
-            self.set_reward(1, random.choice(congratulations_messages))
+        # if the message sent by the learner equals the teacher's selected
+        # phrase followed by a period, reward the learner.
+        # otherwise, it gets another chance while time allows.
+        if event.is_message(self.cur_phrase, '.'):
+            self.set_reward(1, random.choice(msg.congratulations))
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))
+
 
 class RepeatWhatISay2Task(Task):
     def __init__(self, env):
@@ -71,27 +81,28 @@ class RepeatWhatISay2Task(Task):
 
     @on_start()
     def on_start(self, event):
-        # sample a random verb
-        message = random.choice(verbs) + " "
-
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word + " "
-
-        # sample a random context
-        message += random.choice(context)
-
-        self.set_message(message)
+        # sample a random phrase
+        self.cur_phrase = random.choice(phrases)
+        # ask the learner to repeat the phrase sampling one of the possible
+        # ways of asking that, and putting some context after the target.
+        self.set_message(random.choice(verbs) + " " + self.cur_phrase + " " +
+                         random.choice(context) + ".")
 
     @on_message(r'\.$')
     def on_message(self, event):
         # on every character check if the suffix of the learner's message
-        # equals to the teacher's word.
-        if event.is_message(self.cur_word):
-            self.set_reward(1, random.choice(congratulations_messages))
+        # equals to the teacher's phrase.
+        if event.is_message(self.cur_phrase, '.'):
+            self.set_reward(1, random.choice(msg.congratulations))
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))
 
 repeat_min = 2
 repeat_max = 3
+
 
 class RepeatWhatISayMultipleTimesTask(Task):
     def __init__(self, env):
@@ -103,9 +114,9 @@ class RepeatWhatISayMultipleTimesTask(Task):
         # sample a random verb
         message = random.choice(verbs) + " "
 
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word + " "
+        # sample a random phrase
+        self.cur_phrase = random.choice(phrases)
+        message += self.cur_phrase + " "
 
         # sample a random number
         self.n = random.randint(repeat_min, repeat_max)
@@ -115,11 +126,17 @@ class RepeatWhatISayMultipleTimesTask(Task):
 
     @on_message(r'\.$')
     def on_message(self, event):
-        target = ' '.join([self.cur_word] * self.n)
+        target = ' '.join([self.cur_phrase] * self.n)
         if target in event.message:
-            self.set_reward(1, random.choice(congratulations_messages))
+            self.set_reward(1, random.choice(msg.congratulations))
         else:
             self.set_reward(0, '')
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))
+
 
 class RepeatWhatISayMultipleTimes2Task(Task):
     def __init__(self, env):
@@ -131,9 +148,9 @@ class RepeatWhatISayMultipleTimes2Task(Task):
         # sample a random verb
         message = random.choice(verbs) + " "
 
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word + " "
+        # sample a random phrase
+        self.cur_phrase = random.choice(phrases)
+        message += self.cur_phrase + " "
 
         # sample a random number
         self.n = random.randint(repeat_min, repeat_max)
@@ -146,11 +163,17 @@ class RepeatWhatISayMultipleTimes2Task(Task):
 
     @on_message(r'\.$')
     def on_message(self, event):
-        target = ' '.join([self.cur_word] * self.n)
+        target = ' '.join([self.cur_phrase] * self.n)
         if target in event.message:
-            self.set_reward(1, random.choice(congratulations_messages))
+            self.set_reward(1, random.choice(msg.congratulations))
         else:
             self.set_reward(0, '')
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))
+
 
 class RepeatWhatISayMultipleTimesSeparatedByCommaTask(Task):
     def __init__(self, env):
@@ -163,9 +186,9 @@ class RepeatWhatISayMultipleTimesSeparatedByCommaTask(Task):
         # sample a random verb
         message = random.choice(verbs) + " "
 
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word + " "
+        # sample a random phrase
+        self.cur_phrase = random.choice(phrases)
+        message += self.cur_phrase + " "
 
         # sample a random number
         self.n = random.randint(repeat_min, repeat_max)
@@ -175,11 +198,17 @@ class RepeatWhatISayMultipleTimesSeparatedByCommaTask(Task):
 
     @on_message(r'\.$')
     def on_message(self, event):
-        target = ', '.join([self.cur_word] * self.n)
+        target = ', '.join([self.cur_phrase] * self.n)
         if target in event.message:
-            self.set_reward(1, random.choice(congratulations_messages))
+            self.set_reward(1, random.choice(msg.congratulations))
         else:
             self.set_reward(0, '')
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))
+
 
 class RepeatWhatISayMultipleTimesSeparatedByAndTask(Task):
     def __init__(self, env):
@@ -192,9 +221,9 @@ class RepeatWhatISayMultipleTimesSeparatedByAndTask(Task):
         # sample a random verb
         message = random.choice(verbs) + " "
 
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word + " "
+        # sample a random phrase
+        self.cur_phrase = random.choice(phrases)
+        message += self.cur_phrase + " "
 
         # sample a random number
         self.n = random.randint(repeat_min, repeat_max)
@@ -204,11 +233,17 @@ class RepeatWhatISayMultipleTimesSeparatedByAndTask(Task):
 
     @on_message(r'\.$')
     def on_message(self, event):
-        target = ' and '.join([self.cur_word] * self.n)
+        target = ' and '.join([self.cur_phrase] * self.n)
         if target in event.message:
-            self.set_reward(1, random.choice(congratulations_messages))
+            self.set_reward(1, random.choice(msg.congratulations))
         else:
             self.set_reward(0, '')
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))
+
 
 class RepeatWhatISayMultipleTimesSeparatedByCATask(Task):
     def __init__(self, env):
@@ -221,9 +256,9 @@ class RepeatWhatISayMultipleTimesSeparatedByCATask(Task):
         # sample a random verb
         message = random.choice(verbs) + " "
 
-        # sample a random word
-        self.cur_word = random.choice(words)
-        message += self.cur_word + " "
+        # sample a random phrase
+        self.cur_phrase = random.choice(phrases)
+        message += self.cur_phrase + " "
 
         # sample a random number
         self.n = random.randint(repeat_min, repeat_max)
@@ -235,11 +270,16 @@ class RepeatWhatISayMultipleTimesSeparatedByCATask(Task):
     def on_message(self, event):
         target = ''
         if self.n == 2:
-            target = self.cur_word + ' and ' + self.cur_word
+            target = self.cur_phrase + ' and ' + self.cur_phrase
         else:
-            target = ', '.join([self.cur_word] * (self.n - 1))
-            target += ' and ' + self.cur_word
+            target = ', '.join([self.cur_phrase] * (self.n - 1))
+            target += ' and ' + self.cur_phrase
         if target in event.message:
-            self.set_reward(1, random.choice(congratulations_messages))
+            self.set_reward(1, random.choice(msg.congratulations))
         else:
             self.set_reward(0, '')
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # fail the learner if it hasn't repeated the message by the timeout
+        self.set_reward(0, random.choice(msg.fail))

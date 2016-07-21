@@ -7,7 +7,7 @@ import re
 import logging
 from core.task import Task, on_start, on_message, on_sequence,\
     on_state_changed, on_timeout, on_output_message, on_init
-
+import tasks.messages as msg
 # global data structures to be called by multiple tasks
 
 # properties of objects in two baskets, for memory tasks
@@ -50,15 +50,7 @@ for basket in global_properties:
             else:
                 reverse_global_properties[basket][property]=[object]
 
-# handy list with word transcriptions of the integers from 0 to 10
-numbers_in_words=['zero','one','two','three','four','five','six','seven','eight','nine','ten']
 
-# a list of congratulations messages to be issued when the learner solves a task
-congratulations_messages=['good job.',
-                          'bravo.',
-                          'congratulations.',
-                          'nice work.',
-                          'correct.']
 
 # a list of questions about a number, shared by multiple tasks
 number_questions=['please tell me the number.',
@@ -91,7 +83,7 @@ class AssociateObjectWithPropertyTask(Task):
         if not self.instructions_completed:
             self.clear_input_channel()
         elif event.message[-len(self.property):] == self.property:
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -135,7 +127,7 @@ class VerifyThatObjectHasPropertyTask(Task):
         if not self.instructions_completed:
             self.clear_input_channel()
         elif (self.coin_flip==1 and event.message[-3:] == "no.") or (self.coin_flip==0 and event.message[-4:] == "yes."):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -194,7 +186,7 @@ class ListPropertiesofAnObjectTask(Task):
                     if (not re.search(' ',chunk)):
                         potential_properties.add(chunk)
                 if (self.object_properties == potential_properties):
-                    self.set_reward(1,random.choice(congratulations_messages))
+                    self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -245,7 +237,7 @@ class NameAPropertyOfAnObject(Task):
                 object_properties_index+=1
             # is match found, give reward
             if (found_matching_property):
-                self.set_reward(1,random.choice(congratulations_messages))
+                self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -266,7 +258,7 @@ class HowManyPropertiesDoesAnObjectHaveTask(Task):
         self.property_count= len(global_properties[basket][object])
         # alphabetic conversion only supported up to ten
         if (self.property_count<=10):
-            self.alphabetic_property_count=numbers_in_words[self.property_count]
+            self.alphabetic_property_count=msg.numbers_in_words[self.property_count]
         else:
             self.alphabetic_property_count=''
 
@@ -287,7 +279,7 @@ class HowManyPropertiesDoesAnObjectHaveTask(Task):
                 or
                 (len(self.alphabetic_property_count)>0 and
                  (event.message[-(len(self.alphabetic_property_count)+1):] == (self.alphabetic_property_count+'.')))):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -352,13 +344,13 @@ class ItalianHowManyPropertiesDoesAnObjectHaveTask(Task):
                 or
                 (len(self.alphabetic_property_count)>0 and
                  (event.message[-(len(self.alphabetic_property_count)+1):] == (self.alphabetic_property_count+'.')))):
-            italian_congratulations_messages=['ottimo lavoro.',
+            italian_msg.congratulations=['ottimo lavoro.',
                                               'bravo.',
                                               'congratulazioni.',
                                               'giusto.',
                                               'corretto.']
 
-            self.set_reward(1,random.choice(italian_congratulations_messages))
+            self.set_reward(1,random.choice(italian_msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -420,7 +412,7 @@ class ListObjectsWithACertainPropertyTask(Task):
                     if (not re.search(' ',chunk)):
                         potential_objects.add(chunk)
                 if (self.objects == potential_objects):
-                    self.set_reward(1,random.choice(congratulations_messages))
+                    self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -468,7 +460,7 @@ class NameAnObjectWithAProperty(Task):
                 objects_index+=1
             # is match found, give reward
             if (found_matching_object):
-                self.set_reward(1,random.choice(congratulations_messages))
+                self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -508,7 +500,7 @@ class HowManyObjectsHaveACertainPropertyTask(Task):
             self.object_count= len(reverse_global_properties[basket][property])
             # alphabetic conversion only supported up to ten
             if (self.object_count<=10):
-                self.alphabetic_object_count=numbers_in_words[self.object_count]
+                self.alphabetic_object_count=msg.numbers_in_words[self.object_count]
             else:
                 self.alphabetic_object_count=''
 
@@ -530,7 +522,7 @@ class HowManyObjectsHaveACertainPropertyTask(Task):
                 or
                 (len(self.alphabetic_object_count)>0 and
                  (event.message[-(len(self.alphabetic_object_count)+1):] == (self.alphabetic_object_count+'.')))):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -618,7 +610,7 @@ class WhoHasACertainObjectWithACertainPropertyTask(Task):
                     if (not re.search(' ',chunk)):
                         potential_baskets.add(chunk)
                 if (self.basket_set == potential_baskets):
-                    self.set_reward(1,random.choice(congratulations_messages))
+                    self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -702,7 +694,7 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(Task):
                     if (not re.search(' ',chunk)):
                         potential_properties.add(chunk)
                 if (self.distinctive_properties_set == potential_properties):
-                    self.set_reward(1,random.choice(congratulations_messages))
+                    self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -781,7 +773,7 @@ class ListThePropertiesThatAnObjectHasInAllBasketsTask(Task):
                     if (not re.search(' ',chunk)):
                         potential_properties.add(chunk)
                 if (self.shared_properties_set == potential_properties):
-                    self.set_reward(1,random.choice(congratulations_messages))
+                    self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -831,7 +823,7 @@ class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
         elif self.re_query.match(event.message):
             self.set_message(self.target_number + '.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -877,7 +869,7 @@ class GuessTheNumberAskingQuestionsTask(Task):
         elif self.re_query.match(event.message):
             self.set_message(self.target_number + '.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -936,7 +928,7 @@ class GuessTheNumberAskingForDigitsExplicitModelTask(Task):
             else:
                 self.set_message('the number has only ' + str(self.digits) + ' digits.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -1000,7 +992,7 @@ class GuessTheNumberAskingForDigitsTask(Task):
             else:
                 self.set_message('the number has only ' + str(self.digits) + ' digits.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(congratulations_messages))
+            self.set_reward(1,random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):

@@ -115,6 +115,9 @@ class Environment:
 
         return output, reward
 
+    def is_silent(self):
+        return self._output_channel.is_silent()
+
     def on_input_sequence_updated(self, sequence):
         if self.event_manager.raise_event(SequenceReceived(sequence)):
             self.logger.debug("Message received by running task: '{0}'".format(
