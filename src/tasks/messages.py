@@ -28,13 +28,19 @@ numbers_in_words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six',
                     'seven', 'eight', 'nine', 'ten']
 
 
-def get_random_number(nfrom, nto):
+def number_to_string(num):
     '''
-    Returns a random number in the interval [from,to]. If the number has
-    a translation into letters, it returns it with p=.5
+    Returns a string version of a number, randomly picking between
+    letters and numbers.
     '''
-    num = random.randint(nfrom, nto)
     if num <= len(numbers_in_words) and random.randint(0, 1) == 1:
         return numbers_in_words[num]
     else:
         return str(num)
+
+
+def string_to_number(n):
+    if n in numbers_in_words:
+        return numbers_in_words.index(n)
+    else:
+        return int(n)

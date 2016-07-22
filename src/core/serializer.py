@@ -35,8 +35,9 @@ class StandardSerializer:
             data.append(bin_c)
         return ''.join(data)
 
-    def to_text(self, data):
-        for skip in range(int(len(data) / 8)):
+    def to_text(self, data, strict=False):
+        # if we are not in strict mode, we can skip bytes to find a message
+        for skip in range(int(len(data) / 8) if not strict else 1):
             try:
                 message = str('')
                 sub_data = data[skip * 8:]

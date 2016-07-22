@@ -96,7 +96,15 @@ class OutputChannel:
 
     def set_message(self, message):
         new_binary = self.serializer.to_binary(message)
-        self._set_buffer(new_binary)
+        # find the first available point from where we can insert
+        # the new buffer without breaking the encoding
+        insert_point = len(self._binary_buffer)
+        for i in range(len(self._binary_buffer)):
+            # if we can decode from insert_point on, we can replace
+            # that information with the new buffer
+            if self.serializer.to_text(self._binary_buffer[i:]):
+                insert_point = i
+        self._set_buffer(self._binary_buffer[:insert_point] + new_binary)
 
     def clear(self):
         self._set_buffer('')
