@@ -33,10 +33,16 @@ def number_to_string(num):
     Returns a string version of a number, randomly picking between
     letters and numbers.
     '''
-    if num <= len(numbers_in_words) and random.randint(0, 1) == 1:
-        return numbers_in_words[num]
-    else:
-        return str(num)
+    return random.choice(number_to_strings(num))
+
+def number_to_strings(num):
+    '''
+    Returns all the string versions of a number.
+    '''
+    ret = [str(num)]
+    if num <= len(numbers_in_words):
+        ret.append(numbers_in_words[num])
+    return ret
 
 
 def string_to_number(n):
@@ -44,3 +50,9 @@ def string_to_number(n):
         return numbers_in_words.index(n)
     else:
         return int(n)
+
+def indef_article(x):
+    if x[0] in 'aeiou':
+        return 'an ' + x
+    else:
+        return 'a ' + x

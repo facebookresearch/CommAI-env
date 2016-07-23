@@ -11,12 +11,14 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import unittest
 import tasks.messages as msg
-import tasks.marco_tasks as marco_tasks
+import tasks.objects_properties as objects_properties
 from tasks.tests.helpers import task_messenger
 import random
 
+global_properties = objects_properties.global_properties
 
-class TestMarcoTasks(unittest.TestCase):
+
+class TestObjectsProperties(unittest.TestCase):
 
     #
     # helper methods
@@ -41,7 +43,9 @@ class TestMarcoTasks(unittest.TestCase):
         try:
             # the answer could be a space-separated list that
             # solves the task in any order
-            self.assertEqual(set(exp_answer.split(" ")), set(answer.split(" ")))
+            self.assertEqual(set(self.string_to_enum(exp_answer)),
+                             set(self.string_to_enum(answer)),
+                             "{0} != {1}".format(exp_answer, answer))
         except AttributeError:
             # exp_answer is not a string and thus,
             # the expected answer is a collection of possibilities
@@ -113,6 +117,21 @@ class TestMarcoTasks(unittest.TestCase):
             # test for not solving it at all
             self.solve_interrupting_teacher(m, get_correct_answer)
 
+    separators = [" ", " and ", ", ", ", and "]
+
+    def enum_to_string(self, lst):
+        sep = random.choice(self.separators)
+        return sep.join(lst)
+
+    def string_to_enum(self, strlst):
+        # check whether strlst has split (to see if it's a string)
+        splitting = strlst.split
+        for sep in sorted(self.separators,
+                          key=lambda x: -len(x)):
+            if sep in strlst:
+                return splitting(sep)
+        return [strlst]
+
     #
     # tasks testing routines
     #
@@ -121,7 +140,7 @@ class TestMarcoTasks(unittest.TestCase):
             # find the answer in the instructions
             property_, = m.search_last_message(r"basket is (\w+)")
             return property_,
-        self.do_test_battery(marco_tasks.AssociateObjectWithPropertyTask,
+        self.do_test_battery(objects_properties.AssociateObjectWithPropertyTask,
                              get_correct_answer)
 
     def testVerifyThatObjectHasProperty(self):
@@ -129,15 +148,15 @@ class TestMarcoTasks(unittest.TestCase):
             # find the answer in the instructions
             object_, property_, basket = m.search_last_message(
                 r"(\w+) (\w+) in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
-            self.assertIn(object_, marco_tasks.global_properties[basket])
+            self.assertIn(basket, global_properties)
+            self.assertIn(object_, global_properties[basket])
             # send the answer with the termination marker
-            if property_ in marco_tasks.global_properties[basket][object_]:
+            if property_ in global_properties[basket][object_]:
                 answer = "yes"
             else:
                 answer = "no"
             return answer,
-        self.do_test_battery(marco_tasks.VerifyThatObjectHasPropertyTask,
+        self.do_test_battery(objects_properties.VerifyThatObjectHasPropertyTask,
                              get_correct_answer)
 
     def testListPropertiesofAnObject(self):
@@ -145,23 +164,23 @@ class TestMarcoTasks(unittest.TestCase):
             # find the answer in the instructions
             object_, basket = m.search_last_message(
                 r"does (\w+) have in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
-            self.assertIn(object_, marco_tasks.global_properties[basket])
-            answer = ' '.join(marco_tasks.global_properties[basket][object_])
+            self.assertIn(basket, global_properties)
+            self.assertIn(object_, global_properties[basket])
+            answer = self.enum_to_string(global_properties[basket][object_])
             return answer,
-        self.do_test_battery(marco_tasks.ListPropertiesofAnObjectTask,
+        self.do_test_battery(objects_properties.ListPropertiesofAnObjectTask,
                              get_correct_answer)
 
     def testNameAPropertyOfAnObject(self):
         def get_correct_answer(m):
             # find the answer in the instructions
             object_, basket = m.search_last_message(r"of (\w+) in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
-            self.assertIn(object_, marco_tasks.global_properties[basket])
-            all_answers = marco_tasks.global_properties[basket][object_]
+            self.assertIn(basket, global_properties)
+            self.assertIn(object_, global_properties[basket])
+            all_answers = global_properties[basket][object_]
             answer = random.choice(all_answers)
             return answer, all_answers
-        self.do_test_battery(marco_tasks.NameAPropertyOfAnObject,
+        self.do_test_battery(objects_properties.NameAPropertyOfAnObjectTask,
                              get_correct_answer)
 
     def testHowManyPropertiesDoesAnObjectHave(self):
@@ -169,9 +188,9 @@ class TestMarcoTasks(unittest.TestCase):
             # find the answer in the instructions
             object_, basket = m.search_last_message(
                 r"does (\w+) have in (\w+)'s")
-            if basket in marco_tasks.global_properties and \
-                    object_ in marco_tasks.global_properties[basket]:
-                props = marco_tasks.global_properties[basket][object_]
+            if basket in global_properties and \
+                    object_ in global_properties[basket]:
+                props = global_properties[basket][object_]
                 all_answers = [str(len(props))]
                 if len(props) <= len(msg.numbers_in_words):
                     all_answers.append(msg.numbers_in_words[len(props)])
@@ -179,49 +198,52 @@ class TestMarcoTasks(unittest.TestCase):
                 all_answers = ["0", "zero"]
             answer = random.choice(all_answers)
             return answer, all_answers
-        self.do_test_battery(marco_tasks.HowManyPropertiesDoesAnObjectHaveTask,
-                             get_correct_answer)
+        self.do_test_battery(
+            objects_properties.HowManyPropertiesDoesAnObjectHaveTask,
+            get_correct_answer)
 
     def testListObjectsWithACertainProperty(self):
         def get_correct_answer(m):
             # find the answer in the instructions
             property_, basket = m.search_last_message(
                 r"objects are (\w+) in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
+            self.assertIn(basket, global_properties)
             answer = [object_ for object_ in
-                        marco_tasks.global_properties[basket]
+                        global_properties[basket]
                         if property_ in
-                        marco_tasks.global_properties[basket][object_]]
+                        global_properties[basket][object_]]
             return " ".join(answer),
-        self.do_test_battery(marco_tasks.ListObjectsWithACertainPropertyTask,
-                             get_correct_answer)
+        self.do_test_battery(
+            objects_properties.ListObjectsWithACertainPropertyTask,
+            get_correct_answer)
 
     def testNameAnObjectWithAProperty(self):
         def get_correct_answer(m):
             # find the answer in the instructions
             property_, basket = m.search_last_message(r"is (\w+) in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
+            self.assertIn(basket, global_properties)
             all_answers = [object_ for object_ in
-                            marco_tasks.global_properties[basket]
+                            global_properties[basket]
                             if property_ in
-                            marco_tasks.global_properties[basket][object_]]
+                            global_properties[basket][object_]]
             answer = random.choice(all_answers)
             self.failUnless(all_answers, "There are no objects {0} "
                             "in {1}'s basket".format(property_, basket))
             return answer, all_answers
-        self.do_test_battery(marco_tasks.NameAnObjectWithAProperty,
-                             get_correct_answer)
+        self.do_test_battery(
+            objects_properties.NameAnObjectWithAPropertyTask,
+            get_correct_answer)
 
     def testHowManyObjectsHaveACertainProperty(self):
         def get_correct_answer(m):
             # find the answer in the instructions
             property_, basket = m.search_last_message(
                 r"objects are (\w+) in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
+            self.assertIn(basket, global_properties)
             objects = [object_ for object_ in
-                            marco_tasks.global_properties[basket]
+                            global_properties[basket]
                             if property_ in
-                            marco_tasks.global_properties[basket][object_]]
+                            global_properties[basket][object_]]
             num_objects = len(objects)
             all_answers = [str(num_objects)]
             if num_objects <= len(msg.numbers_in_words):
@@ -229,8 +251,9 @@ class TestMarcoTasks(unittest.TestCase):
                     msg.numbers_in_words[num_objects])
             answer = random.choice(all_answers)
             return answer, all_answers
-        self.do_test_battery(marco_tasks.HowManyObjectsHaveACertainPropertyTask,
-                             get_correct_answer)
+        self.do_test_battery(
+            objects_properties.HowManyObjectsHaveACertainPropertyTask,
+            get_correct_answer)
 
     def testWhoHasACertainObjectWithACertainProperty(self):
         def get_correct_answer(m):
@@ -238,7 +261,7 @@ class TestMarcoTasks(unittest.TestCase):
             property_, object_ = m.search_last_message(
                 r"(\w+) (\w+) in the")
             baskets = [basket for basket, object_props in
-                        marco_tasks.global_properties.items()
+                        global_properties.items()
                         if object_ in object_props and
                         property_ in object_props[object_]]
             if not baskets:
@@ -247,7 +270,7 @@ class TestMarcoTasks(unittest.TestCase):
                 answer = " ".join(baskets)
             return answer,
         self.do_test_battery(
-            marco_tasks.WhoHasACertainObjectWithACertainPropertyTask,
+            objects_properties.WhoHasACertainObjectWithACertainPropertyTask,
             get_correct_answer)
 
     def testListThePropertiesThatAnObjectHasInABasketOnly(self):
@@ -255,13 +278,13 @@ class TestMarcoTasks(unittest.TestCase):
             # find the answer in the instructions
             object_, basket = m.search_last_message(
                 r"(\w+) have in (\w+)'s")
-            self.assertIn(basket, marco_tasks.global_properties)
-            self.assertIn(object_, marco_tasks.global_properties[basket])
-            properties = set(marco_tasks.global_properties[basket][object_])
+            self.assertIn(basket, global_properties)
+            self.assertIn(object_, global_properties[basket])
+            properties = set(global_properties[basket][object_])
             comp_baskets_props = set.union(
                 *[set(object_props[object_])
                     for basket2, object_props in
-                    marco_tasks.global_properties.items() if basket2 != basket])
+                    global_properties.items() if basket2 != basket])
             properties_basket_only = properties - comp_baskets_props
             if properties_basket_only:
                 answer = " ".join(properties_basket_only)
@@ -269,7 +292,7 @@ class TestMarcoTasks(unittest.TestCase):
                 answer = "none"
             return answer,
         self.do_test_battery(
-            marco_tasks.ListThePropertiesThatAnObjectHasInABasketOnlyTask,
+            objects_properties.ListThePropertiesThatAnObjectHasInABasketOnlyTask,
             get_correct_answer)
 
         def testListThePropertiesThatAnObjectHasInAllBaskets(self):
@@ -281,14 +304,14 @@ class TestMarcoTasks(unittest.TestCase):
                     *[set(object_props[object_]
                             if object_ in object_props else [])
                         for basket2, object_props in
-                        marco_tasks.global_properties.items()])
+                        global_properties.items()])
                 if all_baskets_props:
                     answer = " ".join(all_baskets_props)
                 else:
                     answer = "none"
                 return answer,
             self.do_test_battery(
-                marco_tasks.ListThePropertiesThatAnObjectHasInAllBasketsTask,
+                objects_properties.ListThePropertiesThatAnObjectHasInAllBasketsTask,
                 get_correct_answer)
 
 

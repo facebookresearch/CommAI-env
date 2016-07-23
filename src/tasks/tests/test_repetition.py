@@ -147,7 +147,18 @@ class TestRepetitionTasks(unittest.TestCase):
             answer, = m.search_last_message(r"(?:{verb}) (\w)\.".format(
                 verb="|".join(repetition.verbs)))
             return answer
-        self.do_test_battery(repetition.RepeatCharacterTask, get_correct_answer)
+        task = repetition.RepeatCharacterTask
+        # cannot use the add ending garbage test here
+        # (spam. could prompt a correct answer if the query is for m)
+        with task_messenger(task) as m:
+            # test for solving the task correctly
+            self.solve_correctly_test(m, get_correct_answer)
+        with task_messenger(task) as m:
+            # test for not solving it at all
+            self.repeat_everything(m, get_correct_answer)
+        with task_messenger(task) as m:
+            # test for solving the task correctly
+            self.timeout_test(m, get_correct_answer)
 
     def testRepeatWhatISay(self):
         def get_correct_answer(m):
