@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import random
-from core.serializer import StandardSerializer
+from core.serializer import StandardSerializer, IdentitySerializer
 
 class SampleRepeatingLearner:
     def reward(self, reward):
@@ -111,4 +111,23 @@ class SampleRandomWordsLearner:
             output, self.output_buf = self.output_buf[0], self.output_buf[1:]
         else:
             output = '0'
+        return output
+
+
+class RandomCharacterLearner:
+
+    # just for testing the char-level environment
+    def __init__(self, logging_path=None):
+        self.alphabet = [chr(ord('a') + x) for x in range(26)] + [chr(ord('A') + x) for x in range(26)] + [chr(ord('0') + x) for x in range(10)] + ['.', '\'', '\"', ',', ' ']
+        self.log_file = open(logging_path) if logging_path is not None else None
+        self.serializer = IdentitySerializer()
+
+    def reward(self, reward):
+        pass
+
+    def next(self, input):
+        output = random.randint(0, len(self.alphabet) - 1)
+        output = self.alphabet[output]
+        if self.log_file is not None:
+            self.log_file.write('{} -> {}'.format(input, output))
         return output

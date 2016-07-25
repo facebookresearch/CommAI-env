@@ -13,6 +13,21 @@ import logging
 import codecs
 
 
+class IdentitySerializer:
+    def __init__(self):
+        self.SILENCE_TOKEN = ' '
+        self.logger = logging.getLogger(__name__)
+
+    def to_binary(self, message):
+        return message
+
+    def to_text(self, data):
+        return data
+
+    def can_deserialize(self, data):
+        return data
+
+
 class StandardSerializer:
     def __init__(self):
         self.SILENCE_TOKEN = ' '

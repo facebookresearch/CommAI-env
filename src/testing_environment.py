@@ -11,10 +11,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import sys
 import logging
-from core.serializer import StandardSerializer
+from core.serializer import StandardSerializer, IdentitySerializer
 from core.environment import Environment
 from tasks_config import create_tasks, create_tasks_incremental
 from learners.sample_learners import SampleRandomWordsLearner
+from learners.sample_learners import RandomCharacterLearner
 from learners.sample_learners import SampleMemorizingLearner
 from learners.human_learner import HumanLearner
 from core.session import Session
@@ -75,12 +76,21 @@ def random_words_learner():
     session, view = build_tournament(serializer, learner)
     run_tournament(session, view)
 
+def random_character_learner():
+    serializer = IdentitySerializer()
+    learner = RandomCharacterLearner()
+    session, view = build_tournament(serializer, learner)
+    session.set_sleep(0.1)
+    run_tournament(session, view)
+
+
 
 if __name__ == '__main__':
     _learners = {
             'human': human_learner,
             'memorizing': memorizing_learner,
-            'random_words': random_words_learner
+            'random_words': random_words_learner,
+            'random_char': random_character_learner
                 }
     learner_type = sys.argv[1]
     _learners[learner_type]()
