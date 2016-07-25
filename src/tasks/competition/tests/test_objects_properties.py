@@ -10,9 +10,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import unittest
-import tasks.messages as msg
-import tasks.objects_properties as objects_properties
-from tasks.tests.helpers import task_messenger
+import tasks.competition.messages as msg
+import tasks.competition.objects_properties as objects_properties
+from tasks.competition.tests.helpers import task_messenger
 import random
 
 global_properties = objects_properties.global_properties
@@ -27,7 +27,9 @@ class TestObjectsProperties(unittest.TestCase):
         # hear the congratulations
         feedback_blen = m.read()
         # there is some feedback
-        self.assertGreater(feedback_blen, 0)
+        self.assertGreater(feedback_blen, 0,
+                           "answering '{0}' to query '{1}' didn't work.".format(
+                               answer, instructions))
         m.send()
         self.assertEqual(m.get_cumulative_reward(), 1,
                          "answering '{0}' to query '{1}' didn't work.".format(

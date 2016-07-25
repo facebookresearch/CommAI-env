@@ -11,46 +11,24 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
     on_state_changed, on_timeout, on_output_message, on_init
+import tasks.competition.messages as msg
+from tasks.competition.objects_properties import global_properties
 import random
-import string
+
+# use the set of objects from the objects-properties association tasks.
+objects = set(obj for basket, objects in global_properties.items()
+                  for obj in objects)
 
 
-def gen_random_str(N):
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(N))
-
-
-TIME_CHAR = 32
+TIME_CHAR = 8
+TIME_VERB = (len("Say 'I xxxxxxxxxxxx' to xxxxxxxxxxxx.") +
+             len("You xxxxxxxxxxxxed.")) * TIME_CHAR
 TIME_TURN = (len("I turn right.") + len("You turned.")) * TIME_CHAR
 TIME_MOVE = (len("I move forward.") + len("You moved.")) * TIME_CHAR
 TIME_PICK = (len("I pick up the xxxxxxxxxxxx.") +
              len("You picked up the xxxxxxxxxxxx.")) * TIME_CHAR
-TIME_VERB = (len("Say 'I xxxxxxxxxxxx' to xxxxxxxxxxxx.") +
-             len("You xxxxxxxxxxxxed.")) * TIME_CHAR
 TIME_GIVE = (len("I give you an xxxxxxxxxxxx.") +
              len("You gave me an xxxxxxxxxxxx.")) * TIME_CHAR
-
-
-class VerbTask(Task):
-    verbs = ('sing', 'smile', 'rest', 'relax', 'jump', 'dance')
-    verbs_past = ('sang', 'smiled', 'rested', 'relaxed', 'jumped', 'danced')
-
-    def __init__(self, env, world):
-        super(VerbTask, self).__init__(
-            env=env, max_time=2 * TIME_VERB, world=world)
-
-    @on_init()
-    def on_init(self, event):
-        self.target_verb = random.choice(self.verbs)
-
-    @on_start()
-    def on_start(self, event):
-        self.set_message("Say 'I {0}' to {0}.".format(self.target_verb))
-
-        def correct(self, event):
-            self.set_reward(1, 'You {0}.'.format(
-                self.verbs_past[self.verbs.index(self.target_verb)]))
-        self.dyn_add_handler(on_message(
-            'I {0}\.$'.format(self.target_verb))(correct))
 
 
 class TurningTask(Task):
@@ -71,12 +49,16 @@ class TurningTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.set_message("Turn {0}".format(self.target_turn))
+        self.set_message("Turn {0}.".format(self.target_turn))
 
-    @on_state_changed(lambda ws, ts: ws.learner_direction ==
-                      ts.target_direction)
+    @on_state_changed(
+        lambda ws, ts: ws.learner_direction == ts.target_direction)
     def on_moved(self, event):
         self.set_reward(1)
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
 
 class MovingTask(Task):
@@ -98,6 +80,10 @@ class MovingTask(Task):
     @on_state_changed(lambda ws, ts: ws.learner_pos == ts.dest_pos)
     def on_moved(self, event):
         self.set_reward(1)
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
 
 class MovingRelativeTask(Task):
@@ -159,9 +145,6 @@ class MovingAbsoluteTask(Task):
         self.set_reward(1)
 
 
-objs = ('apple', 'banana', 'carrot', 'ball', 'pineapple')
-
-
 class PickUpTask(Task):
 
     def __init__(self, env, world):
@@ -170,13 +153,14 @@ class PickUpTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         ws = self.get_world().state
+        ld = ws.learner_direction
         lp = ws.learner_pos
         self.state.initial_count = ws.learner_inventory[self.target_obj]
-        self.get_world().put_entity(lp, self.target_obj, True, True)
+        self.get_world().put_entity(lp + ld, self.target_obj, True, True)
 
-        self.dyn_add_handler(
+        self.add_handler(
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
@@ -184,7 +168,10 @@ class PickUpTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.set_message("Pick up the {0}.".format(self.target_obj))
+        self.set_message("You have {indef_object} next to you. "
+                         "Pick up the {object}.".format(
+                             indef_object=indef_article(self.target_obj),
+                             object=self.target_obj))
 
     def on_object_picked_up(self, event):
         self.set_reward(1, "You picked up the {0}.".format(self.target_obj))
@@ -206,14 +193,14 @@ class PickUpAroundTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         self.direction = random.choice(self.get_world().valid_directions.keys())
         ws = self.get_world().state
         p = ws.learner_pos + self.get_world().valid_directions[self.direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
         self.get_world().put_entity(p, self.target_obj, True, True)
 
-        self.dyn_add_handler(
+        self.add_handler(
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
@@ -236,14 +223,14 @@ class PickUpInFrontTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         ws = self.get_world().state
         p = ws.learner_pos + self.get_world().valid_directions[
             ws.learner_direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
         self.get_world().put_entity(p, self.target_obj, True, True)
 
-        self.dyn_add_handler(
+        self.add_handler(
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
@@ -266,7 +253,7 @@ class GiveTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         ws = self.get_world().state
         self.state.initial_count = ws.learner_inventory[self.target_obj]
         ws.learner_inventory[self.target_obj] += 1
@@ -274,8 +261,8 @@ class GiveTask(Task):
     @on_start()
     def on_start(self, event):
         self.set_message("I gave you {0}. Give it back to me by saying "
-                         "\"I give you {0}\"."
-                         .format(indef_article(self.target_obj)))
+                          "\"I give you {0}\"."
+                          .format(indef_article(self.target_obj)))
 
     @on_message("I give you (an? (\w+))\.$")
     def on_give_me_object(self, event):
@@ -302,14 +289,14 @@ class PickUpAroundAndGiveTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         self.direction = random.choice(self.get_world().valid_directions.keys())
         ws = self.get_world().state
         p = ws.learner_pos + self.get_world().valid_directions[self.direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
         self.get_world().put_entity(p, self.target_obj, True, True)
         self.object_picked_up = False
-        self.dyn_add_handler(
+        self.add_handler(
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
@@ -364,7 +351,7 @@ class CountingInventoryTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         self.set_message("How many {0} do you have?".format(
                          pluralize(self.target_obj, 2)))
         # Perhaps we should standardize some feedback state variable
@@ -396,7 +383,7 @@ class CountingInventoryGivingTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.target_obj = random.choice(objs)
+        self.target_obj = random.choice(objects)
         self.set_message("How many {0} do you have?".format(
                          pluralize(self.target_obj, 2)))
         # Perhaps we should standardize some feedback state variable
@@ -460,69 +447,3 @@ class CountingInventoryGivingTask(Task):
                 self.set_message("I have asked you to give me {0}, not {1}."
                                  .format(indef_article(self.target_obj),
                                          indef_article(event.get_match(2))))
-# class AssociationTask(Task):
-#     def __init__(self, env, seq_length=3, num_objects=4):
-#         super(AssociationTask, self).__init__(env=env, max_time=1000)
-#         self.seq_length = seq_length
-#         self.num_objects = num_objects
-#         self.logger = logging.getLogger(__name__)
-#
-#     @on_init()
-#     def initialization(self, event):
-#         self.objects = {}
-#         for i in range(self.num_objects):
-#             obj_name = gen_random_str(self.seq_length)
-#             obj_prop = gen_random_str(self.seq_length)
-#             self.objects[obj_name] = obj_prop
-#         self.target = random.choice(self.objects.keys())
-#
-#     @on_start()
-#     def on_start(self, event):
-#         message = ", ".join("{0} is {1}".format(k, v) for k, v in
-#                             self.objects.items())
-#         message += "; what is {0} like?".format(self.target)
-#         self.set_message(message)
-#
-#         def success(self, event):
-#             self.set_reward(1, "")
-#         self.dyn_add_handler(on_message("{0} is {1}$".format(
-#             self.target, self.objects[self.target]))(success))
-#
-#
-# class MultiAssociationTask(Task):
-#     def __init__(self, env, seq_length=3, num_objects=4, num_props=3):
-#         super(MultiAssociationTask, self).__init__(env=env, max_time=10000)
-#         self.seq_length = seq_length
-#         self.num_objects = num_objects
-#         self.num_props = num_props
-#         self.logger = logging.getLogger(__name__)
-#
-#     @on_init()
-#     def initialization(self, event):
-#         self.objects = {}
-#         for i in range(self.num_objects):
-#             obj_name = gen_random_str(self.seq_length)
-#             self.objects[obj_name] = []
-#             for j in range(self.num_props):
-#                 obj_prop = gen_random_str(self.seq_length)
-#                 self.objects[obj_name].append(obj_prop)
-#         self.target = random.choice(self.objects.keys())
-#
-#     @on_start()
-#     def on_start(self, event):
-#         obj_props = [(k, v) for k in self.objects.keys()
-#                      for v in self.objects[k]]
-#         random.shuffle(obj_props)
-#         message = ", ".join("{0} is {1}".format(k, v) for k, v in obj_props)
-#         message += "; what is {0} like?".format(self.target)
-#         self.set_message(message)
-#
-#         def success(self, event):
-#             self.set_reward(1, "")
-#         for i, props_perm in enumerate(
-#                 itertools.permutations(self.objects[self.target])):
-#             correct_answer = "{0} is {1}$".format(
-#                 self.target, " and ".join(props_perm))
-#             self.logger.debug('Registering handler for correct answer {0}'
-#                               .format(correct_answer))
-#             self.dyn_add_handler(on_message(correct_answer)(success))

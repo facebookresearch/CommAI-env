@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from worlds.grid_world import GridWorld
-from tasks.sample_tasks import *
+from tasks.sample.sample_tasks import *
 from core.scheduler import RandomTaskScheduler
 from core.scheduler import IncrementalTaskScheduler
 

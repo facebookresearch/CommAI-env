@@ -23,10 +23,6 @@ class EventManager:
         self.triggers = {}
         self.logger = logging.getLogger(__name__)
 
-        # temporary setting to silence the warnings
-        # after changing this remove the condition in raise_event method
-        self.suppress_warnings = True
-
     def register(self, observer, trigger):
         '''
         Register a trigger (a tuple containing an
@@ -66,8 +62,7 @@ class EventManager:
                     try:
                         event.condition_outcome = condition_outcome
                     except AttributeError:
-                        if not self.suppress_warnings:
-                            self.logger.warn("Couldn't save condition outcome for "
+                        self.logger.warn("Couldn't save condition outcome for "
                                          "event {0}".format(event))
                     self.logger.debug('{0} handled by {1}'.format(
                         event, trigger.event_handler))

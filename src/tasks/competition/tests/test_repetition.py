@@ -10,9 +10,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import unittest
-import tasks.repetition as repetition
-import tasks.messages as msg
-from tasks.tests.helpers import task_messenger
+import tasks.competition.repetition as repetition
+import tasks.competition.messages as msg
+from tasks.competition.tests.helpers import task_messenger
 
 
 class TestRepetitionTasks(unittest.TestCase):

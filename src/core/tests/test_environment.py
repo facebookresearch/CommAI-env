@@ -52,7 +52,7 @@ class TestEnvironment(unittest.TestCase):
 
             @task.on_init()
             def init_handler(self, event):
-                self.dyn_add_handler(task.on_start()(
+                self.add_handler(task.on_start()(
                     self.start_handler.im_func))
                 self.init_handled = True
 

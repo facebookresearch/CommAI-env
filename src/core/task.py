@@ -51,6 +51,9 @@ class MessageReceived():
     def get_match(self, ngroup=0):
         return self.condition_outcome.group(ngroup)
 
+    def get_match_groups(self):
+        return self.condition_outcome.groups()
+
 # Event handlers are annotated through decorators and are automatically
 # registered by the environment on Task startup
 
@@ -61,9 +64,17 @@ class MessageReceived():
 global_event_handlers = {}
 
 
+def method_to_func(f):
+    try:
+        return f.im_func
+    except AttributeError:
+        return f
+
+
 # Decorator for the Start of Task event handler
 def on_start():
     def register(f):
+        f = method_to_func(f)
         # The filtering condition is always True
         global_event_handlers[f] = Trigger(Start, lambda e: True, f)
         return f
@@ -73,6 +84,7 @@ def on_start():
 # Decorator for the End of Task event handler
 def on_ended():
     def register(f):
+        f = method_to_func(f)
         # The filtering condition is always True
         global_event_handlers[f] = Trigger(Ended, lambda e: True, f)
         return f
@@ -82,6 +94,7 @@ def on_ended():
 # Decorator for the World Start event handler
 def on_world_start():
     def register(f):
+        f = method_to_func(f)
         # The filtering condition is always True
         global_event_handlers[f] = Trigger(WorldStart, lambda e: True, f)
         return f
@@ -91,6 +104,7 @@ def on_world_start():
 # Decorator for the Init event handler
 def on_init():
     def register(f):
+        f = method_to_func(f)
         # The filtering condition is always True
         global_event_handlers[f] = Trigger(Init, lambda e: True, f)
         return f
@@ -109,6 +123,7 @@ def on_world_init():
 # Decorator for the StateChanged event handler
 def on_state_changed(condition):
     def register(f):
+        f = method_to_func(f)
         # The filtering condition is given as an argument.
         # There could be one or two state objects (corresponding to the
         # world state). So we check if we need to call the condition with
@@ -123,6 +138,7 @@ def on_state_changed(condition):
 
 def on_message(target_message=None):
     def register(f):
+        f = method_to_func(f)
         # If a target message is given, interpret it as a regular expression
         if target_message:
             cmessage = re.compile(target_message)
@@ -139,6 +155,7 @@ def on_message(target_message=None):
 
 def on_output_message(target_message=None):
     def register(f):
+        f = method_to_func(f)
         # If a target message is given, interpret it as a regular expression
         if target_message:
             cmessage = re.compile(target_message)
@@ -155,6 +172,7 @@ def on_output_message(target_message=None):
 
 def on_sequence(target_sequence=None):
     def register(f):
+        f = method_to_func(f)
         if target_sequence:
             csequence = re.compile(target_sequence)
         else:
@@ -169,6 +187,7 @@ def on_sequence(target_sequence=None):
 
 def on_output_sequence(target_sequence=None):
     def register(f):
+        f = method_to_func(f)
         if target_sequence:
             csequence = re.compile(target_sequence)
         else:
@@ -184,6 +203,7 @@ def on_output_sequence(target_sequence=None):
 
 def on_timeout():
     def register(f):
+        f = method_to_func(f)
         # There is no filtering condition (it always activates if registered)
         global_event_handlers[f] = Trigger(Timeout, lambda e: True, f)
         return f
@@ -301,9 +321,10 @@ class ScriptSet(object):
     def end(self):
         self._ended = True
 
-    def dyn_add_handler(self, handler):
-        '''deregisters and registers back all the triggers in the task
-        in case some have been updated/removed/added'''
+    def add_handler(self, handler):
+        '''
+        Adds and registers a handler.
+        '''
         trigger = handler_to_trigger(handler)
         if trigger:
             self._env._register_task_trigger(self, trigger)

@@ -23,6 +23,8 @@ failed = ['wrong!',
           'you failed!',
           'incorrect.']
 
+timeout = ['time is out!', 'sorry, time is out!', 'too bad, time out!']
+
 # handy list with word transcriptions of the integers from 0 to 10
 numbers_in_words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six',
                     'seven', 'eight', 'nine', 'ten']

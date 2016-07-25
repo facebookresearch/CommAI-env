@@ -11,8 +11,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
     on_state_changed, on_timeout, on_output_message, on_init
-from tasks.base import BaseTask
-import tasks.messages as msg
+from tasks.competition.base import BaseTask
+import tasks.competition.messages as msg
 import random
 import string
 
@@ -27,7 +27,6 @@ context = ["and you will get a reward",
 # repetition tasks configuration
 repeat_min = 2
 repeat_max = 3
-
 
 class BeSilentTask(Task):
     def __init__(self, env):
@@ -415,3 +414,40 @@ class RepeatWhatISayMultipleTimesSeparatedByCATask(BaseTask):
                             negative_feedback=random.choice(msg.failed),
                             answer=self.target
                         ))
+
+# timing constants
+TIME_CHAR = 8
+TIME_VERB = (len("Say 'I xxxxxxxxxxxx' to xxxxxxxxxxxx.") +
+             len("You xxxxxxxxxxxxed.")) * TIME_CHAR
+
+
+class VerbTask(Task):
+    verbs = ('sing', 'smile', 'rest', 'relax', 'jump', 'dance')
+    verbs_past = ('sang', 'smiled', 'rested', 'relaxed', 'jumped', 'danced')
+
+    def __init__(self, env, world):
+        super(VerbTask, self).__init__(
+            env=env, max_time=2 * TIME_VERB, world=world)
+
+    @on_init()
+    def on_init(self, event):
+        self.target_verb = random.choice(self.verbs)
+
+    @on_start()
+    def on_start(self, event):
+        self.set_message("Say 'I {0}' to {0}.".format(self.target_verb))
+
+    @on_message(r'\.$')
+    def correct(self, event):
+        if event.is_message(self.target_verb, '.'):
+            self.set_reward(1, 'You {0}.'.format(
+                self.verbs_past[self.verbs.index(self.target_verb)]))
+        else:
+            self.fail_learner()
+
+    @on_timeout()
+    def on_timeout(self, event):
+        self.fail_learner()
+
+    def fail_learner(self):
+        self.set_reward(0, random.choice(msg.failed))

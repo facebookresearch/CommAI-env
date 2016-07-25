@@ -106,7 +106,7 @@ class TestEvents(unittest.TestCase):
                 def start_handler(self, event):
                     pass
                 self.start_handler_func = start_handler
-                self.dyn_add_handler(task.on_start()(start_handler))
+                self.add_handler(task.on_start()(start_handler))
 
         class EnvironmentMock():
             def __init__(self, triggers):
