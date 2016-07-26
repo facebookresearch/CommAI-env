@@ -11,6 +11,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import sys
 import logging
+import logging.config
 from core.serializer import StandardSerializer, IdentitySerializer
 from core.environment import Environment
 from tasks_config import create_tasks, create_tasks_incremental
@@ -18,21 +19,16 @@ from learners.sample_learners import SampleRandomWordsLearner
 from learners.sample_learners import RandomCharacterLearner
 from learners.sample_learners import SampleMemorizingLearner
 from learners.human_learner import HumanLearner
-from core.session import Session, ExternalSession
+from core.session import Session
 from view.console import ConsoleView
 
 
-def init_logger(default_path='logging.json',
+def init_logger(default_path='logging.ini',
         default_level=logging.INFO,
         env_key='LOG_CFG'):
+    logging.config.fileConfig(default_path)
     logger = logging.getLogger(__name__)
     logger.info("Starting new tournament")
-
-    """
-        Logging config
-    """
-    # Python 2.6 doesn't have decent config utilities, so using the basic config
-    logging.basicConfig(level=default_level)
 
 
 def build_tournament(serializer, learner):
@@ -83,7 +79,8 @@ def random_character_learner():
     session.set_sleep(0.1)
     run_tournament(session, view)
 
-def external_learner():
+def external_learner(logging_config_path='logging.ini'):
+    init_logger(default_path=logging_config_path)
     serializer = IdentitySerializer()
     env = Environment(serializer)
     task_scheduler = create_tasks_incremental(env)
