@@ -63,3 +63,4 @@ class Session:
 
     def reset_sleep(self):
         self._sleep = self._default_sleep
+

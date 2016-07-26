@@ -131,3 +131,5 @@ class RandomCharacterLearner:
         if self.log_file is not None:
             self.log_file.write('{} -> {}'.format(input, output))
         return output
+
+

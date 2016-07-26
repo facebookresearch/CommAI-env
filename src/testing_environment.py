@@ -18,7 +18,7 @@ from learners.sample_learners import SampleRandomWordsLearner
 from learners.sample_learners import RandomCharacterLearner
 from learners.sample_learners import SampleMemorizingLearner
 from learners.human_learner import HumanLearner
-from core.session import Session
+from core.session import Session, ExternalSession
 from view.console import ConsoleView
 
 
@@ -82,6 +82,13 @@ def random_character_learner():
     session, view = build_tournament(serializer, learner)
     session.set_sleep(0.1)
     run_tournament(session, view)
+
+def external_learner():
+    serializer = IdentitySerializer()
+    env = Environment(serializer)
+    task_scheduler = create_tasks_incremental(env)
+    env.set_task_scheduler(task_scheduler)
+    return env
 
 
 
