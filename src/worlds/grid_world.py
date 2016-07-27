@@ -13,6 +13,7 @@ from core.task import World, on_world_start, on_message, on_sequence,\
     on_state_changed, on_timeout, on_output_message, on_world_init
 from collections import namedtuple, defaultdict
 import logging
+import tasks.competition.messages as msg
 import re
 
 
@@ -29,8 +30,13 @@ class Point(namedtuple('Point', ('x', 'y'))):
     def __str__(self):
         return 'Point({0},{1})'.format(self.x, self.y)
 
-Span = namedtuple('Span', ('dx', 'dy'))
 
+class Span(namedtuple('Span', ('dx', 'dy'))):
+    def __rmul__(self, m):
+        return Span(m * self.dx, m * self.dy)
+
+    def __mul__(self, m):
+        return Span(m * self.dx, m * self.dy)
 
 class GWEntity(namedtuple('GWEntity', ('name', 'pickable', 'traversable'))):
     def __str__(self):
@@ -87,16 +93,22 @@ class GridWorld(World):
         self.state.entities = {}
         # inventory of the learner (a multiset)
         self.state.learner_inventory = defaultdict(int)
+        # inventory of the teacher (a multiset)
+        self.state.teacher_inventory = defaultdict(int)
+        # set of objects the teacher is willing to receive
+        self.state.teacher_accepts = set()
 
     @on_message(r"I turn left\.$")
     def on_turn_left(self, event):
         self.turn(-1)
-        self.set_message("You turned left.")
+        self.set_message("You turned left, you are now facing {direction}."
+                         .format(direction=self.state.learner_direction))
 
     @on_message(r"I turn right\.$")
     def on_turn_right(self, event):
         self.turn(1)
-        self.set_message("You turned right.")
+        self.set_message("You turned right, you are now facing {direction}."
+                         .format(direction=self.state.learner_direction))
 
     @on_message(r"I move forward\.$")
     def on_move_forward(self, event):
@@ -133,6 +145,18 @@ class GridWorld(World):
                 self.set_message("You can't pick up the {0}.".format(obj_name))
         else:
             self.set_message("There is no {0} here.".format(obj_name))
+
+    @on_message("I give you (an? (\w+))\.$")
+    def on_object_given(self, event):
+        object_ = event.get_match(2)
+        if object_ in self.state.teacher_accepts:
+            self.state.learner_inventory[object_] -= 1
+            self.state.teacher_inventory[object_] += 1
+            self.set_message("You gave me {indef_object}.".format(
+                indef_object=msg.indef_article(object_)))
+        else:
+            self.set_message("I haven't asked you for {indef_object}.".format(
+                indef_object=msg.indef_article(object_)))
 
     def turn(self, d):
         '''

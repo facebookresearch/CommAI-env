@@ -10,6 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.aux.observer import Observable
+import logging
 
 
 class InputChannel:
@@ -52,12 +53,19 @@ class InputChannel:
             self.message_updated(self._deserialized_buffer)
 
     def clear(self):
+        '''Clears all the  buffers'''
         self._set_deserialized_buffer('')
         self._set_binary_buffer('')
         self._deserialized_pos = 0
 
     def get_binary(self):
         return self._binary_buffer
+
+    def set_deserialized_buffer(self, new_buffer):
+        '''
+        Replaces the deserialized part of the buffer.
+        '''
+        self._deserialized_buffer = new_buffer
 
     def get_undeserialized(self):
         '''
@@ -93,6 +101,7 @@ class OutputChannel:
         self._binary_buffer = ''
         # event that gets fired every time we change the output sequence
         self.sequence_updated = Observable()
+        self.logger = logging.getLogger(__name__)
 
     def set_message(self, message):
         new_binary = self.serializer.to_binary(message)
@@ -104,6 +113,10 @@ class OutputChannel:
             # that information with the new buffer
             if self.serializer.to_text(self._binary_buffer[i:]):
                 insert_point = i
+                break
+        if insert_point > 0:
+            self.logger.debug("Inserting new contents at {0}".format(
+                insert_point))
         self._set_buffer(self._binary_buffer[:insert_point] + new_binary)
 
     def clear(self):

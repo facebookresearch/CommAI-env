@@ -120,7 +120,7 @@ class Environment:
 
     def on_input_sequence_updated(self, sequence):
         if self.event_manager.raise_event(SequenceReceived(sequence)):
-            self.logger.debug("Message received by running task: '{0}'".format(
+            self.logger.debug("Sequence received by running task: '{0}'".format(
                 sequence))
 
     def on_input_message_updated(self, message):

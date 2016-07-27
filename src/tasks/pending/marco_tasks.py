@@ -133,7 +133,7 @@ class ItalianHowManyPropertiesDoesAnObjectHaveTask(Task):
     @on_message()
     def check_response(self, event):
         if not self.instructions_completed:
-            self.clear_input_channel()
+            self.ignore_last_char()
         elif (
                 (event.message[-(len(str(self.property_count))+1):] == (str(self.property_count)+'.'))
                 or
@@ -195,7 +195,7 @@ class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
     @on_message()
     def check_response(self, event):
         if not self.instructions_completed:
-            self.clear_input_channel()
+            self.ignore_last_char()
         elif self.re_query.match(event.message):
             self.set_message(self.target_number + '.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
@@ -241,7 +241,7 @@ class GuessTheNumberAskingQuestionsTask(Task):
     @on_message()
     def check_response(self, event):
         if not self.instructions_completed:
-            self.clear_input_channel()
+            self.ignore_last_char()
         elif self.re_query.match(event.message):
             self.set_message(self.target_number + '.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
@@ -296,7 +296,7 @@ class GuessTheNumberAskingForDigitsExplicitModelTask(Task):
     @on_message()
     def check_response(self, event):
         if not self.instructions_completed:
-            self.clear_input_channel()
+            self.ignore_last_char()
         elif self.re_query.match(event.message):
             if (self.next_digit<self.digits):
                 self.set_message(self.target_number[self.next_digit] + '.')
@@ -360,7 +360,7 @@ class GuessTheNumberAskingForDigitsTask(Task):
     @on_message()
     def check_response(self, event):
         if not self.instructions_completed:
-            self.clear_input_channel()
+            self.ignore_last_char()
         elif self.re_query.match(event.message):
             if (self.next_digit<self.digits):
                 self.set_message(self.target_number[self.next_digit] + '.')

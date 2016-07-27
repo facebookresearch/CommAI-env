@@ -10,8 +10,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init
+    on_state_changed, on_timeout, on_output_message, on_init, on_ended
 import tasks.competition.messages as msg
+from tasks.competition.base import BaseTask
 from tasks.competition.objects_properties import global_properties
 import random
 
@@ -31,14 +32,16 @@ TIME_GIVE = (len("I give you an xxxxxxxxxxxx.") +
              len("You gave me an xxxxxxxxxxxx.")) * TIME_CHAR
 
 
-class TurningTask(Task):
+class TurningTask(BaseTask):
     def __init__(self, env, world):
         super(TurningTask, self).__init__(
             env=env, max_time=3 * TIME_TURN, world=world)
 
     @on_init()
     def on_init(self, event):
+        # during initalization task, save the direction the learner is facing
         self.state.init_dir = self.get_world().state.learner_direction
+        # randomly choose a target direction and save it too
         self.target_turn = random.choice(['left', 'right'])
         if self.target_turn == 'right':
             self.state.target_direction = \
@@ -49,11 +52,13 @@ class TurningTask(Task):
 
     @on_start()
     def on_start(self, event):
+        # ask the learner to turn in the target direction
         self.set_message("Turn {0}.".format(self.target_turn))
 
     @on_state_changed(
         lambda ws, ts: ws.learner_direction == ts.target_direction)
     def on_moved(self, event):
+        # reward the learner when it's facing the right direction
         self.set_reward(1)
 
     @on_timeout()
@@ -61,20 +66,23 @@ class TurningTask(Task):
         self.set_message(random.choice(msg.timeout))
 
 
-class MovingTask(Task):
+class MovingTask(BaseTask):
     def __init__(self, env, world):
         super(MovingTask, self).__init__(
             env, max_time=3 * TIME_MOVE, world=world)
 
     @on_init()
     def on_init(self, event):
+        # during initalization task, save the learner's position
         self.state.initial_pos = self.get_world().state.learner_pos
+        # save the destination position one step forward from the learner is
         dp = self.get_world().valid_directions[
             self.get_world().state.learner_direction]
         self.state.dest_pos = self.state.initial_pos + dp
 
     @on_start()
     def on_start(self, event):
+        # ask the learner to move forward
         self.set_message("Move forward.")
 
     @on_state_changed(lambda ws, ts: ws.learner_pos == ts.dest_pos)
@@ -86,15 +94,17 @@ class MovingTask(Task):
         self.set_message(random.choice(msg.timeout))
 
 
-class MovingRelativeTask(Task):
+class MovingRelativeTask(BaseTask):
     def __init__(self, env, world):
         super(MovingRelativeTask, self).__init__(
             env=env, max_time=2 * TIME_TURN + 2 * TIME_MOVE, world=world)
 
-    # initialize state variables
     @on_init()
     def on_init(self, event):
+        # during initalization task, save the direction the learner is facing
         self.state.init_dir = self.get_world().state.learner_direction
+        # randomly choose a target direction and save the position
+        # one step forward in that direction
         self.state.initial_pos = self.get_world().state.learner_pos
         self.target_turn = random.choice(['left', 'right'])
         if self.target_turn == 'right':
@@ -108,14 +118,19 @@ class MovingRelativeTask(Task):
 
     @on_start()
     def on_start(self, event):
+        # Ask the learner to move in a particular direction (left or right)
         self.set_message("Move {0}.".format(self.target_turn))
 
     @on_state_changed(lambda ws, ts: ws.learner_pos == ts.dest_pos)
     def on_moved(self, event):
         self.set_reward(1)
 
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
-class MovingAbsoluteTask(Task):
+
+class MovingAbsoluteTask(BaseTask):
     def __init__(self, env, world):
         super(MovingAbsoluteTask, self).__init__(
             env=env, max_time=8 * TIME_TURN + 4 * TIME_MOVE, world=world)
@@ -123,7 +138,10 @@ class MovingAbsoluteTask(Task):
     # initialize state variables
     @on_init()
     def on_init(self, event):
+        # during initalization task, save the direction the learner is facing
         self.state.init_dir = self.get_world().state.learner_direction
+        # randomly choose a target direction and save the position
+        # one step forward in that direction
         self.state.initial_pos = self.get_world().state.learner_pos
         self.target_turn = random.choice(['left', 'right'])
         if self.target_turn == 'right':
@@ -137,6 +155,8 @@ class MovingAbsoluteTask(Task):
 
     @on_start()
     def on_start(self, event):
+        # Ask the learner to move in a particular absolute direction
+        # (north, east, south, west)
         self.set_message("You are facing {0}, move {1}.".format(
             self.state.init_dir, self.state.target_dir))
 
@@ -144,8 +164,12 @@ class MovingAbsoluteTask(Task):
     def on_moved(self, event):
         self.set_reward(1)
 
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
-class PickUpTask(Task):
+
+class PickUpTask(BaseTask):
 
     def __init__(self, env, world):
         super(PickUpTask, self).__init__(
@@ -153,38 +177,38 @@ class PickUpTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objects)
+        # choose some random object
+        self.target_obj, = random.sample(objects, 1)
+        # find the cell in front of the learner
         ws = self.get_world().state
-        ld = ws.learner_direction
+        ld = self.get_world().valid_directions[ws.learner_direction]
         lp = ws.learner_pos
         self.state.initial_count = ws.learner_inventory[self.target_obj]
+        # place the object there
         self.get_world().put_entity(lp + ld, self.target_obj, True, True)
 
         self.add_handler(
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
-            (self.on_object_picked_up.im_func))
+            (self.on_object_picked_up))
 
     @on_start()
     def on_start(self, event):
-        self.set_message("You have {indef_object} next to you. "
+        self.set_message("You have {indef_object} in front of you. "
                          "Pick up the {object}.".format(
-                             indef_object=indef_article(self.target_obj),
+                             indef_object=msg.indef_article(self.target_obj),
                              object=self.target_obj))
 
     def on_object_picked_up(self, event):
-        self.set_reward(1, "You picked up the {0}.".format(self.target_obj))
+        self.set_reward(1)
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
 
-def indef_article(x):
-    if x[0] in 'aeiou':
-        return 'an ' + x
-    else:
-        return 'a ' + x
-
-
-class PickUpAroundTask(Task):
+class PickUpAroundTask(BaseTask):
 
     def __init__(self, env, world):
         super(PickUpAroundTask, self).__init__(
@@ -193,11 +217,14 @@ class PickUpAroundTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objects)
+        # choose a random object
+        self.target_obj, = random.sample(objects, 1)
+        # find a random cell around the learner
         self.direction = random.choice(self.get_world().valid_directions.keys())
         ws = self.get_world().state
         p = ws.learner_pos + self.get_world().valid_directions[self.direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
+        # place the object there
         self.get_world().put_entity(p, self.target_obj, True, True)
 
         self.add_handler(
@@ -208,24 +235,37 @@ class PickUpAroundTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.set_message("There is {0} {1} from you. Pick up the {0}.".format(
-                         indef_article(self.target_obj), self.direction))
+        self.set_message("There is {indef_object} {direction} from you, "
+                         "pick up the {object}.".format(
+                             indef_object=msg.indef_article(self.target_obj),
+                             direction=self.direction,
+                             object=self.target_obj))
 
     def on_object_picked_up(self, event):
-        self.set_reward(1, "You picked up the {0}.".format(self.target_obj))
+        self.set_reward(1)
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
 
-class PickUpInFrontTask(Task):
+class PickUpInFrontTask(BaseTask):
+    max_steps_forward = 10
 
     def __init__(self, env, world):
         super(PickUpInFrontTask, self).__init__(
-            env=env, max_time=50 * TIME_CHAR + 2 * TIME_PICK, world=world)
+            env=env, max_time=50 * TIME_CHAR + 2 * TIME_PICK +
+            PickUpInFrontTask.max_steps_forward * TIME_MOVE, world=world)
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objects)
+        # choose a random object
+        self.target_obj, = random.sample(objects, 1)
         ws = self.get_world().state
-        p = ws.learner_pos + self.get_world().valid_directions[
+        # select a random number of steps
+        self.n = random.randint(1, PickUpInFrontTask.max_steps_forward)
+        # place the object that number of steps in front of the learner
+        p = ws.learner_pos + self.n * self.get_world().valid_directions[
             ws.learner_direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
         self.get_world().put_entity(p, self.target_obj, True, True)
@@ -238,48 +278,59 @@ class PickUpInFrontTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.set_message("There is {0} in front of you. Pick up the {0}."
-                         .format(indef_article(self.target_obj)))
+        self.set_message("There is {indef_object} {n} steps forward, "
+                         "pick up the {object}."
+                         .format(
+                             indef_object=msg.indef_article(self.target_obj),
+                             n=msg.number_to_string(self.n),
+                             object=self.target_obj))
 
     def on_object_picked_up(self, event):
         self.set_reward(1, "You picked up the {0}.".format(self.target_obj))
 
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
-class GiveTask(Task):
+
+class GivingTask(BaseTask):
 
     def __init__(self, env, world):
-        super(GiveTask, self).__init__(
+        super(GivingTask, self).__init__(
             env=env, max_time=50 * TIME_CHAR + 2 * TIME_GIVE, world=world)
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objects)
         ws = self.get_world().state
-        self.state.initial_count = ws.learner_inventory[self.target_obj]
-        ws.learner_inventory[self.target_obj] += 1
+        # pick a random object
+        self.state.target_obj, = random.sample(objects, 1)
+        # give one of it to the learner
+        ws.learner_inventory[self.state.target_obj] += 1
+        # save how many objects of this we have
+        self.state.initial_count = ws.teacher_inventory[self.state.target_obj]
+        # inform the world that we can expect to receive such an object
+        ws.teacher_accepts.add(self.state.target_obj)
 
     @on_start()
     def on_start(self, event):
-        self.set_message("I gave you {0}. Give it back to me by saying "
-                          "\"I give you {0}\"."
-                          .format(indef_article(self.target_obj)))
+        self.set_message("I gave you {indef_object}. Give it back to me "
+                         "by saying \"I give you {indef_object}\"."
+                          .format(indef_object=msg.indef_article(
+                              self.state.target_obj)))
 
-    @on_message("I give you (an? (\w+))\.$")
+    # if I have one more of the target object, the learner solved the task.
+    @on_state_changed(
+        lambda ws, ts: ws.teacher_inventory[ts.target_obj] ==
+        ts.initial_count + 1)
     def on_give_me_object(self, event):
-        if event.get_match(1) == indef_article(self.target_obj):
-            ws = self.get_world().state
-            ws.learner_inventory[self.target_obj] -= 1
-            self.set_reward(1, "You gave me {0}.".format(
-                indef_article(self.target_obj)))
-        elif event.get_match(2) == self.target_obj:
-            self.set_message("Wrong article.")
-        elif event.get_match(2) != self.target_obj:
-            self.set_message("I have asked you to give me {0}, not {1}."
-                             .format(indef_article(self.target_obj),
-                                     indef_article(event.get_match(2))))
+        self.set_reward(1)
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
 
-class PickUpAroundAndGiveTask(Task):
+class PickUpAroundAndGiveTask(BaseTask):
 
     def __init__(self, env, world):
         super(PickUpAroundAndGiveTask, self).__init__(
@@ -289,60 +340,70 @@ class PickUpAroundAndGiveTask(Task):
 
     @on_init()
     def on_init(self, event):
-        self.target_obj = random.choice(objects)
-        self.direction = random.choice(self.get_world().valid_directions.keys())
         ws = self.get_world().state
-        p = ws.learner_pos + self.get_world().valid_directions[self.direction]
-        self.state.initial_count = ws.learner_inventory[self.target_obj]
-        self.get_world().put_entity(p, self.target_obj, True, True)
+        # pick a random object
+        target_obj, = random.sample(objects, 1)
+        self.state.target_obj = target_obj
+        # save how many objects of this we have
+        self.state.initial_count = ws.teacher_inventory[target_obj]
+        # save how many instances of the object the learner intially had
+        self.state.learner_initial_count = ws.learner_inventory[target_obj]
+        # choose some random direction
+        self.direction = random.choice(self.get_world().valid_directions.keys())
+        # measure a cell one step in that direction
+        self.obj_pos = ws.learner_pos + \
+            self.get_world().valid_directions[self.direction]
+        # put an object in the given position
+        self.get_world().put_entity(self.obj_pos, target_obj, True, True)
+        # initialize a variable to check if the object has been picked up
         self.object_picked_up = False
-        self.add_handler(
-            on_state_changed(lambda ws, ts:
-                             ws.learner_inventory[self.target_obj] ==
-                             ts.initial_count + 1)
-            (self.on_object_picked_up.im_func))
+        # inform the world that we can expect to receive such an object
+        ws.teacher_accepts.add(self.state.target_obj)
 
     @on_start()
     def on_start(self, event):
-        self.set_message("There is {0} {1} from you."
+        self.set_message("There is {indef_object} {direction} from you."
                          " Pick it up and give it to me.".format(
-                             indef_article(self.target_obj), self.direction))
+                             indef_object=msg.indef_article(
+                                 self.state.target_obj),
+                             direction=self.direction))
 
+    @on_state_changed(lambda ws, ts:
+                      ws.learner_inventory[ts.target_obj] ==
+                      ts.learner_initial_count + 1)
     def on_object_picked_up(self, event):
         self.object_picked_up = True
 
-    # FIXME: make this a verb of the world?
-    @on_message("I give you (an? (\w+))\.$")
+    # if I have one more of the target object, the learner solved the task
+    # if it also picked up the object in the grid.
+    @on_state_changed(
+        lambda ws, ts: ws.teacher_inventory[ts.target_obj] ==
+        ts.initial_count + 1)
     def on_give_me_object(self, event):
-        self.set_message("dsdfs")
-        if event.get_match(1) == indef_article(self.target_obj):
-            if self.object_picked_up:
-                ws = self.get_world().state
-                ws.learner_inventory[self.target_obj] -= 1
-                self.set_reward(1, "You gave me {0}.".format(
-                    indef_article(self.target_obj)))
-            else:
-                self.set_message("You have to pick up the {0} first."
-                                 .format(self.target_obj))
-        elif event.get_match(2) == self.target_obj:
-            self.set_message("Wrong article.")
-        elif event.get_match(2) != self.target_obj:
-            self.set_message("I have asked you to give me {0}, not {1}."
-                             .format(indef_article(self.target_obj),
-                                     indef_article(event.get_match(2))))
+        if self.object_picked_up:
+            self.set_reward(1)
         else:
-            self.set_message(event.get_match(1))
+            self.set_message("You have to pick up the {object} first."
+                             .format(object=self.state.target_obj))
+
+    @on_timeout()
+    def fail_learner(self, event):
+        # cleaning up
+        if not self.object_picked_up:
+            self.get_world().remove_entity(self.obj_pos)
+        self.set_message(random.choice(msg.timeout))
+
+    @on_ended()
+    def on_ended(self, event):
+        # cleanup
+        self.get_world().state.teacher_accepts.remove(self.state.target_obj)
+
+#
+# Counting + Proprioception
+#
 
 
-def pluralize(obj, c):
-    if c == 1:
-        return obj
-    else:
-        return obj + 's'
-
-
-# TODO: also accept numbers written in letters
-class CountingInventoryTask(Task):
+class CountingInventoryTask(BaseTask):
 
     def __init__(self, env, world):
         super(CountingInventoryTask, self).__init__(
@@ -351,99 +412,124 @@ class CountingInventoryTask(Task):
 
     @on_start()
     def on_start(self, event):
-        self.target_obj = random.choice(objects)
+        self.target_obj, = random.sample(objects, 1)
         self.set_message("How many {0} do you have?".format(
-                         pluralize(self.target_obj, 2)))
-        # Perhaps we should standardize some feedback state variable
-        self.feedback_given = False
+                         msg.pluralize(self.target_obj, 2)))
 
-    @on_message("\.$")
+    @on_message("(\w+)\.$")
     def on_something_said(self, event):
+        # find out the correct answer
         count = self.get_world().state.learner_inventory[self.target_obj]
-        # TODO: add letter version of the number here
-        if event.is_message(str(count) + '.'):
+        # get the answer of the learner and parse it
+        answer = event.get_match(1)
+        num_answer = msg.string_to_number(answer)
+        if num_answer == count:
             self.set_reward(1, "Correct!")
         else:
-            if not self.feedback_given:
-                self.set_message("No, you have {0} {1}.".format(count,
-                                 pluralize(self.target_obj, count)))
-                self.feedback_given = True
-            else:
-                self.set_reward(0, "Sorry, that's wrong!")
+            self.set_message("{negative_feedback} "
+                             "You have {count} {objects}.".format(
+                                 negative_feedback=random.choice(msg.failed),
+                                 count=count,
+                                 objects=msg.pluralize(self.target_obj,
+                                                       count)))
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
 
 
-# TODO: also accept numbers written in letters
-class CountingInventoryGivingTask(Task):
+class CountingInventoryGivingTask(BaseTask):
 
     def __init__(self, env, world):
         super(CountingInventoryGivingTask, self).__init__(
-            env=env, max_time=10000 * TIME_CHAR,
+            env=env, max_time=1000 * TIME_CHAR,
             world=world)
-        self.stop_propagation = None
+
+    @on_init()
+    def on_init(self, event):
+        self.failed = False
+        self.time_gave_me_object = None
+        self.state.target_obj, = random.sample(objects, 1)
+        self.state.initial_count = \
+            self.get_world().state.learner_inventory[self.state.target_obj]
 
     @on_start()
     def on_start(self, event):
-        self.target_obj = random.choice(objects)
         self.set_message("How many {0} do you have?".format(
-                         pluralize(self.target_obj, 2)))
-        # Perhaps we should standardize some feedback state variable
-        self.stage = 0
+                         msg.pluralize(self.state.target_obj, 2)))
+        self.stages = ['initial-query', 'one-more-query', 'waiting-give-back',
+                       'final-query']
+        self.stage = 'initial-query'
 
-    @on_message("\.$")
-    def on_something_said(self, event):
-        # FIXME: move this check to the event proccessing
-        # This check ensures that this event doesn't get activated
-        # at the same time as "I give you an X."
-        if self.stop_propagation == event:
+    @on_message("(\w+)\.$")
+    def on_answer_query(self, event):
+        # if we are waiting for an object, then we don't expect an answer
+        # to a query
+        if self.stage == 'waiting-give-back':
             return
-        count = self.get_world().state.learner_inventory[self.target_obj]
-        # TODO: add letter version of the number here
-        if self.stage == 3:
-            if event.is_message(str(count) + '.'):
-                self.set_reward(1, "Correct!")
+        # if you just gave me an object, then this is not the
+        # answer for a query
+        if self.time_gave_me_object == self.get_time():
+            return
+        # short variable for the world state
+        ws = self.get_world().state
+        # we check if the learner's answer matches the number of instances
+        # it has of the given object
+        count = ws.learner_inventory[self.state.target_obj]
+        # get the answer of the learner and parse it
+        answer = event.get_match(1)
+        try:
+            num_answer = msg.string_to_number(answer)
+        except ValueError:
+            num_answer = None
+        # check if the learner has failed
+        self.failed = self.failed or num_answer != count
+        # get a feedback response
+        feedback = random.choice(msg.congratulations) if num_answer == count \
+                    else random.choice(msg.failed)
+        if self.stage == 'initial-query':
+            ws.learner_inventory[self.state.target_obj] += 1
+            self.set_message(
+                "{feedback} I gave you {indef_object}. "
+                "How many {objects} do you have now?".format(
+                    indef_object=msg.indef_article(self.state.target_obj),
+                    objects=msg.pluralize(self.state.target_obj, 2),
+                    feedback=feedback))
+            self.stage = 'one-more-query'
+        elif self.stage == 'one-more-query':
+            self.set_message("{feedback} Now give the {object} back to me."
+                             .format(object=self.state.target_obj,
+                                     feedback=feedback))
+            ws.teacher_accepts.add(self.state.target_obj)
+            self.stage = 'waiting-give-back'
+        elif self.stage == 'final-query':
+            # reward the learner if it replied correctly all the questions
+            if not self.failed:
+                self.set_reward(1, feedback)
             else:
-                self.set_message("Sorry, that's wrong!")
-        elif self.stage == 0 or self.stage == 1:
-            msg = ''
-            if event.is_message(str(count) + '.'):
-                msg += "Correct!"
-                ws = self.get_world().state
-                if self.stage == 0:
-                    ws.learner_inventory[self.target_obj] += 1
-                    msg += " I gave you {0}."\
-                        " How many {1} do you have now?".format(
-                            indef_article(self.target_obj),
-                            pluralize(self.target_obj, 2))
-                    self.stage = 1
-                elif self.stage == 1:
-                    msg += " Now give the {0} back to me.".format(
-                        self.target_obj)
-                    self.stage = 2
-            else:
-                msg += "Sorry, that's wrong!"
-            self.set_message(msg)
+                self.set_reward(0, feedback)
 
-    # FIXME: make this a verb of the world?
-    @on_message("I give you (an? (\w+))\.$")
-    def on_give_me_object(self, event):
-        if self.stage != 2:
-            self.set_message('I haven\'t asked you to give me anything.')
-        else:
-            if event.get_match(1) == indef_article(self.target_obj):
-                ws = self.get_world().state
-                ws.learner_inventory[self.target_obj] -= 1
-                self.set_message("Good! You gave me {0}. "
-                                 "How many {1} do you have now?".format(
-                                     indef_article(self.target_obj),
-                                     pluralize(self.target_obj, 2)))
-                self.stage = 3
-                # FIXME: change for an event.stop_propagation()
-                self.stop_propagation = event
-                # FIXME: we need an event.stop_propagation() thingy for this to
-                # work!
-            elif event.get_match(2) == self.target_obj:
-                self.set_message("Wrong article.")
-            elif event.get_match(2) != self.target_obj:
-                self.set_message("I have asked you to give me {0}, not {1}."
-                                 .format(indef_article(self.target_obj),
-                                         indef_article(event.get_match(2))))
+    # if I have one more of the target object, the learner solved the task
+    # if it also picked up the object in the grid.
+    @on_state_changed(
+        lambda ws, ts: ws.teacher_inventory[ts.target_obj] ==
+        ts.initial_count + 1)
+    def on_gave_me_target_object(self, event):
+        if self.stage == 'waiting-give-back':
+            self.time_gave_me_object = self.get_time()
+            self.set_message(
+                "Good! You gave me {indef_object}. "
+                "How many {objects} do you have now?".format(
+                    indef_object=msg.indef_article(self.state.target_obj),
+                    objects=msg.pluralize(self.state.target_obj, 2)))
+        self.stage = 'final-query'
+
+    @on_timeout()
+    def fail_learner(self, event):
+        self.set_message(random.choice(msg.timeout))
+
+    @on_ended()
+    def on_ended(self, event):
+        if self.stage in ['waiting-give-back', 'final-query']:
+            # cleanup
+            self.get_world().state.teacher_accepts.remove(self.state.target_obj)

@@ -109,7 +109,7 @@ class RepeatingPhraseTask(Task):
     def on_any_message(self, event):
         if not self.instructions_completed:
             # we forget the input if the instructions are not completed yet
-            self.clear_input_channel()
+            self.ignore_last_char()
 
     # This handler gets exeuted whenever the learner says anything containing
     # the string "I am not a Robot" (thus, a mimicking learner will be given
@@ -230,7 +230,6 @@ class LookAroundTask(Task):
         self.set_reward(1)
 
 
-
 class PickAnApple(Task):
     def __init__(self, env, world):
         super(PickAnApple, self).__init__(
@@ -252,6 +251,7 @@ class PickAnApple(Task):
         if self.block_pos == self.apple_pos:
             self.block_pos = self.block_pos + Span(0, 1)
         self.get_world().put_entity(self.block_pos, 'block', False, False)
+        self.set_message("This shouldn't appear.")
 
     @on_ended()
     def cleanup(self, event):
@@ -262,7 +262,7 @@ class PickAnApple(Task):
 
     @on_start()
     def on_start(self, event):
-        self.set_message("Pick up an apple")
+        self.set_message("Pick up an apple.")
 
     @on_state_changed(lambda ws, ts: ws.learner_inventory['apple'] >
                       ts.starting_apples)

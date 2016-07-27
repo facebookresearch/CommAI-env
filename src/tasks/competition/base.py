@@ -9,8 +9,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init
+from core.task import Task, on_message
 
 
 class BaseTask(Task):
@@ -27,5 +26,7 @@ class BaseTask(Task):
     def on_any_message(self, event):
         # if the environment is speaking
         if not self._env.is_silent():
-            # i will ignore what the learner just said by forgetting it
-            self.clear_input_channel()
+            # and the last message was not a silence
+            if event.message[-1] != ' ':
+                # i will ignore what the learner just said by forgetting it
+                self.ignore_last_char()

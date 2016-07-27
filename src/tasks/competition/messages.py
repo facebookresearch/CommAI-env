@@ -37,6 +37,7 @@ def number_to_string(num):
     '''
     return random.choice(number_to_strings(num))
 
+
 def number_to_strings(num):
     '''
     Returns all the string versions of a number.
@@ -53,8 +54,29 @@ def string_to_number(n):
     else:
         return int(n)
 
+#
+# simple grammatical functions
+#
+
+
 def indef_article(x):
     if x[0] in 'aeiou':
         return 'an ' + x
     else:
         return 'a ' + x
+
+
+def pluralize(obj, c):
+    if c == 1:
+        return obj
+    else:
+        return obj + 's'
+
+
+def lemmatize(word):
+    # if the word ends with an s and it's the result of pluralization
+    # remove the s:
+    if word[-1] == 's' and pluralize(word[:-1], 2) == word:
+        return word[:-1]
+    else:
+        return word

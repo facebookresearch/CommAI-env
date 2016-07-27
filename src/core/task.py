@@ -360,8 +360,14 @@ class ScriptSet(object):
     def set_message(self, message, priority=0):
         self._env.set_message(message, priority)
 
-    def clear_input_channel(self):
-        self._env._input_channel.clear()
+    def ignore_last_char(self):
+        '''
+        Replaces the last character in the input channel with a silence.
+        '''
+        self._env._input_channel.set_deserialized_buffer(
+            self._env._input_channel.get_text()[:-1] +
+            self._env._serializer.SILENCE_TOKEN
+        )
 
 
 class World(ScriptSet):
@@ -408,7 +414,18 @@ class Task(ScriptSet):
         self._env.raise_event(Ended())
 
     # ### API for the scripts ###
+    def get_time(self):
+        '''Gets the environment's task time'''
+        return self._env._task_time
+
     def set_reward(self, reward, message='', priority=1):
+        '''Assigns a reward to the learner and ends the task.
+        Args:
+            reward: numerical reward given to the learner
+            message: optional message to be given with the reward
+            priotity: the priority of the message. If there is another
+                message on the output stream and the priority is lower than it,
+                the message will be blocked.'''
         super(Task, self).set_reward(reward, message, priority)
 
     def set_message(self, message, priority=1):
