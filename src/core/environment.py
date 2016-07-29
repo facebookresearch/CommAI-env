@@ -58,8 +58,8 @@ class Environment:
             self.on_output_message_updated)
 
     def set_task_scheduler(self, task_scheduler):
-        ''' A task scheduler is an object with methods get_next_task() and reward()
-        that can feed new tasks on demand'''
+        ''' A task scheduler is an object with methods get_next_task() and
+        reward() that can feed new tasks on demand'''
         self.task_scheduler = task_scheduler
 
     def next(self, learner_input):
@@ -89,7 +89,7 @@ class Environment:
                     # reward the learner if necessary and switch to new task
                     reward = self._reward if self._reward is not None else 0
                     if reward != 0:
-                        self.task_scheduler.reward()
+                        self.task_scheduler.reward(reward)
                     self._switch_new_task()
                     self._task_separator_issued = False
                 else:
