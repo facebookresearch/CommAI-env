@@ -10,45 +10,99 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.aux.observer import Observable
+from collections import defaultdict
 import time
-import logging
 
 
 class Session:
-    def __init__(self, environment, learner, task_scheduler):
+    def __init__(self, environment, learner, task_scheduler,
+                 max_reward_per_task=10, default_sleep=0.01):
+        # internal initialization
         self._env = environment
         self._learner = learner
+        self._max_reward_per_task = max_reward_per_task
         self._env.set_task_scheduler(task_scheduler)
+        self._task_scheduler = task_scheduler
+        self._default_sleep = default_sleep
+        self._sleep = self._default_sleep
+        # listen to changes in the currently running task
+        self._env.task_updated.register(self.on_task_updated)
+        # observable status
         self.env_token_updated = Observable()
         self.learner_token_updated = Observable()
         self.total_reward_updated = Observable()
         self.total_time_updated = Observable()
-        self._default_sleep = 0.01
-        self._sleep = self._default_sleep
-        self.logger = logging.getLogger(__name__)
+        # -- accounting --
+        # total time
+        self._total_time = 0
+        # total cumulative reward
+        self._total_reward = 0
+        # cumulative reward per task
+        self._reward_per_task = defaultdict(int)
+        # keep track of how many times we have tried each task
+        self._task_count = defaultdict(int)
+        # keep track of how much time we have spent on each task
+        self._task_time = defaultdict(int)
 
     def run(self):
+        # initialize a token variable
         token = None
-        self._total_time = 0
-        self._total_reward = 0
+        # send out initial values of status variables
         self.total_time_updated(self._total_time)
         self.total_reward_updated(self._total_reward)
-        while True:
+        # loop until stopped
+        self._stop = False
+        while not self._stop:
             # first speaks the environment one token (one bit)
             token, reward = self._env.next(token)
             self.env_token_updated(token)
             # reward the learner if it has been set
             if reward is not None:
                 self._learner.reward(reward)
-                self._total_reward += reward
-                self.total_reward_updated(self._total_reward)
-            time.sleep(self._sleep)
+                self.accumulate_reward(reward)
+            # allow some time before processing the next iteration
+            if self._sleep > 0:
+                time.sleep(self._sleep)
             # then speaks the learner one token
             token = self._learner.next(token)
             self.learner_token_updated(token)
             # and we loop
             self._total_time += 1
+            self._task_time[self._current_task.get_name()] += 1
             self.total_time_updated(self._total_time)
+
+    def stop(self):
+        self._stop = True
+
+    def get_total_time(self):
+        return self._total_time
+
+    def get_total_reward(self):
+        return self._total_reward
+
+    def get_reward_per_task(self):
+        return self._reward_per_task
+
+    def get_task_count(self):
+        return self._task_count
+
+    def get_task_time(self):
+        return self._task_time
+
+    def accumulate_reward(self, reward):
+        '''Records the reward if the learner hasn't exceeded the maximum
+        possible amount of reward allowed for the current task.'''
+        task_name = self._current_task.get_name()
+        if self._reward_per_task[task_name] < self._max_reward_per_task:
+            if reward != 0:
+                self._task_scheduler.reward(reward)
+                self._reward_per_task[task_name] += reward
+                self._total_reward += reward
+                self.total_reward_updated(self._total_reward)
+
+    def on_task_updated(self, task):
+        self._current_task = task
+        self._task_count[self._current_task.get_name()] += 1
 
     def set_sleep(self, sleep):
         if sleep < 0:
@@ -63,4 +117,3 @@ class Session:
 
     def reset_sleep(self):
         self._sleep = self._default_sleep
-

@@ -88,8 +88,6 @@ class Environment:
                     # Have nothing more to say
                     # reward the learner if necessary and switch to new task
                     reward = self._reward if self._reward is not None else 0
-                    if reward != 0:
-                        self.task_scheduler.reward(reward)
                     self._switch_new_task()
                     self._task_separator_issued = False
                 else:

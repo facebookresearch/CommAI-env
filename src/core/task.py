@@ -343,6 +343,10 @@ class ScriptSet(object):
                 pass
         return triggers
 
+    def get_name(self):
+        '''Some unique identifier of the task'''
+        return self.__class__.__name__
+
     def _raise_state_changed(self):
         ret = self._env.raise_state_changed()
         if self.has_started():
