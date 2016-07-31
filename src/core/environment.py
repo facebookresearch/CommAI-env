@@ -13,6 +13,7 @@ from core.events import EventManager
 from core.task import StateChanged, MessageReceived, \
     SequenceReceived, OutputSequenceUpdated, OutputMessageUpdated
 from core.aux.observer import Observable
+from core.serializer import ScramblingSerializerWrapper
 from core.channels import InputChannel, OutputChannel
 import logging
 
@@ -21,17 +22,19 @@ class Environment:
     '''
     The Environment, you know.
     '''
-    def __init__(self, serializer):
+    def __init__(self, serializer, scramble=False):
         self.event_manager = EventManager()
         self._current_task = None
         self._current_world = None
         self._serializer = serializer
-        # input channel
-        self._input_channel = InputChannel(serializer)
-        # output channel
-        self._output_channel = OutputChannel(serializer)
         # we hear to our own output
         self._output_channel_listener = InputChannel(serializer)
+        if scramble:
+            serializer = ScramblingSerializerWrapper(serializer)
+        # output channel
+        self._output_channel = OutputChannel(serializer)
+        # input channel
+        self._input_channel = InputChannel(serializer)
         # priority of ongoing message
         self._output_priority = 0
         # reward that is to be given at the learner at the end of the task

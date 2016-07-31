@@ -27,6 +27,10 @@ def main():
     op = OptionParser()
     op.add_option('-o', '--output', dest='output', default='results.out',
                   help='File where the simulation results are saved.')
+    op.add_option('--scramble', dest='scramble', action='store_true',
+                  default=False,
+                  help='Randomly scramble the words in the tasks for '
+                  'a human player.')
     ops, args = op.parse_args()
 
     logger = logging.getLogger(__name__)
@@ -34,16 +38,16 @@ def main():
     # we choose how the environment will produce and interpret
     # the bit signal
     serializer = StandardSerializer()
-    # construct an environment
-    env = Environment(serializer)
     # we'll have a mechanism to instantiate many types of learner later
     learner = HumanLearner(serializer)
+    # construct an environment
+    env = Environment(serializer, ops.scramble)
     # create our tasks and put them into a scheduler to serve them
     task_scheduler = create_tasks(env)
     # a learning session
     session = Session(env, learner, task_scheduler)
     # console interface
-    view = ConsoleView(env, session)
+    view = ConsoleView(env, session, serializer)
     # send the interface to the human learner
     learner.set_view(view)
     try:
