@@ -1,0 +1,35 @@
+{
+  "worlds": {
+    "gw": {
+      "type": "worlds.grid_world.GridWorld"
+    }
+  },
+  "tasks":
+  {
+    "r1": {
+        "type": "tasks.competition.repetition.RepeatCharacterTask"
+    },
+    "r2": {
+        "type": "tasks.competition.repetition.RepeatWhatISayTask"
+    },
+    "r3": {
+        "type": "tasks.competition.repetition.RepeatWhatISay2Task"
+    },
+    "n1": {
+        "type": "tasks.competition.navigation.TurningTask",
+        "world": "gw"
+      },
+    "n2": {
+        "type": "tasks.competition.navigation.MovingTask",
+        "world": "gw"
+      }
+  },
+  "scheduler":
+    {
+      "type": "core.scheduler.DependenciesTaskScheduler",
+      "args": {
+          "tasks": ["r1", "r2"],
+          "tasks_dependencies": [["r1", "r2"], ["r2", "r3"]]
+        }
+    }
+}

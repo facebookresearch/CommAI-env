@@ -16,7 +16,7 @@ import operator
 from optparse import OptionParser
 from core.serializer import StandardSerializer
 from core.environment import Environment
-from tasks_config import create_tasks
+from core.config_loader import JSONConfigLoader, PythonConfigLoader
 from learners.human_learner import HumanLearner
 from core.session import Session
 from view.console import ConsoleView
@@ -24,7 +24,8 @@ from view.console import ConsoleView
 
 def main():
     setup_logging()
-    op = OptionParser()
+    op = OptionParser("Usage: %prog [options] "
+                      "(tasks_config.json | tasks_config.py)")
     op.add_option('-o', '--output', dest='output', default='results.out',
                   help='File where the simulation results are saved.')
     op.add_option('--scramble', dest='scramble', action='store_true',
@@ -32,7 +33,10 @@ def main():
                   help='Randomly scramble the words in the tasks for '
                   'a human player.')
     ops, args = op.parse_args()
-
+    if len(args) == 0:
+        op.error("Tasks schedule configuration file required.")
+    # retrieve the task configuration file
+    tasks_config_file = args[0]
     logger = logging.getLogger(__name__)
     logger.info("Starting new tournament")
     # we choose how the environment will produce and interpret
@@ -43,7 +47,7 @@ def main():
     # construct an environment
     env = Environment(serializer, ops.scramble)
     # create our tasks and put them into a scheduler to serve them
-    task_scheduler = create_tasks(env)
+    task_scheduler = create_tasks_from_config(env, tasks_config_file)
     # a learning session
     session = Session(env, learner, task_scheduler)
     # console interface
@@ -60,6 +64,24 @@ def main():
         raise
     else:
         view.finalize()
+
+
+def create_tasks_from_config(env, tasks_config_file):
+    ''' Returns a TaskScheduler based on either:
+
+        - a json configuration file.
+        - a python module with a function create_tasks that does the job
+        of returning the task scheduler.
+    '''
+    fformat = tasks_config_file.split('.')[-1]
+    if fformat == 'json':
+        config_loader = JSONConfigLoader(env)
+    elif fformat == 'py':
+        config_loader = PythonConfigLoader(env)
+    else:
+        raise RuntimeError("Unknown configuration file format: {filename}"
+                           .format(filename=tasks_config_file))
+    return config_loader.create_tasks(tasks_config_file)
 
 
 def save_results(session, output_file):
