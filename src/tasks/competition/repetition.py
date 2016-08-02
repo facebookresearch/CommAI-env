@@ -28,9 +28,11 @@ context = ["and you will get a reward",
 repeat_min = 2
 repeat_max = 3
 
+
 class BeSilentTask(Task):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(BeSilentTask, self).__init__(env=env,
+                                           world=world,
                                            max_time=random.randint(100, 1000))
 
     # give instructions at the beginning of the task
@@ -62,8 +64,10 @@ class BeSilentTask(Task):
 
 
 class RepeatCharacterTask(BaseTask):
-    def __init__(self, env):
-        super(RepeatCharacterTask, self).__init__(env=env, max_time=1000)
+    def __init__(self, env, world=None):
+        super(RepeatCharacterTask, self).__init__(env=env,
+                                                  world=world,
+                                                  max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -99,8 +103,10 @@ class RepeatCharacterTask(BaseTask):
 
 
 class RepeatWhatISayTask(BaseTask):
-    def __init__(self, env):
-        super(RepeatWhatISayTask, self).__init__(env=env, max_time=1000)
+    def __init__(self, env, world=None):
+        super(RepeatWhatISayTask, self).__init__(env=env,
+                                                 world=world,
+                                                 max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -136,8 +142,10 @@ class RepeatWhatISayTask(BaseTask):
 
 
 class RepeatWhatISay2Task(BaseTask):
-    def __init__(self, env):
-        super(RepeatWhatISay2Task, self).__init__(env=env, max_time=1000)
+    def __init__(self, env, world=None):
+        super(RepeatWhatISay2Task, self).__init__(env=env,
+                                                  world=world,
+                                                  max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -173,8 +181,9 @@ class RepeatWhatISay2Task(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(RepeatWhatISayMultipleTimesTask, self).__init__(env=env,
+                                                              world=world,
                                                               max_time=10000)
 
     @on_start()
@@ -222,8 +231,9 @@ class RepeatWhatISayMultipleTimesTask(BaseTask):
 
 
 class RepeatWhatISayMultipleTimes2Task(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(RepeatWhatISayMultipleTimes2Task, self).__init__(env=env,
+                                                               world=world,
                                                                max_time=10000)
 
     @on_start()
@@ -269,9 +279,10 @@ class RepeatWhatISayMultipleTimes2Task(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesSeparatedByCommaTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(RepeatWhatISayMultipleTimesSeparatedByCommaTask, self).__init__(
             env=env,
+            world=world,
             max_time=10000)
 
     @on_start()
@@ -318,9 +329,10 @@ class RepeatWhatISayMultipleTimesSeparatedByCommaTask(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesSeparatedByAndTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(RepeatWhatISayMultipleTimesSeparatedByAndTask, self).__init__(
             env=env,
+            world=world,
             max_time=10000)
 
     @on_start()
@@ -367,9 +379,10 @@ class RepeatWhatISayMultipleTimesSeparatedByAndTask(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesSeparatedByCATask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(RepeatWhatISayMultipleTimesSeparatedByCATask, self).__init__(
             env=env,
+            world=world,
             max_time=10000)
 
     @on_start()

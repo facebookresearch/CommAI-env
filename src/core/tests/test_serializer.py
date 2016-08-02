@@ -23,6 +23,24 @@ class TestSerializer(unittest.TestCase):
         # greek letter \alpha (not working in current ascii serialization)
         self.assertEqual(u"\u03B1", slzr.to_text(slzr.to_binary(u"\u03B1")))
 
+    def testScramblingSerializerWrapper(self):
+        slzr = serializer.ScramblingSerializerWrapper(
+            serializer.StandardSerializer())
+        self.assertEqual(slzr.tokenize("a b"),
+                         [("a", "WORD"), (" ", 'SILENCE'), ('b', 'WORD')])
+        self.assertEqual(slzr.tokenize("a  b"),
+                         [("a", "WORD"), (" ", 'SILENCE'), (" ", 'SILENCE'),
+                          ('b', 'WORD')])
+        self.assertEqual(slzr.tokenize("a b "),
+                         [("a", "WORD"), (" ", 'SILENCE'), ('b', 'WORD'),
+                          (' ', 'SILENCE')])
+        self.assertEqual(slzr.tokenize("a b, "),
+                         [("a", "WORD"), (" ", 'SILENCE'), ('b', 'WORD'),
+                          (',', 'PUNCT'), (' ', 'SILENCE')])
+        self.assertEqual(slzr.tokenize("a b ."),
+                         [("a", "WORD"), (" ", 'SILENCE'), ('b', 'WORD'),
+                          (' ', 'SILENCE'), ('.', 'PUNCT')])
+
 
 def main():
     unittest.main()

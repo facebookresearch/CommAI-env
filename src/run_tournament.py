@@ -32,7 +32,11 @@ def main():
                   default=False,
                   help='Randomly scramble the words in the tasks for '
                   'a human player.')
-    ops, args = op.parse_args()
+    op.add_option('-w', '--show-world', dest='show_world', action='store_true',
+                  default=False,
+                  help='shows a visualization of the world in the console '
+                  '(mainly for debugging)')
+    opt, args = op.parse_args()
     if len(args) == 0:
         op.error("Tasks schedule configuration file required.")
     # retrieve the task configuration file
@@ -45,13 +49,13 @@ def main():
     # we'll have a mechanism to instantiate many types of learner later
     learner = HumanLearner(serializer)
     # construct an environment
-    env = Environment(serializer, ops.scramble)
+    env = Environment(serializer, opt.scramble)
     # create our tasks and put them into a scheduler to serve them
     task_scheduler = create_tasks_from_config(env, tasks_config_file)
     # a learning session
     session = Session(env, learner, task_scheduler)
     # console interface
-    view = ConsoleView(env, session, serializer)
+    view = ConsoleView(env, session, serializer, opt.show_world)
     # send the interface to the human learner
     learner.set_view(view)
     try:
@@ -60,7 +64,7 @@ def main():
         session.run()
     except BaseException:
         view.finalize()
-        save_results(session, ops.output)
+        save_results(session, opt.output)
         raise
     else:
         view.finalize()

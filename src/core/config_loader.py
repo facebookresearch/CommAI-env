@@ -85,7 +85,11 @@ class JSONConfigLoader:
         Return a world object given the world class
         '''
         C = get_class(world_class)
-        return C(self._env)
+        try:
+            return C(self._env)
+        except Exception as e:
+            raise RuntimeError("Failed to instantiate world {0} ({1})".format(
+                world_class, e))
 
     def instantiate_task(self, task_class, worlds, world_id=None):
         '''
@@ -93,10 +97,14 @@ class JSONConfigLoader:
         runs (if any)
         '''
         C = get_class(task_class)
-        if world_id:
-            return C(self._env, worlds[world_id])
-        else:
-            return C(self._env)
+        try:
+            if world_id:
+                return C(self._env, worlds[world_id])
+            else:
+                return C(self._env)
+        except Exception as e:
+            raise RuntimeError("Failed to instantiate task {0} ({1})".format(
+                task_class, e))
 
 
 class PythonConfigLoader:
@@ -129,11 +137,11 @@ def get_class(name):
 def map_tasks(arg, tasks):
     try:
         # if arg is a task, return the task object
-        if arg in tasks:
-            return tasks[arg]
-        else:
-            # else, we treat arg as a collection that should be mapped
-            return map(lambda x: map_tasks(x, tasks), arg)
-    except Exception():
-        # else, we treat arg as a collection that should be mapped
+        return tasks[arg]
+    except KeyError:
+        # arg is a hashable type, but we cannot map it to a task
+        raise RuntimeError("Coudln't find task id '{0}'.".format(arg))
+    # unhashable type
+    except TypeError:
+        # we treat arg as a collection that should be mapped
         return map(lambda x: map_tasks(x, tasks), arg)

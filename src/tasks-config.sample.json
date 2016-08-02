@@ -6,20 +6,95 @@
   },
   "tasks":
   {
-    "r1": {
-        "type": "tasks.competition.repetition.RepeatCharacterTask"
+    "k0": {
+      "type": "tasks.competition.repetition.BeSilentTask",
+      "world": "gw"
     },
-    "r2": {
-        "type": "tasks.competition.repetition.RepeatWhatISayTask"
+    "g15": {
+        "type": "tasks.competition.repetition.RepeatCharacterTask",
+        "world": "gw"
     },
-    "r3": {
-        "type": "tasks.competition.repetition.RepeatWhatISay2Task"
+    "k2": {
+        "type": "tasks.competition.repetition.RepeatWhatISayTask",
+        "world": "gw"
     },
-    "n1": {
+    "k5": {
+        "type": "tasks.competition.repetition.RepeatWhatISayMultipleTimesTask",
+        "world": "gw"
+    },
+    "k6": {
+        "type": "tasks.competition.repetition.RepeatWhatISayMultipleTimes2Task",
+        "world": "gw"
+    },
+    "k7": {
+        "type": "tasks.competition.repetition.RepeatWhatISayMultipleTimesSeparatedByCommaTask",
+        "world": "gw"
+    },
+    "k8": {
+        "type": "tasks.competition.repetition.RepeatWhatISayMultipleTimesSeparatedByAndTask",
+        "world": "gw"
+    },
+    "k9": {
+        "type": "tasks.competition.repetition.RepeatWhatISayMultipleTimesSeparatedByCATask",
+        "world": "gw"
+    },
+    "g0": {
+        "type": "tasks.competition.repetition.VerbTask",
+        "world": "gw"
+    },
+    "m1": {
+        "type": "tasks.competition.objects_properties.AssociateObjectWithPropertyTask",
+        "world": "gw"
+    },
+    "m2": {
+        "type": "tasks.competition.objects_properties.VerifyThatObjectHasPropertyTask",
+        "world": "gw"
+    },
+    "m3": {
+        "type": "tasks.competition.objects_properties.ListPropertiesofAnObjectTask",
+        "world": "gw"
+    },
+    "m4": {
+        "type": "tasks.competition.objects_properties.NameAPropertyOfAnObjectTask",
+        "world": "gw"
+    },
+    "m5": {
+        "type": "tasks.competition.objects_properties.HowManyPropertiesDoesAnObjectHaveTask",
+        "world": "gw"
+    },
+    "m6": {
+        "type": "tasks.competition.objects_properties.ListObjectsWithACertainPropertyTask",
+        "world": "gw"
+    },
+    "m7": {
+        "type": "tasks.competition.objects_properties.NameAnObjectWithAPropertyTask",
+        "world": "gw"
+    },
+    "m8": {
+        "type": "tasks.competition.objects_properties.HowManyObjectsHaveACertainPropertyTask",
+        "world": "gw"
+    },
+    "m9": {
+        "type": "tasks.competition.objects_properties.WhoHasACertainObjectWithACertainPropertyTask",
+        "world": "gw"
+    },
+    "m10": {
+        "type": "tasks.competition.objects_properties.ListThePropertiesThatAnObjectHasInABasketOnlyTask",
+        "world": "gw"
+    },
+    "m11": {
+        "type": "tasks.competition.objects_properties.ListThePropertiesThatAnObjectHasInAllBasketsTask",
+        "world": "gw"
+    },
+    "m12": {
+        "type": "tasks.competition.objects_properties.AssociateObjectWithPropertyTask",
+        "world": "gw"
+    },
+    "g1": {
         "type": "tasks.competition.navigation.TurningTask",
         "world": "gw"
       },
-    "n2": {
+    "g2": {
         "type": "tasks.competition.navigation.MovingTask",
         "world": "gw"
       }
@@ -28,8 +103,16 @@
     {
       "type": "core.scheduler.DependenciesTaskScheduler",
       "args": {
-          "tasks": ["r1", "r2"],
-          "tasks_dependencies": [["r1", "r2"], ["r2", "r3"]]
+          "tasks": ["k0", "g15", "k2", "k5", "k6", "k7", "k8", "k9",
+            "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12",
+            "g0", "g1", "g2"],
+          "tasks_dependencies": [["k2", "k5"], ["k2", "k6"], ["k5", "k7"],
+                                ["k5", "k8"], ["k5", "k9"],
+                                ["k2", "g0"], ["g0", "g1"], ["g0", "g2"],
+                                ["k2", "m1"], ["m1", "m2"], ["m1", "m3"],
+                                ["m1", "m4"], ["m1", "m5"], ["m1", "m6"],
+                                ["m1", "m7"], ["m1", "m8"], ["m1", "m9"],
+                                ["m1", "m10"], ["m1", "m11"], ["m1", "m12"]]
         }
     }
 }

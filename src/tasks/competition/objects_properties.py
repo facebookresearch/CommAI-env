@@ -94,9 +94,9 @@ delimiters = r'(?:, | and |, and | )'
 
 
 class AssociateObjectWithPropertyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(AssociateObjectWithPropertyTask, self).__init__(
-            env, max_time=3000)
+            env, world=world, max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -125,9 +125,9 @@ class AssociateObjectWithPropertyTask(BaseTask):
 
 
 class VerifyThatObjectHasPropertyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(VerifyThatObjectHasPropertyTask, self).__init__(
-            env, max_time=3000)
+            env, world=world, max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -171,9 +171,9 @@ class VerifyThatObjectHasPropertyTask(BaseTask):
 
 
 class ListPropertiesofAnObjectTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(ListPropertiesofAnObjectTask, self).__init__(
-            env, max_time=3500)
+            env, world=world, max_time=3500)
 
     @on_start()
     def give_instructions(self, event):
@@ -218,9 +218,9 @@ class ListPropertiesofAnObjectTask(BaseTask):
 
 
 class NameAPropertyOfAnObjectTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(NameAPropertyOfAnObjectTask, self).__init__(
-            env, max_time=3000)
+            env, world=world, max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -253,9 +253,9 @@ class NameAPropertyOfAnObjectTask(BaseTask):
 
 
 class HowManyPropertiesDoesAnObjectHaveTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(HowManyPropertiesDoesAnObjectHaveTask, self).__init__(
-            env, max_time=3000)
+            env, world=world, max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -287,9 +287,9 @@ class HowManyPropertiesDoesAnObjectHaveTask(BaseTask):
 
 
 class ListObjectsWithACertainPropertyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(ListObjectsWithACertainPropertyTask, self).__init__(
-            env, max_time=3500)
+            env, world=world, max_time=3500)
 
     @on_start()
     def give_instructions(self, event):
@@ -332,9 +332,9 @@ class ListObjectsWithACertainPropertyTask(BaseTask):
 
 
 class NameAnObjectWithAPropertyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(NameAnObjectWithAPropertyTask, self).__init__(
-            env, max_time=3000)
+            env, world=world, max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -368,9 +368,9 @@ class NameAnObjectWithAPropertyTask(BaseTask):
 
 
 class HowManyObjectsHaveACertainPropertyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(HowManyObjectsHaveACertainPropertyTask, self).__init__(
-            env, max_time=3000)
+            env, world=world, max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -426,9 +426,9 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
 
 
 class WhoHasACertainObjectWithACertainPropertyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(WhoHasACertainObjectWithACertainPropertyTask, self).__init__(
-            env, max_time=3500)
+            env, world=world, max_time=3500)
 
     @on_start()
     def give_instructions(self, event):
@@ -492,9 +492,9 @@ class WhoHasACertainObjectWithACertainPropertyTask(BaseTask):
 
 
 class ListThePropertiesThatAnObjectHasInABasketOnlyTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(ListThePropertiesThatAnObjectHasInABasketOnlyTask, self).__init__(
-            env, max_time=3500)
+            env, world=world, max_time=3500)
 
     @on_start()
     def give_instructions(self, event):
@@ -580,9 +580,9 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(BaseTask):
 
 
 class ListThePropertiesThatAnObjectHasInAllBasketsTask(BaseTask):
-    def __init__(self, env):
+    def __init__(self, env, world=None):
         super(ListThePropertiesThatAnObjectHasInAllBasketsTask, self).__init__(
-            env, max_time=3500)
+            env, world=world, max_time=3500)
 
     @on_start()
     def give_instructions(self, event):

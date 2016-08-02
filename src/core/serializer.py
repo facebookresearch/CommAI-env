@@ -13,6 +13,7 @@ import logging
 import codecs
 import string
 import random
+import re
 
 
 class IdentitySerializer:
@@ -37,6 +38,16 @@ class ScramblingSerializerWrapper:
     '''
     This is wrapper for any serializer that, on top of the serialization step,
     scrambles the words so they are unintelligible to human readers.
+    Note: the scrambling process has two steps: a forward (during to_binary)
+    where a new word is assigned to each input token and a backward (during
+    to_text) where the word is translated back to its original form.
+    If a word that has not been generated during the forward pass is sent to
+    the backward pass, this word is left unchanged. As a consequence, if the
+    learner uses a word (e.g "apple") before it has been uttered by the
+    environment, it will go through unchanged. If at any point, the environment
+    starts using this word, it will get assigned a new scrambled string (e.g.
+    "vsdsf"), and now "apple" that was going through unchanged before, it's
+    being mapped to a new string.
     '''
     def __init__(self, serializer):
         '''
@@ -49,12 +60,17 @@ class ScramblingSerializerWrapper:
         # a mapping of real words to scrambled words an back
         self.word_mapping = {}
         self.inv_word_mapping = {}
+        self.logger = logging.getLogger(__name__)
 
     def to_binary(self, message):
+        self.logger.debug("Tokenizing message '{0}'".format(message))
         # get all the parts of the message without cutting the spaces out
         tokens = self.tokenize(message)
+        self.logger.debug("Scrambling message '{0}'".format(tokens))
         # transform each of the pieces (if needed) and merge them together
         scrambled_message = ''.join(self.scramble(t) for t in tokens)
+        self.logger.debug("Returning scrambled message '{0}'".format(
+            scrambled_message))
         # pass it on to the real serializer
         return self._serializer.to_binary(scrambled_message)
 
@@ -62,7 +78,9 @@ class ScramblingSerializerWrapper:
         # get the scrambled message back from the bits
         scrambled_message = self._serializer.to_text(data)
         # split into tokens, including spaces and punctuation marks
+        self.logger.debug("Tokenizing {0}".format(scrambled_message))
         tokens = self.tokenize(scrambled_message)
+        self.logger.debug("Unscrambling {0}".format(tokens))
         # unmask the words in it
         return ''.join(self.unscramble(t) for t in tokens)
 
@@ -82,13 +100,25 @@ class ScramblingSerializerWrapper:
             # if this is a space or a punctuation sign, don't do anything
             return word
         else:
-            if word not in self.word_mapping:
+            if word.lower() not in self.word_mapping:
                 # if we don't have a pseudo-word already assigned
                 # generate a new pseudo-word
-                pseudo_word = self.gen_pseudo_word()
-                self.word_mapping[word] = pseudo_word
-                self.inv_word_mapping[pseudo_word] = word
-            return self.word_mapping[word]
+                pseudo_word = self.gen_pseudo_word(len(word))
+                self.word_mapping[word.lower()] = pseudo_word
+                self.inv_word_mapping[pseudo_word] = word.lower()
+            return self.capitalize(word, self.word_mapping[word.lower()])
+
+    def capitalize(self, word, scrambled_word):
+        if len(scrambled_word) == len(word):
+            # if the two words have the same length, we preverve capitalization
+            return ''.join(scrambled_word[i].upper()
+                           if word[i] in string.ascii_uppercase
+                           else scrambled_word[i] for i in range(len(word)))
+        else:
+            # just capitalize the first letter
+            return (scrambled_word[0].upper()
+                    if word[0] in string.ascii_uppercase
+                    else scrambled_word[0]) + scrambled_word[1:]
 
     def unscramble(self, token):
         scrambled_word, pos = token
@@ -98,12 +128,15 @@ class ScramblingSerializerWrapper:
         else:
             # say that we have apple -> qwerty
             # if the word is qwerty, we return apple
-            if scrambled_word in self.inv_word_mapping:
-                return self.inv_word_mapping[scrambled_word]
+            if scrambled_word.lower() in self.inv_word_mapping:
+                return self.capitalize(scrambled_word,
+                                       self.inv_word_mapping[
+                                           scrambled_word.lower()])
             # conversely, if the word is apple, we return qwerty
             # so we have a bijection between the scrambled and normal words
-            elif scrambled_word in self.word_mapping:
-                return self.word_mapping[scrambled_word]
+            elif scrambled_word.lower() in self.word_mapping:
+                return self.capitalize(scrambled_word, self.word_mapping[
+                    scrambled_word.lower()])
             else:
                 # otherwise we just return the word as is
                 return scrambled_word
@@ -125,34 +158,19 @@ class ScramblingSerializerWrapper:
         punct = ",.:;'\"?"
         silence_token = self._serializer.SILENCE_TOKEN
         tokenized_message = []
-        # strip initial silences
-        while message and message[0] == silence_token:
-            tokenized_message.append((silence_token, 'SILENCE'))
-            message = message[1:]
-        tokens = message.split(silence_token)
+        tokens = re.split('(\W)', message)
         for t in tokens:
+            if not t:
+                # re.split can return empty strings between consecutive
+                # separators: ignore them.
+                continue
             # separate intial punctuation marks
-            while t and t[0] in punct:
-                tokenized_message.append((t[0], 'PUNCT'))
-                t = t[1:]
-            # add the word without any trailing punctuation marks
-            word = t.rstrip(punct)
-            if word:
-                tokenized_message.append((word, 'WORD'))
-            t = t[len(word):]
-            # separate trailing punctuation marks
-            while t and t[-1] in punct:
-                tokenized_message.append((t[-1], 'PUNCT'))
-                t = t[:-1]
-            # add separating silence
-            tokenized_message.append((silence_token, 'SILENCE'))
-        # remove the last silence
-        if tokenized_message:
-            del(tokenized_message[-1])
-        # strip final silences
-        while message and message[-1] == silence_token:
-            tokenized_message.append((silence_token, 'SILENCE'))
-            message = message[:-1]
+            if t in punct:
+                tokenized_message.append((t, 'PUNCT'))
+            elif t == silence_token:
+                tokenized_message.append((t, 'SILENCE'))
+            else:
+                tokenized_message.append((t, 'WORD'))
         return tokenized_message
 
 

@@ -111,4 +111,3 @@ class FindObjectAround(Task):
 
     def on_object_picked(self, event):
         self.set_reward(1, 'Well done!')
-

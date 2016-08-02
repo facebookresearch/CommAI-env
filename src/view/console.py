@@ -13,7 +13,7 @@ code = locale.getpreferredencoding()
 
 class ConsoleView:
 
-    def __init__(self, env, session, serializer):
+    def __init__(self, env, session, serializer, show_world=False):
         # TODO: Move environment and session outside of the class
         self._env = env
         self._session = session
@@ -35,8 +35,10 @@ class ConsoleView:
             self.on_env_sequence_updated)
         self._env_channel.message_updated.register(
             self.on_env_message_updated)
-        env.world_updated.register(
-            self.on_world_updated)
+        if show_world:
+            # register a handler to plot the world if show_world is active
+            env.world_updated.register(
+                self.on_world_updated)
         # connect the channels with the observed input bits
         session.env_token_updated.register(self.on_env_token_updated)
         session.learner_token_updated.register(self.on_learner_token_updated)
