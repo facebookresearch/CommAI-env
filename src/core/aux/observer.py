@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 
 
 class Observable(object):
-'''Simple implementation of the observer pattern'''
+    '''Simple implementation of the observer pattern'''
 
     def __init__(self):
         self.observers = []
