@@ -12,6 +12,7 @@ from __future__ import unicode_literals
 import random
 from core.serializer import StandardSerializer, IdentitySerializer
 
+
 class SampleRepeatingLearner:
     def reward(self, reward):
         # YEAH! Reward!!! Whatever...
@@ -95,8 +96,8 @@ class SampleRandomWordsLearner:
             self.teacher_stopped_talking = True
 
         if self.teacher_stopped_talking:
-            # Learning new words and filtering out the case when the word is empty
-            # (because the teacher is silent)
+            # Learning new words and filtering out the case when the word is
+            # empty (because the teacher is silent)
             binary_text = ''.join(self.memory[:-8])
             word = self.serializer.to_text(binary_text)
             if word is not None:
@@ -131,5 +132,3 @@ class RandomCharacterLearner:
         if self.log_file is not None:
             self.log_file.write('{} -> {}'.format(input, output))
         return output
-
-

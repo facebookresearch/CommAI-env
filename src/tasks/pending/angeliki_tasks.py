@@ -24,13 +24,13 @@ gl_objects = ["banana", "apple"]
 
 
 class RepeatingTaskLogical2Objects(Task):
-    def __init__(self, env):
-        super(RepeatingTaskLogical2Objects, self).__init__(env=env, max_time=3000)
+    def __init__(self):
+        super(RepeatingTaskLogical2Objects, self).__init__(max_time=3000)
 
     @on_start()
     def on_start(self, event):
  	print "Tralala"
-	
+
 	#create expression
 	self.negation_1 = gl_logic_operators_verb[random.randint(0, 1)]
 	self.negation_2 = gl_logic_operators_verb[random.randint(0, 1)]
@@ -40,9 +40,9 @@ class RepeatingTaskLogical2Objects(Task):
 
 	#compile message and answer
 	self.answer = self.objects[:]
-	message = ""	
+	message = ""
 	if self.negation_1 == "dont":
-		self.answer.pop(0)	
+		self.answer.pop(0)
 	if self.negation_2 == "dont":
 		self.answer.pop(0)
 		message = " ".join([self.negation_1, "say", self.objects[0], self.logic_operator, self.negation_2, "say", self.objects[1]])
@@ -54,10 +54,10 @@ class RepeatingTaskLogical2Objects(Task):
 
 	#compile answer match
 	re_string = re_string = "([a-z]*)[ ]*(and|,|)[ ]*([a-z]*)"
-	self.delim_answer = ["and", " ", ",", ""] 
+	self.delim_answer = ["and", " ", ",", ""]
 	self.re_answer = re.compile(re_string)
 
-	
+
     @on_message()
     def on_message(self, event):
 
@@ -66,12 +66,10 @@ class RepeatingTaskLogical2Objects(Task):
 	if not m[1] in self.delim_answer:
 		correct = False
 		self.set_reward(0)
-	else:      	
+	else:
 		overlap = len(set(self.answer)&set([m[0], m[2]]))/len(self.answer)
 		correct = (self.logic_operator=="and" and overlap == 1) or (self.logic_operator=="or" and overlap==0.5)
         	if correct:
         		self.set_reward(1)
 		else:
 			self.set_reward(0)
-
-

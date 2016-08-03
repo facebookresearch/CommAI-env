@@ -17,7 +17,7 @@ from optparse import OptionParser
 from core.serializer import StandardSerializer
 from core.environment import Environment
 from core.config_loader import JSONConfigLoader, PythonConfigLoader
-from learners.human_learner import HumanLearner
+import learners
 from core.session import Session
 from view.console import ConsoleView
 
@@ -26,16 +26,24 @@ def main():
     setup_logging()
     op = OptionParser("Usage: %prog [options] "
                       "(tasks_config.json | tasks_config.py)")
-    op.add_option('-o', '--output', dest='output', default='results.out',
+    op.add_option('-o', '--output', default='results.out',
                   help='File where the simulation results are saved.')
-    op.add_option('--scramble', dest='scramble', action='store_true',
-                  default=False,
+    op.add_option('--scramble', action='store_true', default=False,
                   help='Randomly scramble the words in the tasks for '
                   'a human player.')
-    op.add_option('-w', '--show-world', dest='show_world', action='store_true',
-                  default=False,
+    op.add_option('-w', '--show-world', action='store_true', default=False,
                   help='shows a visualization of the world in the console '
                   '(mainly for debugging)')
+    op.add_option('-d', '--time-delay', default=0, type=float,
+                  help='adds some delay between each timestep for easier'
+                  ' visualization.')
+    op.add_option('-l', '--learner',
+                  default='learners.human_learner.HumanLearner',
+                  help='Defines the type of learner.')
+    op.add_option('--max-reward-per-task',
+                  default=10, type=int,
+                  help='Maximum reward that we can give to a learner for'
+                  ' a given task')
     opt, args = op.parse_args()
     if len(args) == 0:
         op.error("Tasks schedule configuration file required.")
@@ -46,18 +54,24 @@ def main():
     # we choose how the environment will produce and interpret
     # the bit signal
     serializer = StandardSerializer()
-    # we'll have a mechanism to instantiate many types of learner later
-    learner = HumanLearner(serializer)
-    # construct an environment
-    env = Environment(serializer, opt.scramble)
+    # create a learner (the human learner takes the serializer)
+    learner = create_learner(opt.learner, serializer)
     # create our tasks and put them into a scheduler to serve them
-    task_scheduler = create_tasks_from_config(env, tasks_config_file)
+    task_scheduler = create_tasks_from_config(tasks_config_file)
+    # construct an environment
+    env = Environment(serializer, task_scheduler, opt.scramble,
+                      opt.max_reward_per_task)
     # a learning session
-    session = Session(env, learner, task_scheduler)
+    session = Session(env, learner, opt.time_delay)
     # console interface
+    # TODO: Add an option to have a simpler view (e.g. only printing statistics)
     view = ConsoleView(env, session, serializer, opt.show_world)
-    # send the interface to the human learner
-    learner.set_view(view)
+    try:
+        # send the interface to the human learner
+        learner.set_view(view)
+    except AttributeError:
+        # this was not a human learner, nothing to do
+        pass
     try:
         view.initialize()
         # ok guys, talk
@@ -70,7 +84,22 @@ def main():
         view.finalize()
 
 
-def create_tasks_from_config(env, tasks_config_file):
+def create_learner(learner_type, serializer):
+    if learner_type == 'learners.human_learner.HumanLearner':
+        return learners.human_learner.HumanLearner(serializer)
+    else:
+        # dynamically load the class given by learner_type
+        # separate the module from the class name
+        path = learner_type.split('.')
+        mod, cname = '.'.join(path[:-1]), path[-1]
+        # import the module (and the class within it)
+        m = __import__(mod, fromlist=[cname])
+        c = getattr(m, cname)
+        # instantiate the learner
+        return c()
+
+
+def create_tasks_from_config(tasks_config_file):
     ''' Returns a TaskScheduler based on either:
 
         - a json configuration file.
@@ -79,12 +108,14 @@ def create_tasks_from_config(env, tasks_config_file):
     '''
     fformat = tasks_config_file.split('.')[-1]
     if fformat == 'json':
-        config_loader = JSONConfigLoader(env)
+        config_loader = JSONConfigLoader()
     elif fformat == 'py':
-        config_loader = PythonConfigLoader(env)
+        config_loader = PythonConfigLoader()
     else:
-        raise RuntimeError("Unknown configuration file format: {filename}"
-                           .format(filename=tasks_config_file))
+        raise RuntimeError("Unknown configuration file format '.{fformat}' of"
+                           " {filename}"
+                           .format(fformat=fformat,
+                                   filename=tasks_config_file))
     return config_loader.create_tasks(tasks_config_file)
 
 

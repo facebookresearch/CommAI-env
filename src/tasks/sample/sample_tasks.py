@@ -18,8 +18,8 @@ import random
 
 
 class RepeatingCharTask(Task):
-    def __init__(self, env):
-        super(RepeatingCharTask, self).__init__(env=env, max_time=100)
+    def __init__(self):
+        super(RepeatingCharTask, self).__init__(max_time=100)
 
     @on_start()
     def on_start(self, event):
@@ -36,8 +36,8 @@ class RepeatingCharTask(Task):
 
 
 class YesNoTask(Task):
-    def __init__(self, env):
-        super(YesNoTask, self).__init__(env=env, max_time=1000)
+    def __init__(self):
+        super(YesNoTask, self).__init__(max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -63,8 +63,8 @@ class YesNoTask(Task):
 
 
 class BeSilentTask(Task):
-    def __init__(self, env):
-        super(BeSilentTask, self).__init__(env=env, max_time=1000)
+    def __init__(self):
+        super(BeSilentTask, self).__init__(max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -82,8 +82,8 @@ class BeSilentTask(Task):
 
 
 class RepeatingPhraseTask(Task):
-    def __init__(self, env):
-        super(RepeatingPhraseTask, self).__init__(env=env, max_time=1000)
+    def __init__(self):
+        super(RepeatingPhraseTask, self).__init__(max_time=1000)
         self.state.sample_state = 1
 
     @on_start()
@@ -127,9 +127,9 @@ class RepeatingPhraseTask(Task):
 
 
 class SampleConflictingMessagesTask(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(SampleConflictingMessagesTask, self).__init__(
-            env=env, max_time=1000)
+            max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -152,7 +152,7 @@ class SampleConflictingMessagesTask(Task):
 
 
 class MovingTask(Task):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(MovingTask, self).__init__(
             env, max_time=1000, world=world)
 
@@ -175,7 +175,7 @@ class MovingTask(Task):
 
 
 class TurnLeftTask(Task):
-    def __init__(self, env, world):
+    def __init__(self, world):
             super(TurnLeftTask, self).__init__(
             env, max_time=1000, world=world)
             self.cd = ['north', 'east', 'south', 'west']
@@ -196,7 +196,7 @@ class TurnLeftTask(Task):
 
 
 class TurnRightTask(Task):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(TurnRightTask, self).__init__(
             env, max_time=1000, world=world)
         self.cd = ['north', 'east', 'south', 'west']
@@ -217,7 +217,7 @@ class TurnRightTask(Task):
 
 
 class LookAroundTask(Task):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(LookAroundTask, self).__init__(
                 env, max_time=1000, world=world)
 
@@ -231,7 +231,7 @@ class LookAroundTask(Task):
 
 
 class PickAnApple(Task):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(PickAnApple, self).__init__(
             env, max_time=10000, world=world)
 
@@ -271,8 +271,8 @@ class PickAnApple(Task):
 
 
 class UnicodeTask(Task):
-    def __init__(self, env):
-        super(UnicodeTask, self).__init__(env=env, max_time=1000)
+    def __init__(self):
+        super(UnicodeTask, self).__init__(max_time=1000)
 
     @on_start()
     def on_start(self, event):

@@ -89,9 +89,9 @@ number_questions = ['please tell me the number.',
 
 
 class ItalianHowManyPropertiesDoesAnObjectHaveTask(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(ItalianHowManyPropertiesDoesAnObjectHaveTask, self).__init__(
-            env, max_time=3000)
+            max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -161,9 +161,9 @@ class ItalianHowManyPropertiesDoesAnObjectHaveTask(Task):
 
 
 class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
-    def __init__(self, env):
+    def __init__(self, ):
         super(GuessTheNumberAskingQuestionsExplicitModelTask, self).__init__(
-            env, max_time=3000)
+            max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -207,9 +207,9 @@ class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
 
 
 class GuessTheNumberAskingQuestionsTask(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GuessTheNumberAskingQuestionsTask, self).__init__(
-            env, max_time=3000)
+            max_time=3000)
 
     @on_start()
     def give_instructions(self, event):
@@ -252,9 +252,9 @@ class GuessTheNumberAskingQuestionsTask(Task):
         self.set_message('if you asked: ' + random.choice(number_questions) + ', I would have said: '+ self.target_number + '.')
 
 class GuessTheNumberAskingForDigitsExplicitModelTask(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GuessTheNumberAskingForDigitsExplicitModelTask, self).__init__(
-            env, max_time=3500)
+            max_time=3500)
 
     @on_start()
     def give_instructions(self, event):
@@ -316,9 +316,9 @@ class GuessTheNumberAskingForDigitsExplicitModelTask(Task):
 
 
 class GuessTheNumberAskingForDigitsTask(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GuessTheNumberAskingForDigitsTask, self).__init__(
-            env, max_time=3500)
+            max_time=3500)
 
     @on_start()
     def give_instructions(self, event):
@@ -431,9 +431,9 @@ def generate_prime_and_target(primes,targets,string_length,prime_cardinality):
 # TASKS START HERE
 
 class RepeatCharacter(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(RepeatCharacter, self).__init__(
-            env, max_time=500)
+            max_time=500)
 
     @on_start()
     def give_instructions(self, event):
@@ -454,9 +454,9 @@ class RepeatCharacter(Task):
             self.set_reward(1)
 
 class RepeatStringMax4(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(RepeatStringMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
 
     @on_start()
     def give_instructions(self, event):
@@ -481,9 +481,9 @@ class RepeatStringMax4(Task):
 
 
 class RepeatStringMin5Max10(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(RepeatStringMin5Max10, self).__init__(
-            env, max_time=500)
+            max_time=500)
 
     @on_start()
     def give_instructions(self, event):
@@ -507,9 +507,9 @@ class RepeatStringMin5Max10(Task):
             self.set_reward(1)
 
 class GlobalTwoAssociatedCharacters(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GlobalTwoAssociatedCharacters, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("global primes: " + str(global_primes))
@@ -533,9 +533,9 @@ class GlobalTwoAssociatedCharacters(Task):
             self.set_reward(1)
 
 class GlobalCharacterPrimeTarget(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GlobalCharacterPrimeTarget, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("global primes: " + str(global_primes))
@@ -567,9 +567,9 @@ class LocalCharacterPrimeTarget(Task):
     # table, but they are not constrained to be the same (nor to be
     #disjoint)
 
-    def __init__(self, env):
+    def __init__(self):
         super(LocalCharacterPrimeTarget, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
         # self.logger=logging.getLogger(__name__)
         # self.logger.debug("local primes " + str(self.primes))
@@ -594,9 +594,9 @@ class LocalCharacterPrimeTarget(Task):
             self.set_reward(1)
 
 class GlobalTwoAssociatedDelimitedStringsMax4(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GlobalTwoAssociatedDelimitedStringsMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("global primes: " + str(global_primes))
@@ -622,9 +622,9 @@ class GlobalTwoAssociatedDelimitedStringsMax4(Task):
 
 
 class GlobalTwoAssociatedStringsMax4(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GlobalTwoAssociatedStringsMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("global primes: " + str(global_primes))
@@ -653,9 +653,9 @@ class LocalTwoAssociatedDelimitedStringsMax4(Task):
     # get local primes and targets
     primes,targets=generate_local_prime_and_target_mappings(global_prime_cardinality)
 
-    def __init__(self, env):
+    def __init__(self):
         super(LocalTwoAssociatedDelimitedStringsMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("local primes " + str(self.primes))
@@ -686,9 +686,9 @@ class LocalTwoAssociatedStringsMax4(Task):
     # get local primes and targets
     primes,targets=generate_local_prime_and_target_mappings(global_prime_cardinality)
 
-    def __init__(self, env):
+    def __init__(self):
         super(LocalTwoAssociatedStringsMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("local primes " + str(self.primes))
@@ -715,9 +715,9 @@ class LocalTwoAssociatedStringsMax4(Task):
 
 
 class GlobalStringPrimeTargetMax4(Task):
-    def __init__(self, env):
+    def __init__(self):
         super(GlobalStringPrimeTargetMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("global primes: " + str(global_primes))
@@ -747,9 +747,9 @@ class LocalStringPrimeTargetMax4(Task):
     # get local primes and targets
     primes,targets=generate_local_prime_and_target_mappings(global_prime_cardinality)
 
-    def __init__(self, env):
+    def __init__(self):
         super(LocalStringPrimeTargetMax4, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("local primes " + str(self.primes))
@@ -779,7 +779,7 @@ class LocalStringPrimeTargetMax4(Task):
 class GlobalStringPrimeTargetMin5Max10(Task):
     def __init__(self, env):
         super(GlobalStringPrimeTargetMin5Max10, self).__init__(
-            env, max_time=500)
+            max_time=500)
         # debug
 #        self.logger=logging.getLogger(__name__)
 #        self.logger.debug("global primes: " + str(global_primes))

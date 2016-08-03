@@ -12,12 +12,14 @@ from __future__ import unicode_literals
 import unittest
 import core.task as task
 import core.session as session
+import core.serializer as serializer
+import core.environment as environment
 from core.aux.observer import Observable
 
 
 class NullTask(task.Task):
-    def __init__(self, env):
-        super(NullTask, self).__init__(env, max_time=100)
+    def __init__(self):
+        super(NullTask, self).__init__(max_time=100)
 
 
 class EnvironmentMock(object):
@@ -47,19 +49,24 @@ class LearnerMock(object):
         pass
 
 
-class TaskSchedulerMock(object):
-    def reward(self, r):
+class SingleTaskScheduler():
+    def __init__(self, task):
+        self.task = task
+
+    def get_next_task(self):
+        return self.task
+
+    def reward(self, reward):
         pass
 
 
 class TestSession(unittest.TestCase):
 
     def testLimitReward(self):
-        env = EnvironmentMock()
-        env.set_task(NullTask(env))
+        env = environment.Environment(serializer.StandardSerializer(),
+                                      SingleTaskScheduler(NullTask()))
         learner = LearnerMock()
-        s = session.Session(env, learner, TaskSchedulerMock(),
-                            max_reward_per_task=10)
+        s = session.Session(env, learner)
 
         def on_time_updated(t):
             if t >= 20:

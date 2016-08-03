@@ -15,6 +15,7 @@ from core.task import StateChanged, MessageReceived, \
 from core.aux.observer import Observable
 from core.serializer import ScramblingSerializerWrapper
 from core.channels import InputChannel, OutputChannel
+from collections import defaultdict
 import logging
 
 
@@ -22,11 +23,22 @@ class Environment:
     '''
     The Environment, you know.
     '''
-    def __init__(self, serializer, scramble=False):
+    def __init__(self, serializer, task_scheduler, scramble=False,
+                 max_reward_per_task=10):
+        # save parameters into member variables
+        self._task_scheduler = task_scheduler
+        self._serializer = serializer
+        self._max_reward_per_task = max_reward_per_task
+        # cumulative reward per task
+        self._reward_per_task = defaultdict(int)
+        # the event manager is the controller that dispatches
+        # changes in the environment (like new inputs or state changes)
+        # to handler functions in the tasks that tell the environment
+        # how to react
         self.event_manager = EventManager()
+        # intialize member variables
         self._current_task = None
         self._current_world = None
-        self._serializer = serializer
         # we hear to our own output
         self._output_channel_listener = InputChannel(serializer)
         if scramble:
@@ -59,11 +71,6 @@ class Environment:
             self.on_output_sequence_updated)
         self._output_channel_listener.message_updated.register(
             self.on_output_message_updated)
-
-    def set_task_scheduler(self, task_scheduler):
-        ''' A task scheduler is an object with methods get_next_task() and
-        reward() that can feed new tasks on demand'''
-        self.task_scheduler = task_scheduler
 
     def next(self, learner_input):
         '''Main loop of the Environment. Receives one bit from the learner and
@@ -113,8 +120,28 @@ class Environment:
         self._output_channel_listener.consume_bit(output)
         # advance time
         self._task_time += 1
-
+        if reward is not None:
+            # process the reward (clearing it if it's not allowed)
+            reward = self.allowable_reward(reward)
+            self._task_scheduler.reward(reward)
         return output, reward
+
+    def get_reward_per_task(self):
+        '''
+        Returns a dictonary that contains the cumulative reward for each
+        task.
+        '''
+        return self._reward_per_task
+
+    def allowable_reward(self, reward):
+        '''Checks if the reward is allowed within the limits of the
+        `max_reward_per_task` parameter, and resets it to 0 if not.'''
+        task_name = self._current_task.get_name()
+        if self._reward_per_task[task_name] < self._max_reward_per_task:
+            self._reward_per_task[task_name] += reward
+            return reward
+        else:
+            return 0
 
     def is_silent(self):
         return self._output_channel.is_silent()
@@ -198,10 +225,7 @@ class Environment:
             self._deregister_task_triggers(self._current_task)
 
         # pick a new task
-        self._current_task = self.task_scheduler.get_next_task()
-        # the task could be in the ended state, let's reinitialize it
-        self._current_task.init()
-        assert not self._current_task.has_started()
+        self._current_task = self._task_scheduler.get_next_task()
         try:
             # This is to check whether the user didn't mess up in instantiating
             # the class
@@ -224,7 +248,7 @@ class Environment:
                 # register new event handlers for the world
                 self._register_task_triggers(self._current_world)
                 # initialize the new world
-                self._current_world.init()
+                self._current_world.init(self)
                 # spin the wheel
                 self._current_world.start()
             self.world_updated(self._current_world)
@@ -236,8 +260,10 @@ class Environment:
         self._output_channel_listener.clear()
         # register new event handlers
         self._register_task_triggers(self._current_task)
-        # we reset the state of the task
-        self._current_task.init()
+        # initialize the task, sending the current environment
+        # so it can interact by sending back rewards and messages
+        self._current_task.init(self)
+        assert not self._current_task.has_started()
         # raise the Start event
         self._current_task.start()
         self.task_updated(self._current_task)

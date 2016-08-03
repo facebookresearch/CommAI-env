@@ -33,9 +33,9 @@ TIME_GIVE = (len("I give you an xxxxxxxxxxxx.") +
 
 
 class TurningTask(BaseTask):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(TurningTask, self).__init__(
-            env=env, max_time=3 * TIME_TURN, world=world)
+            max_time=3 * TIME_TURN, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -67,9 +67,9 @@ class TurningTask(BaseTask):
 
 
 class MovingTask(BaseTask):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(MovingTask, self).__init__(
-            env, max_time=3 * TIME_MOVE, world=world)
+            max_time=3 * TIME_MOVE, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -95,9 +95,9 @@ class MovingTask(BaseTask):
 
 
 class MovingRelativeTask(BaseTask):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(MovingRelativeTask, self).__init__(
-            env=env, max_time=2 * TIME_TURN + 2 * TIME_MOVE, world=world)
+            max_time=2 * TIME_TURN + 2 * TIME_MOVE, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -131,9 +131,9 @@ class MovingRelativeTask(BaseTask):
 
 
 class MovingAbsoluteTask(BaseTask):
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(MovingAbsoluteTask, self).__init__(
-            env=env, max_time=8 * TIME_TURN + 4 * TIME_MOVE, world=world)
+            max_time=8 * TIME_TURN + 4 * TIME_MOVE, world=world)
 
     # initialize state variables
     @on_init()
@@ -171,9 +171,9 @@ class MovingAbsoluteTask(BaseTask):
 
 class PickUpTask(BaseTask):
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(PickUpTask, self).__init__(
-            env=env, max_time=50 * TIME_CHAR + 2 * TIME_PICK, world=world)
+            max_time=50 * TIME_CHAR + 2 * TIME_PICK, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -210,9 +210,9 @@ class PickUpTask(BaseTask):
 
 class PickUpAroundTask(BaseTask):
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(PickUpAroundTask, self).__init__(
-            env=env, max_time=50 * TIME_CHAR + 2 * TIME_PICK +
+            max_time=50 * TIME_CHAR + 2 * TIME_PICK +
             4 * TIME_MOVE + 4 * TIME_TURN, world=world)
 
     @on_init()
@@ -252,9 +252,9 @@ class PickUpAroundTask(BaseTask):
 class PickUpInFrontTask(BaseTask):
     max_steps_forward = 10
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(PickUpInFrontTask, self).__init__(
-            env=env, max_time=50 * TIME_CHAR + 2 * TIME_PICK +
+            max_time=50 * TIME_CHAR + 2 * TIME_PICK +
             PickUpInFrontTask.max_steps_forward * TIME_MOVE, world=world)
 
     @on_init()
@@ -295,9 +295,9 @@ class PickUpInFrontTask(BaseTask):
 
 class GivingTask(BaseTask):
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(GivingTask, self).__init__(
-            env=env, max_time=50 * TIME_CHAR + 2 * TIME_GIVE, world=world)
+            max_time=50 * TIME_CHAR + 2 * TIME_GIVE, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -332,9 +332,9 @@ class GivingTask(BaseTask):
 
 class PickUpAroundAndGiveTask(BaseTask):
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(PickUpAroundAndGiveTask, self).__init__(
-            env=env, max_time=50 * TIME_CHAR + 4 * TIME_PICK + 4 * TIME_GIVE +
+            max_time=50 * TIME_CHAR + 4 * TIME_PICK + 4 * TIME_GIVE +
             4 * TIME_MOVE + 4 * TIME_TURN,
             world=world)
 
@@ -405,9 +405,9 @@ class PickUpAroundAndGiveTask(BaseTask):
 
 class CountingInventoryTask(BaseTask):
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(CountingInventoryTask, self).__init__(
-            env=env, max_time=100 * TIME_CHAR,
+            max_time=100 * TIME_CHAR,
             world=world)
 
     @on_start()
@@ -440,9 +440,9 @@ class CountingInventoryTask(BaseTask):
 
 class CountingInventoryGivingTask(BaseTask):
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(CountingInventoryGivingTask, self).__init__(
-            env=env, max_time=1000 * TIME_CHAR,
+            max_time=1000 * TIME_CHAR,
             world=world)
 
     @on_init()

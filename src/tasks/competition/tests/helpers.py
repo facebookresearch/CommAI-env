@@ -139,15 +139,12 @@ def task_messenger(task_funct, world_funct=None):
             object.
     '''
     slzr = serializer.StandardSerializer()
-    env = environment.Environment(slzr)
-
     if world_funct:
-        world = world_funct(env)
-        task = task_funct(env, world)
+        world = world_funct()
+        task = task_funct(world)
     else:
-        task = task_funct(env)
+        task = task_funct()
     scheduler = SingleTaskScheduler(task)
-    env.set_task_scheduler(scheduler)
-
+    env = environment.Environment(slzr, scheduler)
     m = EnvironmentMessenger(env, slzr)
     yield m

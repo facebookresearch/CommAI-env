@@ -13,11 +13,6 @@ import unittest
 import core.task as task
 
 
-class EnvironmentMock():
-    def raise_event(self, event):
-        pass
-
-
 class TestEvents(unittest.TestCase):
 
     def testTriggers(self):
@@ -45,8 +40,7 @@ class TestEvents(unittest.TestCase):
             def ended_handler(self, event):
                 pass
 
-        env = EnvironmentMock()
-        tt = TestTask(env, max_time=10)
+        tt = TestTask(max_time=10)
         triggers = tt.get_triggers()
         handlers = map(lambda t: t.event_handler, triggers)
         self.assertEqual(5, len(triggers))
@@ -55,7 +49,7 @@ class TestEvents(unittest.TestCase):
         self.failUnless(TestTask.message_handler.im_func in handlers)
         self.failUnless(TestTask.timeout_handler.im_func in handlers)
         self.failUnless(TestTask.ended_handler.im_func in handlers)
-        types = {t.event_handler: t.type for t in triggers}
+        types = dict((t.event_handler, t.type) for t in triggers)
         self.assertEqual(task.Init, types[TestTask.init_handler.im_func])
         self.assertEqual(task.Start, types[TestTask.start_handler.im_func])
         self.assertEqual(task.MessageReceived,
@@ -86,8 +80,7 @@ class TestEvents(unittest.TestCase):
             def start_handler(self, event):
                 pass
 
-        env = EnvironmentMock()
-        tt = ConcreteTask(env, max_time=10)
+        tt = ConcreteTask(max_time=10)
         triggers = tt.get_triggers()
         handlers = map(lambda t: t.event_handler, triggers)
         self.assertEqual(2, len(triggers))
@@ -108,21 +101,22 @@ class TestEvents(unittest.TestCase):
                 self.start_handler_func = start_handler
                 self.add_handler(task.on_start()(start_handler))
 
+        triggers = []
+        tt = TestTask(max_time=10)
+
         class EnvironmentMock():
             def __init__(self, triggers):
                 self.triggers = triggers
 
             def raise_event(self, event):
-                pass
+                # we only generate an init event
+                tt.init_handler(event)
 
             def _register_task_trigger(self, task, trigger):
                 self.triggers.append(trigger)
 
-        triggers = []
-        env = EnvironmentMock(triggers)
-        tt = TestTask(env, max_time=10)
         # raise the init event
-        tt.init_handler(task.Init())
+        tt.init(EnvironmentMock(triggers))
         triggers.extend(tt.get_triggers())
         handlers = map(lambda t: t.event_handler, triggers)
         self.assertEqual(2, len(triggers))

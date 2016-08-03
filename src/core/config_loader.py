@@ -47,9 +47,6 @@ class JSONConfigLoader:
     The scheduler scheduler_arg_value could be a container including
     task ids, which will be replaced by the concrete tasks instances.
     '''
-    def __init__(self, env):
-        self._env = env
-
     def create_tasks(self, tasks_config_file):
         '''
         Given a json configuartion file, it returns a scheduler object
@@ -57,14 +54,15 @@ class JSONConfigLoader:
         '''
         config = json.load(open(tasks_config_file))
         # instantiate the worlds (typically there is only one)
-        worlds = {world_id: self.instantiate_world(world_config['type'])
-                    for world_id, world_config in config['worlds'].items()}
+        worlds = dict((world_id, self.instantiate_world(world_config['type']))
+                      for world_id, world_config in config['worlds'].items())
         # map each task
         # instantiate the tasks with the world (if any)
-        tasks = {task_id: self.instantiate_task(task_config['type'],
-                                                worlds,
-                                                task_config.get('world', None))
-                    for task_id, task_config in config['tasks'].items()}
+        tasks = dict((task_id, self.instantiate_task(task_config['type'],
+                                                     worlds,
+                                                     task_config.get(
+                                                         'world', None)))
+                      for task_id, task_config in config['tasks'].items())
         # retrieve what type of scheduler we need to create
         scheduler_class = get_class(config['scheduler']['type'])
         # prepare the arguments to instantiate the scheduler
@@ -86,7 +84,7 @@ class JSONConfigLoader:
         '''
         C = get_class(world_class)
         try:
-            return C(self._env)
+            return C()
         except Exception as e:
             raise RuntimeError("Failed to instantiate world {0} ({1})".format(
                 world_class, e))
@@ -99,18 +97,19 @@ class JSONConfigLoader:
         C = get_class(task_class)
         try:
             if world_id:
-                return C(self._env, worlds[world_id])
+                return C(worlds[world_id])
             else:
-                return C(self._env)
+                return C()
         except Exception as e:
             raise RuntimeError("Failed to instantiate task {0} ({1})".format(
                 task_class, e))
 
 
 class PythonConfigLoader:
-    def __init__(self, env):
-        self._env = env
-
+    '''
+        Loads a python file containing a stand-alone function called
+        `create_tasks` that returns a TaskScheduler object.
+    '''
     def create_tasks(self, tasks_config_file):
         # make sure we have a relative path
         tasks_config_file = os.path.relpath(tasks_config_file)
@@ -124,7 +123,7 @@ class PythonConfigLoader:
         tasks_config_module = os.path.splitext(
             tasks_config_file)[0].replace('/', '.')
         mod = __import__(tasks_config_module, fromlist=[''])
-        return mod.create_tasks(self._env)
+        return mod.create_tasks()
 
 
 def get_class(name):

@@ -18,6 +18,18 @@ class SerializerMock(object):
     pass
 
 
+class SingleTaskScheduler():
+    def __init__(self, task):
+        self.task = task
+
+    def get_next_task(self):
+        return self.task
+
+    def reward(self, reward):
+        pass
+
+
+
 class TestEnvironment(unittest.TestCase):
 
     def testRegistering(self):
@@ -29,9 +41,9 @@ class TestEnvironment(unittest.TestCase):
             @task.on_init()
             def init_handler(self, event):
                 self.handled = True
-        env = environment.Environment(SerializerMock())
-        tt = TestTask(env, max_time=10)
-
+        tt = TestTask(max_time=10)
+        env = environment.Environment(SerializerMock(), SingleTaskScheduler(tt))
+        tt.init(env)
         env._register_task_triggers(tt)
         # Start cannot be handled
         self.failIf(env.raise_event(task.Start()))
@@ -59,9 +71,9 @@ class TestEnvironment(unittest.TestCase):
             def start_handler(self, event):
                 self.start_handled = True
 
-        env = environment.Environment(SerializerMock())
-        tt = TestTask(env, max_time=10)
-
+        tt = TestTask(max_time=10)
+        env = environment.Environment(SerializerMock(), SingleTaskScheduler(tt))
+        tt.init(env)
         env._register_task_triggers(tt)
         # Start cannot be handled
         self.failIf(env.raise_event(task.Start()))

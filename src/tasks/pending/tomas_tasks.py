@@ -18,8 +18,8 @@ objects = ["apple", "banana", "pineapple", "pear"]
 
 
 class ObjectExistence(Task):
-    def __init__(self, env):
-        super(ObjectExistence, self).__init__(env=env, max_time=3000)
+    def __init__(self):
+        super(ObjectExistence, self).__init__(max_time=3000)
 
     @on_start()
     def on_start(self, event):

@@ -24,8 +24,8 @@ objs = ['banana', 'apple', 'pineapple', 'cherry']
 
 # look in a predifined direction.
 class LookTask(BaseTask):
-    def __init__(self, env, world):
-        super(LookTask, self).__init__(env=env, max_time=1000, world=world)
+    def __init__(self, world):
+        super(LookTask, self).__init__(max_time=1000, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -43,8 +43,8 @@ class LookTask(BaseTask):
 
 # the learner must look around his current position
 class LookAround(Task):
-    def __init__(self, env, world):
-        super(LookAround, self).__init__(env=env, max_time=5000, world=world)
+    def __init__(self, world):
+        super(LookAround, self).__init__(max_time=5000, world=world)
 
     @on_init()
     def on_init(self, event):
@@ -78,8 +78,8 @@ class LookAround(Task):
 
 # Set 4 objects around the learner, ask to find one of them.
 class FindObjectAround(Task):
-    def __init__(self, env, world):
-        super(FindObjectAround, self).__init__(env=env, max_time=10000,
+    def __init__(self, world):
+        super(FindObjectAround, self).__init__(max_time=10000,
                                                world=world)
         self.dir2obj = [0,1,2,3]
         random.shuffle(self.dir2obj)

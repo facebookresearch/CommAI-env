@@ -15,14 +15,11 @@ import time
 
 
 class Session:
-    def __init__(self, environment, learner, task_scheduler,
-                 max_reward_per_task=10, default_sleep=0.01):
+    def __init__(self, environment, learner,
+                 default_sleep=0.01):
         # internal initialization
         self._env = environment
         self._learner = learner
-        self._max_reward_per_task = max_reward_per_task
-        self._env.set_task_scheduler(task_scheduler)
-        self._task_scheduler = task_scheduler
         self._default_sleep = default_sleep
         self._sleep = self._default_sleep
         # listen to changes in the currently running task
@@ -37,8 +34,6 @@ class Session:
         self._total_time = 0
         # total cumulative reward
         self._total_reward = 0
-        # cumulative reward per task
-        self._reward_per_task = defaultdict(int)
         # keep track of how many times we have tried each task
         self._task_count = defaultdict(int)
         # keep track of how much time we have spent on each task
@@ -81,7 +76,7 @@ class Session:
         return self._total_reward
 
     def get_reward_per_task(self):
-        return self._reward_per_task
+        return self._env.get_reward_per_task()
 
     def get_task_count(self):
         return self._task_count
@@ -92,13 +87,9 @@ class Session:
     def accumulate_reward(self, reward):
         '''Records the reward if the learner hasn't exceeded the maximum
         possible amount of reward allowed for the current task.'''
-        task_name = self._current_task.get_name()
-        if self._reward_per_task[task_name] < self._max_reward_per_task:
-            if reward != 0:
-                self._task_scheduler.reward(reward)
-                self._reward_per_task[task_name] += reward
-                self._total_reward += reward
-                self.total_reward_updated(self._total_reward)
+        self._total_reward += reward
+        if reward != 0:
+            self.total_reward_updated(self._total_reward)
 
     def on_task_updated(self, task):
         self._current_task = task

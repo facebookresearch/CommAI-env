@@ -48,9 +48,9 @@ class GridWorld(World):
     This is an infinite grid world where there can be
     objects layed around (pickable or not, traversable or not).
     '''
-    def __init__(self, env, init_pos=(0, 0),
+    def __init__(self, init_pos=(0, 0),
                  init_direction='north'):
-        super(GridWorld, self).__init__(env)
+        super(GridWorld, self).__init__()
         self._init_pos = init_pos
         self._init_direction = init_direction
         self.valid_directions = {

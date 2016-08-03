@@ -289,15 +289,18 @@ class State(object):
 
 
 class ScriptSet(object):
-    def __init__(self, env):
-        self._env = env
-        self.init()
+    def __init__(self):
+        # The environment is set when the script is started
+        self._env = None
+        self._started = False
+        self._ended = False
         # a bit ugly, but there are worse things in life
         self.state_updated = Observable()
         # remember dynamically register handlers to destroy their triggers
         self.dyn_handlers = set()
 
-    def init(self):
+    def init(self, env):
+        self._env = env
         self._started = False
         self._ended = False
         # this is where all the state variables should be kept
@@ -321,15 +324,6 @@ class ScriptSet(object):
     def end(self):
         self._ended = True
 
-    def add_handler(self, handler):
-        '''
-        Adds and registers a handler.
-        '''
-        trigger = handler_to_trigger(handler)
-        if trigger:
-            self._env._register_task_trigger(self, trigger)
-            self.dyn_handlers.add(handler)
-
     def get_triggers(self):
         triggers = []
         for fname in dir(self):
@@ -346,6 +340,15 @@ class ScriptSet(object):
     def get_name(self):
         '''Some unique identifier of the task'''
         return self.__class__.__name__
+
+    def add_handler(self, handler):
+        '''
+        Adds and registers a handler dynamically during a task runtime.
+        '''
+        trigger = handler_to_trigger(handler)
+        if trigger:
+            self._env._register_task_trigger(self, trigger)
+            self.dyn_handlers.add(handler)
 
     def _raise_state_changed(self):
         ret = self._env.raise_state_changed()
@@ -375,22 +378,22 @@ class ScriptSet(object):
 
 
 class World(ScriptSet):
-    def __init__(self, env):
-        super(World, self).__init__(env)
+    def __init__(self):
+        super(World, self).__init__()
 
     def start(self):
         super(World, self).start()
         self._env.raise_event(WorldStart())
 
-    def init(self):
-        super(World, self).init()
+    def init(self, env):
+        super(World, self).init(env)
         self._env.raise_event(WorldInit())
 
 
 # Base class for tasks
 class Task(ScriptSet):
-    def __init__(self, env, max_time, world=None):
-        super(Task, self).__init__(env)
+    def __init__(self, max_time, world=None):
+        super(Task, self).__init__()
         self._world = world
         self._max_time = max_time
 
@@ -410,8 +413,8 @@ class Task(ScriptSet):
         super(Task, self).start()
         self._env.raise_event(Start())
 
-    def init(self):
-        super(Task, self).init()
+    def init(self, env):
+        super(Task, self).init(env)
         self._env.raise_event(Init())
 
     def deinit(self):

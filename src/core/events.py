@@ -62,8 +62,8 @@ class EventManager:
                     try:
                         event.condition_outcome = condition_outcome
                     except AttributeError:
-                        self.logger.warn("Couldn't save condition outcome for "
-                                         "event {0}".format(event))
+                        self.logger.debug("Couldn't save condition outcome for "
+                                          "event {0}".format(event))
                     self.logger.debug('{0} handled by {1}'.format(
                         event, trigger.event_handler))
                     # call the event handler

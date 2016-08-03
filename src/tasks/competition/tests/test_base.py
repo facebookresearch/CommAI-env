@@ -19,8 +19,8 @@ class TestBase(unittest.TestCase):
 
     def testIgnoreInterruptions(self):
         class TestTask(base.BaseTask):
-            def __init__(self, env, max_time=1000):
-                super(TestTask, self).__init__(env, max_time=max_time)
+            def __init__(self, max_time=1000):
+                super(TestTask, self).__init__(max_time=max_time)
 
             @on_start()
             def on_start(self, event):

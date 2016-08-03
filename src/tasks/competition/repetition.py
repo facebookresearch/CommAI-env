@@ -30,9 +30,8 @@ repeat_max = 3
 
 
 class BeSilentTask(Task):
-    def __init__(self, env, world=None):
-        super(BeSilentTask, self).__init__(env=env,
-                                           world=world,
+    def __init__(self, world=None):
+        super(BeSilentTask, self).__init__(world=world,
                                            max_time=random.randint(100, 1000))
 
     # give instructions at the beginning of the task
@@ -43,13 +42,14 @@ class BeSilentTask(Task):
         self.set_message(random.choice(["be silent now.",
                                         "do not say anything."]))
 
-    # silence is encoded as all-zeros tokens
-    # catch any bit 1 sent by the learner
-    @on_sequence("1")
+    # silence is represented by the space character
+    # catch any non-space character
+    @on_message("[^ ]")
     def on_message(self, event):
-        # if the learner produces bit 1, it receives reward 0 and the task is
-        # over. We need to make sure to do this only once so for every
-        # incoming 1 bit we don't start again sending the feedback message.
+        # if the learner produces anything but a space, it receives reward 0
+        # and the task is over. We need to make sure to do this only once so for
+        # every incoming 1 bit we don't start again sending the feedback
+        # message.
         if not self.flag_failed:
             self.set_reward(0, random.choice(msg.failed))
             # set the flag, so we don't
@@ -64,9 +64,8 @@ class BeSilentTask(Task):
 
 
 class RepeatCharacterTask(BaseTask):
-    def __init__(self, env, world=None):
-        super(RepeatCharacterTask, self).__init__(env=env,
-                                                  world=world,
+    def __init__(self, world=None):
+        super(RepeatCharacterTask, self).__init__(world=world,
                                                   max_time=1000)
 
     @on_start()
@@ -103,9 +102,8 @@ class RepeatCharacterTask(BaseTask):
 
 
 class RepeatWhatISayTask(BaseTask):
-    def __init__(self, env, world=None):
-        super(RepeatWhatISayTask, self).__init__(env=env,
-                                                 world=world,
+    def __init__(self, world=None):
+        super(RepeatWhatISayTask, self).__init__(world=world,
                                                  max_time=1000)
 
     @on_start()
@@ -142,9 +140,8 @@ class RepeatWhatISayTask(BaseTask):
 
 
 class RepeatWhatISay2Task(BaseTask):
-    def __init__(self, env, world=None):
-        super(RepeatWhatISay2Task, self).__init__(env=env,
-                                                  world=world,
+    def __init__(self, world=None):
+        super(RepeatWhatISay2Task, self).__init__(world=world,
                                                   max_time=1000)
 
     @on_start()
@@ -181,9 +178,8 @@ class RepeatWhatISay2Task(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesTask(BaseTask):
-    def __init__(self, env, world=None):
-        super(RepeatWhatISayMultipleTimesTask, self).__init__(env=env,
-                                                              world=world,
+    def __init__(self, world=None):
+        super(RepeatWhatISayMultipleTimesTask, self).__init__(world=world,
                                                               max_time=10000)
 
     @on_start()
@@ -231,9 +227,8 @@ class RepeatWhatISayMultipleTimesTask(BaseTask):
 
 
 class RepeatWhatISayMultipleTimes2Task(BaseTask):
-    def __init__(self, env, world=None):
-        super(RepeatWhatISayMultipleTimes2Task, self).__init__(env=env,
-                                                               world=world,
+    def __init__(self, world=None):
+        super(RepeatWhatISayMultipleTimes2Task, self).__init__(world=world,
                                                                max_time=10000)
 
     @on_start()
@@ -279,9 +274,8 @@ class RepeatWhatISayMultipleTimes2Task(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesSeparatedByCommaTask(BaseTask):
-    def __init__(self, env, world=None):
+    def __init__(self, world=None):
         super(RepeatWhatISayMultipleTimesSeparatedByCommaTask, self).__init__(
-            env=env,
             world=world,
             max_time=10000)
 
@@ -329,9 +323,8 @@ class RepeatWhatISayMultipleTimesSeparatedByCommaTask(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesSeparatedByAndTask(BaseTask):
-    def __init__(self, env, world=None):
+    def __init__(self, world=None):
         super(RepeatWhatISayMultipleTimesSeparatedByAndTask, self).__init__(
-            env=env,
             world=world,
             max_time=10000)
 
@@ -379,9 +372,8 @@ class RepeatWhatISayMultipleTimesSeparatedByAndTask(BaseTask):
 
 
 class RepeatWhatISayMultipleTimesSeparatedByCATask(BaseTask):
-    def __init__(self, env, world=None):
+    def __init__(self, world=None):
         super(RepeatWhatISayMultipleTimesSeparatedByCATask, self).__init__(
-            env=env,
             world=world,
             max_time=10000)
 
@@ -438,9 +430,9 @@ class VerbTask(Task):
     verbs = ('sing', 'smile', 'rest', 'relax', 'jump', 'dance')
     verbs_past = ('sang', 'smiled', 'rested', 'relaxed', 'jumped', 'danced')
 
-    def __init__(self, env, world):
+    def __init__(self, world):
         super(VerbTask, self).__init__(
-            env=env, max_time=2 * TIME_VERB, world=world)
+            max_time=2 * TIME_VERB, world=world)
 
     @on_init()
     def on_init(self, event):

@@ -14,7 +14,7 @@ import logging
 import logging.config
 from core.serializer import StandardSerializer, IdentitySerializer
 from core.environment import Environment
-from tasks_config import create_tasks, create_tasks_incremental
+from tasks_config import create_tasks
 from learners.sample_learners import SampleRandomWordsLearner
 from learners.sample_learners import RandomCharacterLearner
 from learners.sample_learners import SampleMemorizingLearner
@@ -33,9 +33,9 @@ def init_logger(default_path='logging.ini',
 
 def build_tournament(serializer, learner):
     init_logger()
-    env = Environment(serializer)
-    task_scheduler = create_tasks_incremental(env)
-    session = Session(env, learner, task_scheduler)
+    task_scheduler = create_tasks()
+    env = Environment(serializer, task_scheduler)
+    session = Session(env, learner)
     view = ConsoleView(env, session)
     return session, view
 
@@ -82,9 +82,8 @@ def random_character_learner():
 def external_learner(logging_config_path='logging.ini'):
     init_logger(default_path=logging_config_path)
     serializer = IdentitySerializer()
-    env = Environment(serializer)
-    task_scheduler = create_tasks_incremental(env)
-    env.set_task_scheduler(task_scheduler)
+    task_scheduler = create_tasks()
+    env = Environment(serializer, task_scheduler)
     return env
 
 
