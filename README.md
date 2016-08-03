@@ -6,8 +6,10 @@ described in A Roadmap towards Machine Intelligence
 
 ## Running
 
-cp tasks_config.py.sample tasks_config.py
-python run_tournament.py
+```
+cp tasks_config.sample.json tasks_config.json
+python run_tournament.py tasks_config.json
+```
 
 ## Requirements
 * Python 2.6+
