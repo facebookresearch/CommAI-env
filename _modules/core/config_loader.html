@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.config_loader &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.config_loader</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016-present, Facebook, Inc.</span>
+<span class="c"># All rights reserved.</span>
+<span class="c">#</span>
+<span class="c"># This source code is licensed under the BSD-style license found in the</span>
+<span class="c"># LICENSE file in the root directory of this source tree. An additional grant</span>
+<span class="c"># of patent rights can be found in the PATENTS file in the same directory.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="JSONConfigLoader"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.JSONConfigLoader">[docs]</a><span class="k">class</span> <span class="nc">JSONConfigLoader</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Loads a set of tasks and a schedule for them from a JSON file::</span>
+
+<span class="sd">        {</span>
+<span class="sd">          &quot;tasks&quot;:</span>
+<span class="sd">          {</span>
+<span class="sd">            &quot;&lt;task_id&gt;&quot;: {</span>
+<span class="sd">                &quot;type&quot;: &quot;&lt;task_class&gt;&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &quot;&lt;task_id&gt;&quot;: {</span>
+<span class="sd">                &quot;type&quot;: &quot;&lt;task_class&gt;&quot;,</span>
+<span class="sd">                &quot;world&quot;: &quot;&lt;world_id&gt;&quot;</span>
+<span class="sd">            }</span>
+<span class="sd">            &quot;...&quot;: &quot;...&quot;</span>
+<span class="sd">          },</span>
+<span class="sd">          &quot;worlds&quot;:</span>
+<span class="sd">          {</span>
+<span class="sd">            &quot;&lt;world_id&gt;&quot;: {</span>
+<span class="sd">              &quot;type&quot;: &quot;&lt;world_class&gt;&quot;,</span>
+<span class="sd">            }</span>
+<span class="sd">          },</span>
+<span class="sd">          &quot;scheduler&quot;:</span>
+<span class="sd">            {</span>
+<span class="sd">              &quot;type&quot;: &quot;&lt;scheduler_class&gt;&quot;,</span>
+<span class="sd">              &quot;args&quot;: {</span>
+<span class="sd">                  &quot;&lt;scheduler_arg&gt;&quot;: &lt;scheduler_arg_value&gt;,</span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+
+<span class="sd">    The scheduler scheduler_arg_value could be a container including</span>
+<span class="sd">    task ids, which will be replaced by the concrete tasks instances.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="JSONConfigLoader.create_tasks"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.JSONConfigLoader.create_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">create_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks_config_file</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Given a json configuartion file, it returns a scheduler object</span>
+<span class="sd">        set up as described in the file.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tasks_config_file</span><span class="p">))</span>
+        <span class="c"># instantiate the worlds (typically there is only one)</span>
+        <span class="n">worlds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">world_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instantiate_world</span><span class="p">(</span><span class="n">world_config</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]))</span>
+                      <span class="k">for</span> <span class="n">world_id</span><span class="p">,</span> <span class="n">world_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;worlds&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="c"># map each task</span>
+        <span class="c"># instantiate the tasks with the world (if any)</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">task_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instantiate_task</span><span class="p">(</span><span class="n">task_config</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">],</span>
+                                                     <span class="n">worlds</span><span class="p">,</span>
+                                                     <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                                         <span class="s">&#39;world&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+                      <span class="k">for</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">task_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;tasks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="c"># retrieve what type of scheduler we need to create</span>
+        <span class="n">scheduler_class</span> <span class="o">=</span> <span class="n">get_class</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;scheduler&#39;</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">])</span>
+        <span class="c"># prepare the arguments to instantiate the scheduler</span>
+        <span class="n">scheduler_args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;scheduler&#39;</span><span class="p">][</span><span class="s">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c"># all arguments that begin with the name tasks are taken as</span>
+            <span class="c"># collections of ids that should be mapped to the corresponding</span>
+            <span class="c"># tasks object</span>
+            <span class="k">if</span> <span class="n">arg_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;tasks&#39;</span><span class="p">):</span>
+                <span class="n">scheduler_args</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">map_tasks</span><span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scheduler_args</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_value</span>
+        <span class="c"># return a scheduler with its corresponding arguments</span>
+        <span class="k">return</span> <span class="n">scheduler_class</span><span class="p">(</span><span class="o">**</span><span class="n">scheduler_args</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="JSONConfigLoader.instantiate_world"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.JSONConfigLoader.instantiate_world">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_world</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world_class</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return a world object given the world class</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">get_class</span><span class="p">(</span><span class="n">world_class</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">C</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Failed to instantiate world {0} ({1})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">world_class</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="JSONConfigLoader.instantiate_task"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.JSONConfigLoader.instantiate_task">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_class</span><span class="p">,</span> <span class="n">worlds</span><span class="p">,</span> <span class="n">world_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a task object given the task class and the world where it</span>
+<span class="sd">        runs (if any)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">get_class</span><span class="p">(</span><span class="n">task_class</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">world_id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">C</span><span class="p">(</span><span class="n">worlds</span><span class="p">[</span><span class="n">world_id</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">C</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Failed to instantiate task {0} ({1})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">task_class</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="PythonConfigLoader"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.PythonConfigLoader">[docs]</a><span class="k">class</span> <span class="nc">PythonConfigLoader</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Loads a python file containing a stand-alone function called</span>
+<span class="sd">        `create_tasks` that returns a TaskScheduler object.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="PythonConfigLoader.create_tasks"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.PythonConfigLoader.create_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">create_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks_config_file</span><span class="p">):</span>
+        <span class="c"># make sure we have a relative path</span>
+        <span class="n">tasks_config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">tasks_config_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tasks_config_file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;The task configuration file must be in the &quot;</span>
+                               <span class="s">&quot;same directory as the competition source.&quot;</span><span class="p">)</span>
+        <span class="c"># just in case, remove initial unneeded &quot;./&quot;</span>
+        <span class="k">if</span> <span class="n">tasks_config_file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;./&#39;</span><span class="p">):</span>
+            <span class="n">tasks_config_file</span> <span class="o">=</span> <span class="n">tasks_config_file</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="c"># transform the config file path into a module path</span>
+        <span class="n">tasks_config_module</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span>
+            <span class="n">tasks_config_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">tasks_config_module</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">mod</span><span class="o">.</span><span class="n">create_tasks</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="get_class"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.get_class">[docs]</a><span class="k">def</span> <span class="nf">get_class</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">components</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="n">components</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">components</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">mod</span>
+
+</div>
+<div class="viewcode-block" id="map_tasks"><a class="viewcode-back" href="../../core.config_loader.html#core.config_loader.map_tasks">[docs]</a><span class="k">def</span> <span class="nf">map_tasks</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">tasks</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># if arg is a task, return the task object</span>
+        <span class="k">return</span> <span class="n">tasks</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="c"># arg is a hashable type, but we cannot map it to a task</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Coudln&#39;t find task id &#39;{0}&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+    <span class="c"># unhashable type</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="c"># we treat arg as a collection that should be mapped</span>
+        <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">map_tasks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tasks</span><span class="p">),</span> <span class="n">arg</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

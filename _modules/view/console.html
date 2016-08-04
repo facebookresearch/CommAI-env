@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>view.console &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for view.console</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">curses</span>
+<span class="kn">import</span> <span class="nn">curses.textpad</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">from</span> <span class="nn">core.channels</span> <span class="kn">import</span> <span class="n">InputChannel</span>
+
+<span class="n">locale</span><span class="o">.</span><span class="n">setlocale</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">LC_ALL</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+<span class="n">code</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ConsoleView"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView">[docs]</a><span class="k">class</span> <span class="nc">ConsoleView</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">show_world</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># TODO: Move environment and session outside of the class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="c"># for visualization purposes, we keep an internal buffer of the</span>
+        <span class="c"># input and output stream so when they are cleared from task to</span>
+        <span class="c"># task, we can keep the history intact.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_buffer</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># record what the learner says</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span> <span class="o">=</span> <span class="n">InputChannel</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+        <span class="c"># record what the environment says</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span> <span class="o">=</span> <span class="n">InputChannel</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+        <span class="c"># listen to the updates in these channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">sequence_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_learner_sequence_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">message_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_learner_message_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">sequence_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_env_sequence_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">message_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_env_message_updated</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show_world</span><span class="p">:</span>
+            <span class="c"># register a handler to plot the world if show_world is active</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">world_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">on_world_updated</span><span class="p">)</span>
+        <span class="c"># connect the channels with the observed input bits</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">env_token_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_env_token_updated</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">learner_token_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_learner_token_updated</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">total_reward_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_total_reward_updated</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">total_time_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_total_time_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="c"># we save information for display later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;reward&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;time&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<div class="viewcode-block" id="ConsoleView.on_env_token_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_env_token_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_env_token_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">consume_bit</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_learner_token_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_learner_token_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_learner_token_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">consume_bit</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_learner_message_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_learner_message_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_learner_message_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="c"># we use the fact that messages arrive character by character</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">get_text</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">get_text</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_scroll_msg_length</span><span class="p">:]</span>
+            <span class="n">learner_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_to_str</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">get_undeserialized</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_learner_seq_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">learner_input</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_learner_sequence_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_learner_sequence_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_learner_sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="n">learner_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_to_str</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_learner_channel</span><span class="o">.</span><span class="n">get_undeserialized</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_learner_seq_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">learner_input</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_env_message_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_env_message_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_env_message_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">get_text</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_buffer</span> <span class="o">+=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">get_text</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_buffer</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_scroll_msg_length</span><span class="p">:]</span>
+            <span class="n">env_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_to_str</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_buffer</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">get_undeserialized</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_teacher_seq_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">env_output</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_env_sequence_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_env_sequence_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_env_sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="n">env_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_to_str</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_buffer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_env_channel</span><span class="o">.</span><span class="n">get_undeserialized</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_teacher_seq_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">env_output</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_total_reward_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_total_reward_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_total_reward_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paint_info_win</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_total_time_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_total_time_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_total_time_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paint_info_win</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdscr</span><span class="o">.</span><span class="n">nodelay</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdscr</span><span class="o">.</span><span class="n">getch</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">add_sleep</span><span class="p">(</span><span class="o">-</span><span class="mf">0.001</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">add_sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">reset_sleep</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.paint_info_win"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.paint_info_win">[docs]</a>    <span class="k">def</span> <span class="nf">paint_info_win</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Total time: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win</span><span class="o">.</span><span class="n">clrtobot</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Total reward: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;reward&#39;</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win</span><span class="o">.</span><span class="n">clrtobot</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_world_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_world_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_world_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">world</span><span class="p">:</span>
+            <span class="n">world</span><span class="o">.</span><span class="n">state_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_world_state_updated</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">world</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.on_world_state_updated"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.on_world_state_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_world_state_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">world</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.initialize"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># initialize curses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdscr</span> <span class="o">=</span> <span class="n">curses</span><span class="o">.</span><span class="n">initscr</span><span class="p">()</span>
+        <span class="n">begin_x</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">begin_y</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_teacher_seq_y</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learner_seq_y</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world_win_y</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world_win_x</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win_width</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win_height</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_y</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_x</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdscr</span><span class="o">.</span><span class="n">getmaxyx</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_msg_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info_win_width</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_win</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdscr</span><span class="o">.</span><span class="n">subwin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">begin_y</span><span class="p">,</span>
+                                        <span class="n">begin_x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worldwin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">subwin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world_win_y</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world_win_x</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">_world_win_y</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">_world_win_x</span><span class="p">)</span>
+        <span class="c"># create info box with reward and time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info_win</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">subwin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info_win_height</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">_info_win_width</span><span class="p">,</span>
+                                          <span class="mi">0</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info_win_width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">subwin</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_x</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_y</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_label_win</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_win</span><span class="o">.</span><span class="n">subwin</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_y</span><span class="p">,</span>
+                             <span class="mi">0</span><span class="p">)</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">noecho</span><span class="p">()</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">cbreak</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.finalize"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">nocbreak</span><span class="p">()</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">echo</span><span class="p">()</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">endwin</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.get_input"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.get_input">[docs]</a>    <span class="k">def</span> <span class="nf">get_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_label_win</span><span class="o">.</span><span class="n">addstr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;input:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_label_win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">echo</span><span class="p">()</span>
+        <span class="n">inputstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win</span><span class="o">.</span><span class="n">getstr</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win_x</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">curses</span><span class="o">.</span><span class="n">noecho</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_win</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">inputstr</span>
+</div>
+<div class="viewcode-block" id="ConsoleView.channel_to_str"><a class="viewcode-back" href="../../view.html#view.console.ConsoleView.channel_to_str">[docs]</a>    <span class="k">def</span> <span class="nf">channel_to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">bits</span><span class="p">):</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_msg_length</span> <span class="o">-</span> <span class="mi">10</span>
+        <span class="k">return</span> <span class="s">&quot;{0:_&gt;{length}}[{1: &lt;8}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">[</span><span class="o">-</span><span class="n">length</span><span class="p">:],</span> <span class="n">bits</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:],</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.channels &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.channels</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016-present, Facebook, Inc.</span>
+<span class="c"># All rights reserved.</span>
+<span class="c">#</span>
+<span class="c"># This source code is licensed under the BSD-style license found in the</span>
+<span class="c"># LICENSE file in the root directory of this source tree. An additional grant</span>
+<span class="c"># of patent rights can be found in the PATENTS file in the same directory.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">core.aux.observer</span> <span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<div class="viewcode-block" id="InputChannel"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel">[docs]</a><span class="k">class</span> <span class="nc">InputChannel</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span> <span class="o">=</span> <span class="n">serializer</span>
+        <span class="c"># remembers the input in binary format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># leftmost deserialization of the binary buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># remember the position until which we deserialized the binary buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># event that gets fired for every new bit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_updated</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="c"># event that gets fired for every new character</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_updated</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+
+<div class="viewcode-block" id="InputChannel.consume_bit"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel.consume_bit">[docs]</a>    <span class="k">def</span> <span class="nf">consume_bit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_bit</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Takes a bit into the channel</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># for now we are storing the input as strings (let&#39;s change this later)</span>
+        <span class="k">if</span> <span class="n">input_bit</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">input_bit</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">input_bit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_bit</span><span class="p">)</span>
+        <span class="c"># store the bit in the binary input buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">+=</span> <span class="n">input_bit</span>
+        <span class="c"># notify the updated sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)</span>
+
+        <span class="c"># we check if we can deserialize the final part of the sequence</span>
+        <span class="n">undeserialized_part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_undeserialized</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">can_deserialize</span><span class="p">(</span><span class="n">undeserialized_part</span><span class="p">):</span>
+            <span class="c"># when we do, we deserialize the chunk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span> <span class="o">+=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">to_text</span><span class="p">(</span><span class="n">undeserialized_part</span><span class="p">)</span>
+            <span class="c"># we update the position</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">undeserialized_part</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="InputChannel.clear"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Clears all the  buffers&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_deserialized_buffer</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_binary_buffer</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_pos</span> <span class="o">=</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="InputChannel.get_binary"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel.get_binary">[docs]</a>    <span class="k">def</span> <span class="nf">get_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span>
+</div>
+<div class="viewcode-block" id="InputChannel.set_deserialized_buffer"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel.set_deserialized_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">set_deserialized_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_buffer</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Replaces the deserialized part of the buffer.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span> <span class="o">=</span> <span class="n">new_buffer</span>
+</div>
+<div class="viewcode-block" id="InputChannel.get_undeserialized"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel.get_undeserialized">[docs]</a>    <span class="k">def</span> <span class="nf">get_undeserialized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the yet non deserialized chunk in the input</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_pos</span><span class="p">:]</span>
+</div>
+<div class="viewcode-block" id="InputChannel.get_text"><a class="viewcode-back" href="../../core.channels.html#core.channels.InputChannel.get_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span>
+</div>
+    <span class="k">def</span> <span class="nf">_set_binary_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_buffer</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Carefully raise the event only if the buffer has actually changed</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">!=</span> <span class="n">new_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">=</span> <span class="n">new_buffer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_deserialized_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_buffer</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Carefully raise the event only if the buffer has actually changed</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span> <span class="o">!=</span> <span class="n">new_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span> <span class="o">=</span> <span class="n">new_buffer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deserialized_buffer</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="OutputChannel"><a class="viewcode-back" href="../../core.channels.html#core.channels.OutputChannel">[docs]</a><span class="k">class</span> <span class="nc">OutputChannel</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span> <span class="o">=</span> <span class="n">serializer</span>
+        <span class="c"># remembers the data that has to be shipped out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># event that gets fired every time we change the output sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_updated</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OutputChannel.set_message"><a class="viewcode-back" href="../../core.channels.html#core.channels.OutputChannel.set_message">[docs]</a>    <span class="k">def</span> <span class="nf">set_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="n">new_binary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">to_binary</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="c"># find the first available point from where we can insert</span>
+        <span class="c"># the new buffer without breaking the encoding</span>
+        <span class="n">insert_point</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)):</span>
+            <span class="c"># if we can decode from insert_point on, we can replace</span>
+            <span class="c"># that information with the new buffer</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">to_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">[</span><span class="n">i</span><span class="p">:]):</span>
+                <span class="n">insert_point</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">insert_point</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Inserting new contents at {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">insert_point</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">[:</span><span class="n">insert_point</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_binary</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OutputChannel.clear"><a class="viewcode-back" href="../../core.channels.html#core.channels.OutputChannel.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_buffer</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_set_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_buffer</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Carefully raise the event only if the buffer has actually changed</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">!=</span> <span class="n">new_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span> <span class="o">=</span> <span class="n">new_buffer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OutputChannel.consume_bit"><a class="viewcode-back" href="../../core.channels.html#core.channels.OutputChannel.consume_bit">[docs]</a>    <span class="k">def</span> <span class="nf">consume_bit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">new_buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_buffer</span><span class="p">(</span><span class="n">new_buffer</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">output</span>
+</div>
+<div class="viewcode-block" id="OutputChannel.is_empty"><a class="viewcode-back" href="../../core.channels.html#core.channels.OutputChannel.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="OutputChannel.is_silent"><a class="viewcode-back" href="../../core.channels.html#core.channels.OutputChannel.is_silent">[docs]</a>    <span class="k">def</span> <span class="nf">is_silent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; All the bits in the output token are the result of serializing</span>
+<span class="sd">        silence tokens&#39;&#39;&#39;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_buffer</span>
+        <span class="n">silent_bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">to_binary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">SILENCE_TOKEN</span><span class="p">)</span>
+        <span class="n">token_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">silent_bits</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">token_size</span><span class="p">:</span>
+            <span class="n">buf_suffix</span><span class="p">,</span> <span class="n">buf</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="o">-</span><span class="n">token_size</span><span class="p">:],</span> <span class="n">buf</span><span class="p">[:</span><span class="o">-</span><span class="n">token_size</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">buf_suffix</span> <span class="o">!=</span> <span class="n">silent_bits</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">buf</span> <span class="o">==</span> <span class="n">silent_bits</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">):]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

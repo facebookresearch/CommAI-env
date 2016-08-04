@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.scheduler module &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-core.scheduler">
+<span id="core-scheduler-module"></span><h1>core.scheduler module<a class="headerlink" href="#module-core.scheduler" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="core.scheduler.DependenciesTaskScheduler">
+<em class="property">class </em><tt class="descclassname">core.scheduler.</tt><tt class="descname">DependenciesTaskScheduler</tt><big>(</big><em>tasks</em>, <em>tasks_dependencies</em>, <em>unlock_threshold=10</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a dependency graph between the tasks and randomly allocates between
+the ones that are at the root, or are dependent on other tasks that
+have been solved (based on a threshold)</p>
+<dl class="method">
+<dt id="core.scheduler.DependenciesTaskScheduler.find_available_tasks">
+<tt class="descname">find_available_tasks</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler.find_available_tasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler.find_available_tasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.DependenciesTaskScheduler.get_next_task">
+<tt class="descname">get_next_task</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler.get_next_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler.get_next_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.DependenciesTaskScheduler.get_task_id">
+<tt class="descname">get_task_id</tt><big>(</big><em>task</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler.get_task_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler.get_task_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.DependenciesTaskScheduler.pick_new_task">
+<tt class="descname">pick_new_task</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler.pick_new_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler.pick_new_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.DependenciesTaskScheduler.reward">
+<tt class="descname">reward</tt><big>(</big><em>reward</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler.reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler.reward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.DependenciesTaskScheduler.solved">
+<tt class="descname">solved</tt><big>(</big><em>task</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#DependenciesTaskScheduler.solved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.DependenciesTaskScheduler.solved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.scheduler.IncrementalTaskScheduler">
+<em class="property">class </em><tt class="descclassname">core.scheduler.</tt><tt class="descname">IncrementalTaskScheduler</tt><big>(</big><em>tasks</em>, <em>success_threshold=2</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#IncrementalTaskScheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.IncrementalTaskScheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches to the next task type sequentially
+After the current task was successfully learned N times</p>
+<dl class="method">
+<dt id="core.scheduler.IncrementalTaskScheduler.get_next_task">
+<tt class="descname">get_next_task</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#IncrementalTaskScheduler.get_next_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.IncrementalTaskScheduler.get_next_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.IncrementalTaskScheduler.reward">
+<tt class="descname">reward</tt><big>(</big><em>reward</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#IncrementalTaskScheduler.reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.IncrementalTaskScheduler.reward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.scheduler.RandomTaskScheduler">
+<em class="property">class </em><tt class="descclassname">core.scheduler.</tt><tt class="descname">RandomTaskScheduler</tt><big>(</big><em>tasks</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#RandomTaskScheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.RandomTaskScheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Scheduler provides new tasks every time is asked.
+This is a random scheduler</p>
+<dl class="method">
+<dt id="core.scheduler.RandomTaskScheduler.get_next_task">
+<tt class="descname">get_next_task</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#RandomTaskScheduler.get_next_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.RandomTaskScheduler.get_next_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.RandomTaskScheduler.reward">
+<tt class="descname">reward</tt><big>(</big><em>reward</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#RandomTaskScheduler.reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.RandomTaskScheduler.reward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.scheduler.SequentialTaskScheduler">
+<em class="property">class </em><tt class="descclassname">core.scheduler.</tt><tt class="descname">SequentialTaskScheduler</tt><big>(</big><em>tasks</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#SequentialTaskScheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.SequentialTaskScheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Scheduler provides new tasks every time is asked.
+This is a random scheduler</p>
+<dl class="method">
+<dt id="core.scheduler.SequentialTaskScheduler.get_next_task">
+<tt class="descname">get_next_task</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#SequentialTaskScheduler.get_next_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.SequentialTaskScheduler.get_next_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.scheduler.SequentialTaskScheduler.reward">
+<tt class="descname">reward</tt><big>(</big><em>reward</em><big>)</big><a class="reference internal" href="_modules/core/scheduler.html#SequentialTaskScheduler.reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.scheduler.SequentialTaskScheduler.reward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/core.scheduler.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

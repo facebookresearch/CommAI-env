@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.events module &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-core.events">
+<span id="core-events-module"></span><h1>core.events module<a class="headerlink" href="#module-core.events" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="core.events.EventManager">
+<em class="property">class </em><tt class="descclassname">core.events.</tt><tt class="descname">EventManager</tt><a class="reference internal" href="_modules/core/events.html#EventManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.events.EventManager" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="core.events.EventManager.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/events.html#EventManager.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.events.EventManager.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deregisters all triggers</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.events.EventManager.deregister">
+<tt class="descname">deregister</tt><big>(</big><em>observer</em>, <em>trigger</em><big>)</big><a class="reference internal" href="_modules/core/events.html#EventManager.deregister"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.events.EventManager.deregister" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.events.EventManager.raise_event">
+<tt class="descname">raise_event</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/core/events.html#EventManager.raise_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.events.EventManager.raise_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.events.EventManager.register">
+<tt class="descname">register</tt><big>(</big><em>observer</em>, <em>trigger</em><big>)</big><a class="reference internal" href="_modules/core/events.html#EventManager.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.events.EventManager.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a trigger (a tuple containing an
+ActivationCondition -a function/functor- and an EventHandler
+- another function/functor-)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.events.Trigger">
+<em class="property">class </em><tt class="descclassname">core.events.</tt><tt class="descname">Trigger</tt><a class="headerlink" href="#core.events.Trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>Trigger(type, condition, event_handler)</p>
+<dl class="attribute">
+<dt id="core.events.Trigger.condition">
+<tt class="descname">condition</tt><a class="headerlink" href="#core.events.Trigger.condition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.events.Trigger.event_handler">
+<tt class="descname">event_handler</tt><a class="headerlink" href="#core.events.Trigger.event_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.events.Trigger.type">
+<tt class="descname">type</tt><a class="headerlink" href="#core.events.Trigger.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/core.events.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.environment module &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-core.environment">
+<span id="core-environment-module"></span><h1>core.environment module<a class="headerlink" href="#module-core.environment" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="core.environment.Environment">
+<em class="property">class </em><tt class="descclassname">core.environment.</tt><tt class="descname">Environment</tt><big>(</big><em>serializer</em>, <em>task_scheduler</em>, <em>scramble=False</em>, <em>max_reward_per_task=10</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Environment, you know.</p>
+<dl class="method">
+<dt id="core.environment.Environment.allowable_reward">
+<tt class="descname">allowable_reward</tt><big>(</big><em>reward</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.allowable_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.allowable_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the reward is allowed within the limits of the
+<cite>max_reward_per_task</cite> parameter, and resets it to 0 if not.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.get_reward_per_task">
+<tt class="descname">get_reward_per_task</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.get_reward_per_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.get_reward_per_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictonary that contains the cumulative reward for each
+task.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.is_silent">
+<tt class="descname">is_silent</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.is_silent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.is_silent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.next">
+<tt class="descname">next</tt><big>(</big><em>learner_input</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main loop of the Environment. Receives one bit from the learner and
+produces a response (also one bit)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.on_input_message_updated">
+<tt class="descname">on_input_message_updated</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.on_input_message_updated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.on_input_message_updated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.on_input_sequence_updated">
+<tt class="descname">on_input_sequence_updated</tt><big>(</big><em>sequence</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.on_input_sequence_updated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.on_input_sequence_updated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.on_output_message_updated">
+<tt class="descname">on_output_message_updated</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.on_output_message_updated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.on_output_message_updated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.on_output_sequence_updated">
+<tt class="descname">on_output_sequence_updated</tt><big>(</big><em>sequence</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.on_output_sequence_updated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.on_output_sequence_updated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.raise_event">
+<tt class="descname">raise_event</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.raise_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.raise_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.raise_state_changed">
+<tt class="descname">raise_state_changed</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.raise_state_changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.raise_state_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This rases a StateChanged Event, meaning that something
+in the state of the world or the tasks changed (but we
+don&#8217;t keep track what)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.set_message">
+<tt class="descname">set_message</tt><big>(</big><em>message</em>, <em>priority=0</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.set_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.set_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the message in the output buffer so it can be delivered
+bit by bit. It overwrites any previous content.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.environment.Environment.set_reward">
+<tt class="descname">set_reward</tt><big>(</big><em>reward</em>, <em>message=u''</em>, <em>priority=0</em><big>)</big><a class="reference internal" href="_modules/core/environment.html#Environment.set_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.environment.Environment.set_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the reward that is going to be given
+to the learner once the task has sent all the remaining message</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/core.environment.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

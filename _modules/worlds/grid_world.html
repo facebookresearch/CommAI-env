@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>worlds.grid_world &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for worlds.grid_world</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016-present, Facebook, Inc.</span>
+<span class="c"># All rights reserved.</span>
+<span class="c">#</span>
+<span class="c"># This source code is licensed under the BSD-style license found in the</span>
+<span class="c"># LICENSE file in the root directory of this source tree. An additional grant</span>
+<span class="c"># of patent rights can be found in the PATENTS file in the same directory.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">core.task</span> <span class="kn">import</span> <span class="n">World</span><span class="p">,</span> <span class="n">on_world_start</span><span class="p">,</span> <span class="n">on_message</span><span class="p">,</span> <span class="n">on_sequence</span><span class="p">,</span>\
+    <span class="n">on_state_changed</span><span class="p">,</span> <span class="n">on_timeout</span><span class="p">,</span> <span class="n">on_output_message</span><span class="p">,</span> <span class="n">on_world_init</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span><span class="p">,</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">tasks.competition.messages</span> <span class="kn">as</span> <span class="nn">msg</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<div class="viewcode-block" id="Point"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.Point">[docs]</a><span class="k">class</span> <span class="nc">Point</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;Point&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">))):</span>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ot</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">ot</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">ot</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ot</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">ot</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">ot</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ot</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">ot</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">ot</span><span class="o">.</span><span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Point({0},{1})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Span"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.Span">[docs]</a><span class="k">class</span> <span class="nc">Span</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;Span&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;dx&#39;</span><span class="p">,</span> <span class="s">&#39;dy&#39;</span><span class="p">))):</span>
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Span</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Span</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GWEntity"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GWEntity">[docs]</a><span class="k">class</span> <span class="nc">GWEntity</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;GWEntity&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;pickable&#39;</span><span class="p">,</span> <span class="s">&#39;traversable&#39;</span><span class="p">))):</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+</div>
+<div class="viewcode-block" id="GridWorld"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld">[docs]</a><span class="k">class</span> <span class="nc">GridWorld</span><span class="p">(</span><span class="n">World</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is an infinite grid world where there can be</span>
+<span class="sd">    objects layed around (pickable or not, traversable or not).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_pos</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                 <span class="n">init_direction</span><span class="o">=</span><span class="s">&#39;north&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GridWorld</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_pos</span> <span class="o">=</span> <span class="n">init_pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_direction</span> <span class="o">=</span> <span class="n">init_direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_directions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;north&#39;</span><span class="p">:</span> <span class="n">Span</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="s">&#39;east&#39;</span><span class="p">:</span> <span class="n">Span</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="s">&#39;south&#39;</span><span class="p">:</span> <span class="n">Span</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s">&#39;west&#39;</span><span class="p">:</span> <span class="n">Span</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clockwise_directions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;north&#39;</span><span class="p">,</span> <span class="s">&#39;east&#39;</span><span class="p">,</span> <span class="s">&#39;south&#39;</span><span class="p">,</span> <span class="s">&#39;west&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GridWorld.put_entity"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.put_entity">[docs]</a>    <span class="k">def</span> <span class="nf">put_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pickable</span><span class="p">,</span> <span class="n">traversable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">GWEntity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pickable</span><span class="p">,</span> <span class="n">traversable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Droped an entity {0} at position {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GridWorld.remove_entity"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.remove_entity">[docs]</a>    <span class="k">def</span> <span class="nf">remove_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+            <span class="n">entity_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">position</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Removed an entity {0} at position {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">entity_name</span><span class="p">,</span> <span class="n">position</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Asked to remove a non-existent entity &quot;</span>
+                             <span class="s">&quot;at position {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GridWorld.get_entity"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.get_entity">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">position</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+    <span class="nd">@on_world_init</span><span class="p">()</span>
+<div class="viewcode-block" id="GridWorld.on_init_grid_world"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_init_grid_world">[docs]</a>    <span class="k">def</span> <span class="nf">on_init_grid_world</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># creates a new Point tuple using init_pos tuple as parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_pos</span><span class="p">)</span>
+        <span class="c"># the agent also faces one direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_direction</span>
+        <span class="c"># dictionary of entities in the world</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c"># inventory of the learner (a multiset)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_inventory</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c"># inventory of the teacher (a multiset)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">teacher_inventory</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c"># set of objects the teacher is willing to receive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">teacher_accepts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</div>
+    <span class="nd">@on_message</span><span class="p">(</span><span class="s">r&quot;I turn left\.$&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="GridWorld.on_turn_left"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_turn_left">[docs]</a>    <span class="k">def</span> <span class="nf">on_turn_left</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You turned left, you are now facing {direction}.&quot;</span>
+                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span><span class="p">))</span>
+</div>
+    <span class="nd">@on_message</span><span class="p">(</span><span class="s">r&quot;I turn right\.$&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="GridWorld.on_turn_right"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_turn_right">[docs]</a>    <span class="k">def</span> <span class="nf">on_turn_right</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You turned right, you are now facing {direction}.&quot;</span>
+                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span><span class="p">))</span>
+</div>
+    <span class="nd">@on_message</span><span class="p">(</span><span class="s">r&quot;I move forward\.$&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="GridWorld.on_move_forward"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_move_forward">[docs]</a>    <span class="k">def</span> <span class="nf">on_move_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">move_forward</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+    <span class="nd">@on_message</span><span class="p">(</span><span class="s">r&quot;I look\.$&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="GridWorld.on_looking"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_looking">[docs]</a>    <span class="k">def</span> <span class="nf">on_looking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">look_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span> <span class="o">+</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid_directions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Looking at position {0} with entities {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">look_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span>
+        <span class="p">))</span>
+        <span class="k">if</span> <span class="n">look_pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;There is a {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">look_pos</span><span class="p">]</span>
+            <span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;There is nothing here.&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@on_message</span><span class="p">(</span><span class="s">r&quot;I pick up the (\w+)\.$&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="GridWorld.on_pick_up"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_pick_up">[docs]</a>    <span class="k">def</span> <span class="nf">on_pick_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">obj_name</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get_match</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">obj_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span> <span class="o">+</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid_directions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">obj_pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span> <span class="ow">and</span> \
+                <span class="n">obj_name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">obj_pos</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="c"># There is an object with the given name here</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">obj_pos</span><span class="p">]</span><span class="o">.</span><span class="n">pickable</span><span class="p">:</span>
+                <span class="c"># We pick it up</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_inventory</span><span class="p">[</span><span class="n">obj_name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">obj_pos</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You picked up the {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj_name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You can&#39;t pick up the {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj_name</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;There is no {0} here.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj_name</span><span class="p">))</span>
+</div>
+    <span class="nd">@on_message</span><span class="p">(</span><span class="s">&quot;I give you (an? (\w+))\.$&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="GridWorld.on_object_given"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.on_object_given">[docs]</a>    <span class="k">def</span> <span class="nf">on_object_given</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">object_</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get_match</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">object_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">teacher_accepts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_inventory</span><span class="p">[</span><span class="n">object_</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">teacher_inventory</span><span class="p">[</span><span class="n">object_</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You gave me {indef_object}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">indef_object</span><span class="o">=</span><span class="n">msg</span><span class="o">.</span><span class="n">indef_article</span><span class="p">(</span><span class="n">object_</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;I haven&#39;t asked you for {indef_object}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">indef_object</span><span class="o">=</span><span class="n">msg</span><span class="o">.</span><span class="n">indef_article</span><span class="p">(</span><span class="n">object_</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="GridWorld.turn"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.turn">[docs]</a>    <span class="k">def</span> <span class="nf">turn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        turns in the specified absolute (north, east, west, south) or clockwise</span>
+<span class="sd">        relative (1, 2, 3, -1, 2, 3) direction.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_directions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clockwise_direction</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GridWorld.get_clockwise_direction"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.get_clockwise_direction">[docs]</a>    <span class="k">def</span> <span class="nf">get_clockwise_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">clockwise_directions</span><span class="p">[</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clockwise_directions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span><span class="p">)</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="GridWorld.move_forward"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.move_forward">[docs]</a>    <span class="k">def</span> <span class="nf">move_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dz</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">==</span> <span class="s">&#39;east&#39;</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">dz</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">==</span> <span class="s">&#39;west&#39;</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="o">-</span><span class="n">dz</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">==</span> <span class="s">&#39;north&#39;</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="o">-</span><span class="n">dz</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span> <span class="o">==</span> <span class="s">&#39;south&#39;</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">dz</span>
+        <span class="n">new_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span> <span class="o">+</span> <span class="n">Span</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_move_to</span><span class="p">(</span><span class="n">new_pos</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span> <span class="o">=</span> <span class="n">new_pos</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You moved.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="s">&quot;You can&#39;t move.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GridWorld.can_move_to"><a class="viewcode-back" href="../../worlds.html#worlds.grid_world.GridWorld.can_move_to">[docs]</a>    <span class="k">def</span> <span class="nf">can_move_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span> <span class="ow">or</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">traversable</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a grid world representation as a string</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">grid_h</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">grid_w</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="c"># there should be cell in the center to show the learner</span>
+        <span class="k">assert</span> <span class="n">grid_w</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">grid_h</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">cell_h</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">cell_w</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell_w</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_w</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;{0: &gt;{length}d} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cell_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">j</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">cell_w</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell_w</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_w</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="n">cell_w</span><span class="p">)</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Drawing world with entities in &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_h</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cell_h</span><span class="p">):</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># print the coordinates</span>
+                    <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;{0: &gt;{length}d} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cell_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                        <span class="n">length</span><span class="o">=</span><span class="n">cell_w</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell_w</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_w</span><span class="p">):</span>
+                    <span class="n">absolute_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">absolute_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_pos</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">j</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">absolute_pos</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">absolute_j</span><span class="p">,</span> <span class="n">absolute_i</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+                        <span class="c"># we print the learner in the middle, using its</span>
+                        <span class="c"># facing direction first character</span>
+                        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">learner_direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">cell_w</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">absolute_pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
+                        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">entities</span><span class="p">[</span><span class="n">absolute_pos</span><span class="p">]</span>
+                        <span class="c"># if there is an object, we fit as much as we can</span>
+                        <span class="c"># of the name</span>
+                        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;{0: &lt;{length}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">k</span> <span class="o">*</span> <span class="n">cell_w</span><span class="p">:(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cell_w</span><span class="p">],</span>
+                            <span class="n">length</span><span class="o">=</span><span class="n">cell_w</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="n">cell_w</span><span class="p">)</span>
+                    <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell_w</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_w</span><span class="p">):</span>
+                <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="n">cell_w</span><span class="p">)</span>
+                <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

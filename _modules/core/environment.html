@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.environment &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.environment</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016-present, Facebook, Inc.</span>
+<span class="c"># All rights reserved.</span>
+<span class="c">#</span>
+<span class="c"># This source code is licensed under the BSD-style license found in the</span>
+<span class="c"># LICENSE file in the root directory of this source tree. An additional grant</span>
+<span class="c"># of patent rights can be found in the PATENTS file in the same directory.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">core.events</span> <span class="kn">import</span> <span class="n">EventManager</span>
+<span class="kn">from</span> <span class="nn">core.task</span> <span class="kn">import</span> <span class="n">StateChanged</span><span class="p">,</span> <span class="n">MessageReceived</span><span class="p">,</span> \
+    <span class="n">SequenceReceived</span><span class="p">,</span> <span class="n">OutputSequenceUpdated</span><span class="p">,</span> <span class="n">OutputMessageUpdated</span>
+<span class="kn">from</span> <span class="nn">core.aux.observer</span> <span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span> <span class="nn">core.serializer</span> <span class="kn">import</span> <span class="n">ScramblingSerializerWrapper</span>
+<span class="kn">from</span> <span class="nn">core.channels</span> <span class="kn">import</span> <span class="n">InputChannel</span><span class="p">,</span> <span class="n">OutputChannel</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<div class="viewcode-block" id="Environment"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment">[docs]</a><span class="k">class</span> <span class="nc">Environment</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The Environment, you know.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">task_scheduler</span><span class="p">,</span> <span class="n">scramble</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">max_reward_per_task</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="c"># save parameters into member variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_scheduler</span> <span class="o">=</span> <span class="n">task_scheduler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_serializer</span> <span class="o">=</span> <span class="n">serializer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_reward_per_task</span> <span class="o">=</span> <span class="n">max_reward_per_task</span>
+        <span class="c"># cumulative reward per task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reward_per_task</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c"># the event manager is the controller that dispatches</span>
+        <span class="c"># changes in the environment (like new inputs or state changes)</span>
+        <span class="c"># to handler functions in the tasks that tell the environment</span>
+        <span class="c"># how to react</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span> <span class="o">=</span> <span class="n">EventManager</span><span class="p">()</span>
+        <span class="c"># intialize member variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># we hear to our own output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel_listener</span> <span class="o">=</span> <span class="n">InputChannel</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scramble</span><span class="p">:</span>
+            <span class="n">serializer</span> <span class="o">=</span> <span class="n">ScramblingSerializerWrapper</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+        <span class="c"># output channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span> <span class="o">=</span> <span class="n">OutputChannel</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+        <span class="c"># input channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_channel</span> <span class="o">=</span> <span class="n">InputChannel</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+        <span class="c"># priority of ongoing message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_priority</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># reward that is to be given at the learner at the end of the task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reward</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Current task time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Task separator issued</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_separator_issued</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c"># Internal logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="c"># signals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world_updated</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_updated</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+
+        <span class="c"># Register channel observers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_channel</span><span class="o">.</span><span class="n">sequence_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_input_sequence_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_channel</span><span class="o">.</span><span class="n">message_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_input_message_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel_listener</span><span class="o">.</span><span class="n">sequence_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_output_sequence_updated</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel_listener</span><span class="o">.</span><span class="n">message_updated</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_output_message_updated</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Environment.next"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">learner_input</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Main loop of the Environment. Receives one bit from the learner and</span>
+<span class="sd">        produces a response (also one bit)&#39;&#39;&#39;</span>
+        <span class="c"># Make sure we have a task</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_switch_new_task</span><span class="p">()</span>
+
+        <span class="c"># If the task has not reached the end by either Timeout or</span>
+        <span class="c"># achieving the goal</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">has_ended</span><span class="p">():</span>
+            <span class="c"># Check if a Timeout occurred</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_time</span><span class="p">):</span>
+                <span class="c"># Process the input from the learner and raise events</span>
+                <span class="k">if</span> <span class="n">learner_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># record the input from the learner and deserialize it</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channel</span><span class="o">.</span><span class="n">consume_bit</span><span class="p">(</span><span class="n">learner_input</span><span class="p">)</span>
+            <span class="c"># We are in the middle of the task, so no rewards are given</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># If the task is ended and there is nothing else to say,</span>
+            <span class="c"># issue a silence and then return reward and move to next task</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_separator_issued</span><span class="p">:</span>
+                    <span class="c"># Have nothing more to say</span>
+                    <span class="c"># reward the learner if necessary and switch to new task</span>
+                    <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="mi">0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_switch_new_task</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_separator_issued</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_serializer</span><span class="o">.</span><span class="n">SILENCE_TOKEN</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_separator_issued</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">reward</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># TODO: decide what to do here.</span>
+                <span class="c"># Should we consume the bit or not?</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_input_channel</span><span class="o">.</span><span class="n">consume_bit</span><span class="p">(</span><span class="n">learner_input</span><span class="p">)</span>
+                <span class="c"># If there is still something to say, continue saying it</span>
+                <span class="n">reward</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Get one bit from the output buffer and ship it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_serializer</span><span class="o">.</span><span class="n">SILENCE_TOKEN</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">consume_bit</span><span class="p">()</span>
+
+        <span class="c"># we hear to ourselves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel_listener</span><span class="o">.</span><span class="n">consume_bit</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="c"># advance time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_time</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># process the reward (clearing it if it&#39;s not allowed)</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowable_reward</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task_scheduler</span><span class="o">.</span><span class="n">reward</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">reward</span>
+</div>
+<div class="viewcode-block" id="Environment.get_reward_per_task"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.get_reward_per_task">[docs]</a>    <span class="k">def</span> <span class="nf">get_reward_per_task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a dictonary that contains the cumulative reward for each</span>
+<span class="sd">        task.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward_per_task</span>
+</div>
+<div class="viewcode-block" id="Environment.allowable_reward"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.allowable_reward">[docs]</a>    <span class="k">def</span> <span class="nf">allowable_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Checks if the reward is allowed within the limits of the</span>
+<span class="sd">        `max_reward_per_task` parameter, and resets it to 0 if not.&#39;&#39;&#39;</span>
+        <span class="n">task_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward_per_task</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_reward_per_task</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reward_per_task</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span> <span class="o">+=</span> <span class="n">reward</span>
+            <span class="k">return</span> <span class="n">reward</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="Environment.is_silent"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.is_silent">[docs]</a>    <span class="k">def</span> <span class="nf">is_silent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">is_silent</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Environment.on_input_sequence_updated"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.on_input_sequence_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_input_sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">SequenceReceived</span><span class="p">(</span><span class="n">sequence</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Sequence received by running task: &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">sequence</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Environment.on_input_message_updated"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.on_input_message_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_input_message_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="c"># send the current received message to the task</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">MessageReceived</span><span class="p">(</span>
+                <span class="n">message</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Message received by running task: &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">message</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Environment.on_output_sequence_updated"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.on_output_sequence_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_output_sequence_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">OutputSequenceUpdated</span><span class="p">(</span><span class="n">sequence</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Environment.on_output_message_updated"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.on_output_message_updated">[docs]</a>    <span class="k">def</span> <span class="nf">on_output_message_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">OutputMessageUpdated</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Environment.set_reward"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.set_reward">[docs]</a>    <span class="k">def</span> <span class="nf">set_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the reward that is going to be given</span>
+<span class="sd">        to the learner once the task has sent all the remaining message&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Setting reward {0} with message &quot;{1}&quot;&#39;</span>
+                          <span class="s">&#39; and priority {2}&#39;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">priority</span><span class="p">))</span>
+        <span class="c"># adds a final space to the final message of the task</span>
+        <span class="c"># to separate the next task instructions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">priority</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Environment.set_message"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.set_message">[docs]</a>    <span class="k">def</span> <span class="nf">set_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Saves the message in the output buffer so it can be delivered</span>
+<span class="sd">        bit by bit. It overwrites any previous content.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="ow">or</span> <span class="n">priority</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_priority</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Setting message &quot;{0}&quot; with priority {1}&#39;</span>
+                               <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">priority</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_output_priority</span> <span class="o">=</span> <span class="n">priority</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s">&#39;Message &quot;{0}&quot; blocked because of &#39;</span>
+                <span class="s">&#39;low priority ({1}&lt;{2}) &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">message</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_priority</span><span class="p">)</span>
+            <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Environment.raise_event"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.raise_event">[docs]</a>    <span class="k">def</span> <span class="nf">raise_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Environment.raise_state_changed"><a class="viewcode-back" href="../../core.environment.html#core.environment.Environment.raise_state_changed">[docs]</a>    <span class="k">def</span> <span class="nf">raise_state_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            This rases a StateChanged Event, meaning that something</span>
+<span class="sd">            in the state of the world or the tasks changed (but we</span>
+<span class="sd">            don&#39;t keep track what)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># state changed events can only be raised if the current task is</span>
+        <span class="c"># started</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">has_started</span><span class="p">():</span>
+            <span class="c"># tasks that have a world should also take the world state as</span>
+            <span class="c"># an argument</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">StateChanged</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">state</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raise_event</span><span class="p">(</span><span class="n">StateChanged</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">state</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="k">def</span> <span class="nf">_switch_new_task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Asks the task scheduler for a new task,</span>
+<span class="sd">        reset buffers and time, and registers the event handlers</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># deregister previous event managers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">deinit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deregister_task_triggers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">)</span>
+
+        <span class="c"># pick a new task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_scheduler</span><span class="o">.</span><span class="n">get_next_task</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># This is to check whether the user didn&#39;t mess up in instantiating</span>
+            <span class="c"># the class</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">get_world</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;The task {0} is not correctly instantiated. &quot;</span>
+                               <span class="s">&quot;Are you sure you are not forgetting to &quot;</span>
+                               <span class="s">&quot;instantiate the class?&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Starting new task: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">))</span>
+
+        <span class="c"># check if it has a world:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">get_world</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">:</span>
+            <span class="c"># if we had an ongoing world, end it.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_deregister_task_triggers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">get_world</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">:</span>
+                <span class="c"># register new event handlers for the world</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_register_task_triggers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">)</span>
+                <span class="c"># initialize the new world</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="c"># spin the wheel</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">world_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_world</span><span class="p">)</span>
+        <span class="c"># reset state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reward</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_channel</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_channel_listener</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="c"># register new event handlers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_task_triggers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">)</span>
+        <span class="c"># initialize the task, sending the current environment</span>
+        <span class="c"># so it can interact by sending back rewards and messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">has_started</span><span class="p">()</span>
+        <span class="c"># raise the Start event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_updated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_task</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_deregister_task_triggers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">get_triggers</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">deregister</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="c"># if the trigger was not registered, we don&#39;t worry about it</span>
+                <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># if the trigger was not registered, we don&#39;t worry about it</span>
+                <span class="k">pass</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">clean_dynamic_handlers</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_register_task_triggers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">get_triggers</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_task_trigger</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_register_task_trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_manager</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">AI-Challenge 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

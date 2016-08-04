@@ -1,0 +1,437 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.task module &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-core.task">
+<span id="core-task-module"></span><h1>core.task module<a class="headerlink" href="#module-core.task" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="core.task.Ended">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">Ended</tt><a class="headerlink" href="#core.task.Ended" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>Ended()</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.Init">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">Init</tt><a class="headerlink" href="#core.task.Init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>Init()</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.MessageReceived">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">MessageReceived</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="_modules/core/task.html#MessageReceived"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.MessageReceived" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="core.task.MessageReceived.get_match">
+<tt class="descname">get_match</tt><big>(</big><em>ngroup=0</em><big>)</big><a class="reference internal" href="_modules/core/task.html#MessageReceived.get_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.MessageReceived.get_match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.MessageReceived.get_match_groups">
+<tt class="descname">get_match_groups</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#MessageReceived.get_match_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.MessageReceived.get_match_groups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.MessageReceived.is_message">
+<tt class="descname">is_message</tt><big>(</big><em>msg</em>, <em>suffix=u''</em><big>)</big><a class="reference internal" href="_modules/core/task.html#MessageReceived.is_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.MessageReceived.is_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.OutputMessageUpdated">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">OutputMessageUpdated</tt><a class="headerlink" href="#core.task.OutputMessageUpdated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>OutputMessageUpdated(output_message,)</p>
+<dl class="attribute">
+<dt id="core.task.OutputMessageUpdated.output_message">
+<tt class="descname">output_message</tt><a class="headerlink" href="#core.task.OutputMessageUpdated.output_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.OutputSequenceUpdated">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">OutputSequenceUpdated</tt><a class="headerlink" href="#core.task.OutputSequenceUpdated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>OutputSequenceUpdated(output_sequence,)</p>
+<dl class="attribute">
+<dt id="core.task.OutputSequenceUpdated.output_sequence">
+<tt class="descname">output_sequence</tt><a class="headerlink" href="#core.task.OutputSequenceUpdated.output_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.ScriptSet">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">ScriptSet</tt><a class="reference internal" href="_modules/core/task.html#ScriptSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="core.task.ScriptSet.add_handler">
+<tt class="descname">add_handler</tt><big>(</big><em>handler</em><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.add_handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.add_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds and registers a handler dynamically during a task runtime.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.clean_dynamic_handlers">
+<tt class="descname">clean_dynamic_handlers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.clean_dynamic_handlers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.clean_dynamic_handlers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.end">
+<tt class="descname">end</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.get_name">
+<tt class="descname">get_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.get_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.get_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Some unique identifier of the task</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.get_triggers">
+<tt class="descname">get_triggers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.get_triggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.get_triggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.has_ended">
+<tt class="descname">has_ended</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.has_ended"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.has_ended" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.has_started">
+<tt class="descname">has_started</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.has_started"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.has_started" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.ignore_last_char">
+<tt class="descname">ignore_last_char</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.ignore_last_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.ignore_last_char" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the last character in the input channel with a silence.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.init">
+<tt class="descname">init</tt><big>(</big><em>env</em><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.set_message">
+<tt class="descname">set_message</tt><big>(</big><em>message</em>, <em>priority=0</em><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.set_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.set_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.set_reward">
+<tt class="descname">set_reward</tt><big>(</big><em>reward</em>, <em>message=u''</em>, <em>priority=0</em><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.set_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.set_reward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.ScriptSet.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#ScriptSet.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.ScriptSet.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.SequenceReceived">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">SequenceReceived</tt><a class="headerlink" href="#core.task.SequenceReceived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>SequenceReceived(sequence,)</p>
+<dl class="attribute">
+<dt id="core.task.SequenceReceived.sequence">
+<tt class="descname">sequence</tt><a class="headerlink" href="#core.task.SequenceReceived.sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.Start">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">Start</tt><a class="headerlink" href="#core.task.Start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>Start()</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.State">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">State</tt><big>(</big><em>owner</em><big>)</big><a class="reference internal" href="_modules/core/task.html#State"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.State" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Holds the state variables for a Task or a world and raises events when
+they change</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.StateChanged">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">StateChanged</tt><a class="reference internal" href="_modules/core/task.html#StateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.StateChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.task.StateChanged" title="core.task.StateChanged"><tt class="xref py py-class docutils literal"><span class="pre">core.task.StateChanged</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.StateTrackingDefaultdictWrapper">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">StateTrackingDefaultdictWrapper</tt><big>(</big><em>obj</em>, <em>owner</em><big>)</big><a class="reference internal" href="_modules/core/task.html#StateTrackingDefaultdictWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.StateTrackingDefaultdictWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">collections.defaultdict</span></tt></p>
+<p>This is a wrapper for variables stored in a State object so
+if something in them change, the original State also gets changed</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.StateTrackingDictionaryWrapper">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">StateTrackingDictionaryWrapper</tt><big>(</big><em>obj</em>, <em>owner</em><big>)</big><a class="reference internal" href="_modules/core/task.html#StateTrackingDictionaryWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.StateTrackingDictionaryWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></p>
+<p>This is a wrapper for variables stored in a State object so
+if something in them change, the original State also gets changed</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.Task">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">Task</tt><big>(</big><em>max_time</em>, <em>world=None</em><big>)</big><a class="reference internal" href="_modules/core/task.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.task.ScriptSet" title="core.task.ScriptSet"><tt class="xref py py-class docutils literal"><span class="pre">core.task.ScriptSet</span></tt></a></p>
+<dl class="method">
+<dt id="core.task.Task.check_timeout">
+<tt class="descname">check_timeout</tt><big>(</big><em>t</em><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.check_timeout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.check_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.deinit">
+<tt class="descname">deinit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.deinit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.deinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.get_time">
+<tt class="descname">get_time</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.get_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.get_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the environment&#8217;s task time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.get_world">
+<tt class="descname">get_world</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.get_world"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.get_world" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.init">
+<tt class="descname">init</tt><big>(</big><em>env</em><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.set_message">
+<tt class="descname">set_message</tt><big>(</big><em>message</em>, <em>priority=1</em><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.set_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.set_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.set_reward">
+<tt class="descname">set_reward</tt><big>(</big><em>reward</em>, <em>message=u''</em>, <em>priority=1</em><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.set_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.set_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns a reward to the learner and ends the task.
+Args:</p>
+<blockquote>
+<div><p>reward: numerical reward given to the learner
+message: optional message to be given with the reward
+priotity: the priority of the message. If there is another</p>
+<blockquote>
+<div>message on the output stream and the priority is lower than it,
+the message will be blocked.</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.task.Task.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#Task.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.Task.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.Timeout">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">Timeout</tt><a class="headerlink" href="#core.task.Timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>Timeout()</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.World">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">World</tt><a class="reference internal" href="_modules/core/task.html#World"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.World" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.task.ScriptSet" title="core.task.ScriptSet"><tt class="xref py py-class docutils literal"><span class="pre">core.task.ScriptSet</span></tt></a></p>
+<dl class="method">
+<dt id="core.task.World.init">
+<tt class="descname">init</tt><big>(</big><em>env</em><big>)</big><a class="reference internal" href="_modules/core/task.html#World.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.World.init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.task.World.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#World.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.World.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.WorldInit">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">WorldInit</tt><a class="headerlink" href="#core.task.WorldInit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>WorldInit()</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.task.WorldStart">
+<em class="property">class </em><tt class="descclassname">core.task.</tt><tt class="descname">WorldStart</tt><a class="headerlink" href="#core.task.WorldStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>WorldStart()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.task.handler_to_trigger">
+<tt class="descclassname">core.task.</tt><tt class="descname">handler_to_trigger</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/core/task.html#handler_to_trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.handler_to_trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks whether f is a function and it was registered to a Trigger.
+If so, it returns the trigger.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.task.method_to_func">
+<tt class="descclassname">core.task.</tt><tt class="descname">method_to_func</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/core/task.html#method_to_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.method_to_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_ended">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_ended</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#on_ended"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_ended" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_init">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_init</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#on_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_message">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_message</tt><big>(</big><em>target_message=None</em><big>)</big><a class="reference internal" href="_modules/core/task.html#on_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_output_message">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_output_message</tt><big>(</big><em>target_message=None</em><big>)</big><a class="reference internal" href="_modules/core/task.html#on_output_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_output_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_output_sequence">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_output_sequence</tt><big>(</big><em>target_sequence=None</em><big>)</big><a class="reference internal" href="_modules/core/task.html#on_output_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_output_sequence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_sequence">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_sequence</tt><big>(</big><em>target_sequence=None</em><big>)</big><a class="reference internal" href="_modules/core/task.html#on_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_sequence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_start">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#on_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_state_changed">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_state_changed</tt><big>(</big><em>condition</em><big>)</big><a class="reference internal" href="_modules/core/task.html#on_state_changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_state_changed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_timeout">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_timeout</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#on_timeout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_world_init">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_world_init</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#on_world_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_world_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.task.on_world_start">
+<tt class="descclassname">core.task.</tt><tt class="descname">on_world_start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/core/task.html#on_world_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.task.on_world_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/core.task.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

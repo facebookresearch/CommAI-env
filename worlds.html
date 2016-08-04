@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>worlds package &mdash; AI-Challenge 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="AI-Challenge 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="worlds-package">
+<h1>worlds package<a class="headerlink" href="#worlds-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-worlds.grid_world">
+<span id="worlds-grid-world-module"></span><h2>worlds.grid_world module<a class="headerlink" href="#module-worlds.grid_world" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="worlds.grid_world.GWEntity">
+<em class="property">class </em><tt class="descclassname">worlds.grid_world.</tt><tt class="descname">GWEntity</tt><a class="reference internal" href="_modules/worlds/grid_world.html#GWEntity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GWEntity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#worlds.grid_world.GWEntity" title="worlds.grid_world.GWEntity"><tt class="xref py py-class docutils literal"><span class="pre">worlds.grid_world.GWEntity</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="worlds.grid_world.GridWorld">
+<em class="property">class </em><tt class="descclassname">worlds.grid_world.</tt><tt class="descname">GridWorld</tt><big>(</big><em>init_pos=(0</em>, <em>0)</em>, <em>init_direction=u'north'</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="core.task.html#core.task.World" title="core.task.World"><tt class="xref py py-class docutils literal"><span class="pre">core.task.World</span></tt></a></p>
+<p>This is an infinite grid world where there can be
+objects layed around (pickable or not, traversable or not).</p>
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.can_move_to">
+<tt class="descname">can_move_to</tt><big>(</big><em>p</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.can_move_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.can_move_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.get_clockwise_direction">
+<tt class="descname">get_clockwise_direction</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.get_clockwise_direction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.get_clockwise_direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.get_entity">
+<tt class="descname">get_entity</tt><big>(</big><em>position</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.get_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.get_entity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.move_forward">
+<tt class="descname">move_forward</tt><big>(</big><em>dz</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.move_forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.move_forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_init_grid_world">
+<tt class="descname">on_init_grid_world</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_init_grid_world"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_init_grid_world" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_looking">
+<tt class="descname">on_looking</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_looking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_looking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_move_forward">
+<tt class="descname">on_move_forward</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_move_forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_move_forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_object_given">
+<tt class="descname">on_object_given</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_object_given"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_object_given" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_pick_up">
+<tt class="descname">on_pick_up</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_pick_up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_pick_up" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_turn_left">
+<tt class="descname">on_turn_left</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_turn_left"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_turn_left" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.on_turn_right">
+<tt class="descname">on_turn_right</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.on_turn_right"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.on_turn_right" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.put_entity">
+<tt class="descname">put_entity</tt><big>(</big><em>position</em>, <em>name</em>, <em>pickable</em>, <em>traversable</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.put_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.put_entity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.remove_entity">
+<tt class="descname">remove_entity</tt><big>(</big><em>position</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.remove_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.remove_entity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="worlds.grid_world.GridWorld.turn">
+<tt class="descname">turn</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/worlds/grid_world.html#GridWorld.turn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.GridWorld.turn" title="Permalink to this definition">¶</a></dt>
+<dd><p>turns in the specified absolute (north, east, west, south) or clockwise
+relative (1, 2, 3, -1, 2, 3) direction.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="worlds.grid_world.Point">
+<em class="property">class </em><tt class="descclassname">worlds.grid_world.</tt><tt class="descname">Point</tt><a class="reference internal" href="_modules/worlds/grid_world.html#Point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.Point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#worlds.grid_world.Point" title="worlds.grid_world.Point"><tt class="xref py py-class docutils literal"><span class="pre">worlds.grid_world.Point</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="worlds.grid_world.Span">
+<em class="property">class </em><tt class="descclassname">worlds.grid_world.</tt><tt class="descname">Span</tt><a class="reference internal" href="_modules/worlds/grid_world.html#Span"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worlds.grid_world.Span" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#worlds.grid_world.Span" title="worlds.grid_world.Span"><tt class="xref py py-class docutils literal"><span class="pre">worlds.grid_world.Span</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-worlds">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-worlds" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">worlds package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-worlds.grid_world">worlds.grid_world module</a></li>
+<li><a class="reference internal" href="#module-worlds">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/worlds.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">AI-Challenge 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Facebook.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
