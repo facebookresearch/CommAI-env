@@ -49,7 +49,13 @@ State variables
 
 Both Tasks and Worlds have a special variable called `state`. What's special
 about this object is that when an attribute stored within it changes it's value,
-it will trigger a StateChanged event
+it will trigger a StateChanged event. This holds true recursively for containers
+stored within this object. For example, say that you have a dictionary created
+in `this.state.my_dict`. And, in the context of a task, you do::
+
+  this.state.my_dict['apple'] = 'green'
+
+this will also trigger a StateChanged event. 
 
 Defining Event Handlers at "runtime"
 ------------------------------------
