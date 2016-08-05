@@ -10,6 +10,7 @@ Welcome to AI-Competition's documentation!
 .. include:: run.rst
 .. include:: test.rst
 .. include:: internal.rst
+.. include:: debugging.rst
 
 Contents
 ========
