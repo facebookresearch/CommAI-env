@@ -32,12 +32,17 @@ OutputMessageUpdated = namedtuple('OutputMessageUpdated',
 
 # horrible way of making second_state optional
 class StateChanged(namedtuple('StateChanged', ('state', 'second_state'))):
+    """
+    Event that is triggered when some member variable within the
+    state object of a Task or a World is changed.
+    """
     def __new__(cls, state, second_state=None):
         return super(StateChanged, cls).__new__(cls, state, second_state)
 
 
 # helper methods for handling received messages
 class MessageReceived():
+    '''A message received event. It has some useful helpers'''
     def __init__(self, message):
         self.message = message
         # this instance variable gets assigned the outcome of the
@@ -45,13 +50,18 @@ class MessageReceived():
         self.condition_outcome = None
 
     def is_message(self, msg, suffix=''):
+        '''Checks if the received message matches the one in the parameter'''
         return self.message[-(len(msg) + len(suffix)):-len(suffix)] == msg and\
             suffix == self.message[-len(suffix):]
 
     def get_match(self, ngroup=0):
+        '''If the regular expression in the Trigger condition had groups,
+        it can retreive what they captured.'''
         return self.condition_outcome.group(ngroup)
 
     def get_match_groups(self):
+        '''If the regular expression in the Trigger condition had groups,
+        it retreives all of them.'''
         return self.condition_outcome.groups()
 
 # Event handlers are annotated through decorators and are automatically
@@ -65,6 +75,9 @@ global_event_handlers = {}
 
 
 def method_to_func(f):
+    """
+    Converts a bound method to an unbound function.
+    """
     try:
         return f.im_func
     except AttributeError:
@@ -73,6 +86,9 @@ def method_to_func(f):
 
 # Decorator for the Start of Task event handler
 def on_start():
+    """
+    Start event decorator
+    """
     def register(f):
         f = method_to_func(f)
         # The filtering condition is always True
@@ -83,6 +99,7 @@ def on_start():
 
 # Decorator for the End of Task event handler
 def on_ended():
+    """Denitialization event decorator"""
     def register(f):
         f = method_to_func(f)
         # The filtering condition is always True
@@ -93,6 +110,9 @@ def on_ended():
 
 # Decorator for the World Start event handler
 def on_world_start():
+    """
+    WorldStart event decorator
+    """
     def register(f):
         f = method_to_func(f)
         # The filtering condition is always True
@@ -103,6 +123,9 @@ def on_world_start():
 
 # Decorator for the Init event handler
 def on_init():
+    """
+    Init event decorator
+    """
     def register(f):
         f = method_to_func(f)
         # The filtering condition is always True
@@ -113,6 +136,9 @@ def on_init():
 
 # Decorator for the Init event handler
 def on_world_init():
+    """
+    WorldInit event decorator
+    """
     def register(f):
         # The filtering condition is always True
         global_event_handlers[f] = Trigger(WorldInit, lambda e: True, f)
@@ -122,6 +148,13 @@ def on_world_init():
 
 # Decorator for the StateChanged event handler
 def on_state_changed(condition):
+    '''
+    Decorator to capture a StateChanged event. Its condition is a function
+    that takes the tasks state (or the world state and the task state, in that
+    order, if the task has a world parameter) and checks for any condition
+    on those state variables. Notice that the argument is the `state` instance
+    variable within the task and not the task itself.
+    '''
     def register(f):
         f = method_to_func(f)
         # The filtering condition is given as an argument.
@@ -137,6 +170,10 @@ def on_state_changed(condition):
 
 
 def on_message(target_message=None):
+    """
+    Decorator to capture the reception of a message from the Learner. It
+    optionally receives a regular expression to be matched against the message.
+    """
     def register(f):
         f = method_to_func(f)
         # If a target message is given, interpret it as a regular expression
@@ -154,6 +191,10 @@ def on_message(target_message=None):
 
 
 def on_output_message(target_message=None):
+    """
+    Decorator to capture a message that it has been outputted by the
+    Environment.
+    """
     def register(f):
         f = method_to_func(f)
         # If a target message is given, interpret it as a regular expression
@@ -171,6 +212,9 @@ def on_output_message(target_message=None):
 
 
 def on_sequence(target_sequence=None):
+    """
+    Decorator to capture the reception of a bit sequence from the Learner.
+    """
     def register(f):
         f = method_to_func(f)
         if target_sequence:
@@ -186,6 +230,10 @@ def on_sequence(target_sequence=None):
 
 
 def on_output_sequence(target_sequence=None):
+    """
+    Decorator to capture a bit sequence that it has been outputted by the
+    Environment.
+    """
     def register(f):
         f = method_to_func(f)
         if target_sequence:
@@ -202,6 +250,9 @@ def on_output_sequence(target_sequence=None):
 
 
 def on_timeout():
+    """
+    Decorator to capture the Timeout event.
+    """
     def register(f):
         f = method_to_func(f)
         # There is no filtering condition (it always activates if registered)
@@ -289,6 +340,10 @@ class State(object):
 
 
 class ScriptSet(object):
+    """
+    Base class for the World and the Task. It contains all of its common
+    behavior.
+    """
     def __init__(self):
         # The environment is set when the script is started
         self._env = None
@@ -325,6 +380,9 @@ class ScriptSet(object):
         self._ended = True
 
     def get_triggers(self):
+        '''Returns the set of triggers that have been registered for this
+        task
+        '''
         triggers = []
         for fname in dir(self):
             try:
@@ -427,13 +485,22 @@ class Task(ScriptSet):
 
     def set_reward(self, reward, message='', priority=1):
         '''Assigns a reward to the learner and ends the task.
-        Args:
-            reward: numerical reward given to the learner
-            message: optional message to be given with the reward
-            priotity: the priority of the message. If there is another
-                message on the output stream and the priority is lower than it,
-                the message will be blocked.'''
+
+        :param reward: numerical reward given to the learner
+        :param message: optional message to be given with the reward
+        :param priotity: the priority of the message. If there is another
+            message on the output stream and the priority is lower than it,
+            the message will be blocked.
+        '''
         super(Task, self).set_reward(reward, message, priority)
 
     def set_message(self, message, priority=1):
+        '''Sets the message that is going to be sent to the learner over
+        the next time steps.
+
+        :param message: message to be sent.
+        :param priotity: the priority of the message. If there is another
+            message on the output stream and the priority is lower than it,
+            the message will be blocked.
+        '''
         super(Task, self).set_message(message, priority)

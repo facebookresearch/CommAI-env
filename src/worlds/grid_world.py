@@ -14,10 +14,10 @@ from core.task import World, on_world_start, on_message, on_sequence,\
 from collections import namedtuple, defaultdict
 import logging
 import tasks.competition.messages as msg
-import re
 
 
 class Point(namedtuple('Point', ('x', 'y'))):
+    '''Represents a point in the grid world'''
     def __add__(self, ot):
         return Point(self.x + ot.dx, self.y + ot.dy)
 
@@ -32,11 +32,13 @@ class Point(namedtuple('Point', ('x', 'y'))):
 
 
 class Span(namedtuple('Span', ('dx', 'dy'))):
+    '''Represents a displacement.'''
     def __rmul__(self, m):
         return Span(m * self.dx, m * self.dy)
 
     def __mul__(self, m):
         return Span(m * self.dx, m * self.dy)
+
 
 class GWEntity(namedtuple('GWEntity', ('name', 'pickable', 'traversable'))):
     def __str__(self):
@@ -47,6 +49,42 @@ class GridWorld(World):
     '''
     This is an infinite grid world where there can be
     objects layed around (pickable or not, traversable or not).
+
+    Learner primitives:
+
+        I move forward.
+
+        I turn left/right.
+
+        I look.
+
+        I pick up the X.
+
+        I give you a[n] X.
+
+    Attributes:
+
+        valid_directions[direction]: a mapping from the possible directions to
+        a vector that goes one step in that direction
+        (which can be added to a position).
+
+    State variables:
+
+        learner_pos: current position of the learner.
+
+        learner_direction: current direction the learner is facing to.
+
+        entities: contains the objects in the world (better if accessed with
+        the get_entity primitive).
+
+        learner_inventory: a mapping acting as a multiset of the objects that
+        the learner has.
+
+        teacher_inventory: a mapping acting as a multiset of the objects that
+        the teacher has.
+
+        teacher_accepts: a set of objects that the teacher is willing to accept
+        if the learner wants to give one to the teacher.
     '''
     def __init__(self, init_pos=(0, 0),
                  init_direction='north'):
@@ -63,11 +101,15 @@ class GridWorld(World):
         self.logger = logging.getLogger(__name__)
 
     def put_entity(self, position, name, pickable, traversable):
+        '''creates an entity with the given name, at the given position,
+        while informing whether the agent can pick it up and whether it can
+        move over it.'''
         self.state.entities[position] = GWEntity(name, pickable, traversable)
         self.logger.info('Droped an entity {0} at position {1}'.format(
             name, position))
 
     def remove_entity(self, position):
+        '''returns the entity at the given position.'''
         if position in self.state.entities:
             entity_name = self.state.entities[position].name
             del(self.state.entities[position])

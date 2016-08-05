@@ -1,12 +1,18 @@
-.. AI-Challenge documentation master file, created by
+.. AI-Competition documentation master file, created by
    sphinx-quickstart on Wed Aug  3 14:31:58 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to AI-Challenge's documentation!
-========================================
+Welcome to AI-Competition's documentation!
+==========================================
 
 .. include:: intro.rst
+.. include:: run.rst
+.. include:: test.rst
+.. include:: internal.rst
+
+Contents
+========
 
 Contents:
 

@@ -6,4 +6,4 @@ core
 
    core
    view
-   world
+   worlds

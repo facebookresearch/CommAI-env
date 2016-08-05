@@ -17,8 +17,8 @@ python run_tournament.py tasks_config.json
 
 ## Full documentation
 
-We will release shortly documents describing how to write tasks in the system
-and evaluate learners on them.
+The full documentation can be produced using Python Sphinx. Just go to
+`src/docs` and run `make html` or `make latexpdf`.
 
 ## License
 AI Challenge is BSD-licensed. We also provide an additional patent grant.

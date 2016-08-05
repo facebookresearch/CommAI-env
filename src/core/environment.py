@@ -21,7 +21,18 @@ import logging
 
 class Environment:
     '''
-    The Environment, you know.
+    The Environment is the one that communicates with the Learner,
+    interpreting its output and reacting to it. The interaction is governed
+    by an ongoing task which is picked by a TaskScheduler object.
+
+    :param serializer: a Serializer object that translates text into binary and
+        back.
+    :param task_scheduler: a TaskScheduler object that determines which task
+        is going to be run next.
+    :param scramble: if True, the words outputted by the tasks are randomly
+        scrambled.
+    :param max_reward_per_task: maximum amount of reward that a learner can
+        receive for a given task.
     '''
     def __init__(self, serializer, task_scheduler, scramble=False,
                  max_reward_per_task=10):
@@ -64,13 +75,13 @@ class Environment:
 
         # Register channel observers
         self._input_channel.sequence_updated.register(
-            self.on_input_sequence_updated)
+            self._on_input_sequence_updated)
         self._input_channel.message_updated.register(
-            self.on_input_message_updated)
+            self._on_input_message_updated)
         self._output_channel_listener.sequence_updated.register(
-            self.on_output_sequence_updated)
+            self._on_output_sequence_updated)
         self._output_channel_listener.message_updated.register(
-            self.on_output_message_updated)
+            self._on_output_message_updated)
 
     def next(self, learner_input):
         '''Main loop of the Environment. Receives one bit from the learner and
@@ -122,7 +133,7 @@ class Environment:
         self._task_time += 1
         if reward is not None:
             # process the reward (clearing it if it's not allowed)
-            reward = self.allowable_reward(reward)
+            reward = self._allowable_reward(reward)
             self._task_scheduler.reward(reward)
         return output, reward
 
@@ -133,7 +144,7 @@ class Environment:
         '''
         return self._reward_per_task
 
-    def allowable_reward(self, reward):
+    def _allowable_reward(self, reward):
         '''Checks if the reward is allowed within the limits of the
         `max_reward_per_task` parameter, and resets it to 0 if not.'''
         task_name = self._current_task.get_name()
@@ -144,24 +155,28 @@ class Environment:
             return 0
 
     def is_silent(self):
+        '''
+        Tells if the environment is sending any information through the output
+        channel.
+        '''
         return self._output_channel.is_silent()
 
-    def on_input_sequence_updated(self, sequence):
+    def _on_input_sequence_updated(self, sequence):
         if self.event_manager.raise_event(SequenceReceived(sequence)):
             self.logger.debug("Sequence received by running task: '{0}'".format(
                 sequence))
 
-    def on_input_message_updated(self, message):
+    def _on_input_message_updated(self, message):
         # send the current received message to the task
         if self.event_manager.raise_event(MessageReceived(
                 message)):
             self.logger.debug("Message received by running task: '{0}'".format(
                 message))
 
-    def on_output_sequence_updated(self, sequence):
+    def _on_output_sequence_updated(self, sequence):
         self.event_manager.raise_event(OutputSequenceUpdated(sequence))
 
-    def on_output_message_updated(self, message):
+    def _on_output_message_updated(self, message):
         self.event_manager.raise_event(OutputMessageUpdated(message))
 
     def set_reward(self, reward, message='', priority=0):

@@ -204,14 +204,19 @@ class StandardSerializer:
         return ''.join(data)
 
     def to_text(self, data, strict=False):
-        '''
+        '''Transforms a binary string into text.
+
         Given a binary string, returns the UTF-8 encoded text. If the
-        string cannot be deserialized, returns None.
+        string cannot be deserialized, returns None. It can also try to
+        recover from meaningless data by skipping a few bytes in the beginning.
+
         Args:
             data: the binary string to deserialze.
             strict: if False, the initial bytes can be skipped in order to
-                find a valid character. This allows to recover from randomly
-                produced bit strings.
+            find a valid character. This allows to recover from randomly
+            produced bit strings.
+
+        Returns: A string with containing the decoded text.
         '''
         # if we are not in strict mode, we can skip bytes to find a message
         for skip in range(int(len(data) / 8) if not strict else 1):
