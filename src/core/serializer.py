@@ -14,6 +14,7 @@ import codecs
 import string
 import random
 import re
+import math
 
 
 class IdentitySerializer:
@@ -49,7 +50,7 @@ class ScramblingSerializerWrapper:
     "vsdsf"), and now "apple" that was going through unchanged before, it's
     being mapped to a new string.
     '''
-    def __init__(self, serializer):
+    def __init__(self, serializer, readable=True):
         '''
         Args:
             serialzer: underlying serializer that will get the calls forwarded.
@@ -57,6 +58,10 @@ class ScramblingSerializerWrapper:
         # the underlying serializer
         self._serializer = serializer
         self.SILENCE_TOKEN = serializer.SILENCE_TOKEN
+        # 'vowels' and 'consonants' (to be alternated if readable = true)
+        self.readable = readable
+        self.V = 'aeiouy'
+        self.C = ''.join([i for i in string.ascii_lowercase if i not in self.V])
         # a mapping of real words to scrambled words an back
         self.word_mapping = {}
         self.inv_word_mapping = {}
@@ -141,13 +146,21 @@ class ScramblingSerializerWrapper:
                 # otherwise we just return the word as is
                 return scrambled_word
 
-    def gen_pseudo_word(self, word_len=None):
-        if not word_len:
-            word_len = random.randint(1, 8)
+    def gen_pseudo_word(self, L=None):
+        if not L:
+            L = random.randint(1, 8)
+        # generate one word that we hadn't used before
         while True:
-            # generate one word that we hadn't used before
-            pseudo_word = ''.join(random.sample(
-                                  string.ascii_lowercase, word_len))
+            if self.readable:
+                # alternating between vowels and consonants, sampled with repl.
+                _choice, _range = random.choice, range(int(math.ceil(L / 2)))
+                v = [_choice(self.V) for i in _range]
+                c = [_choice(self.C) for i in _range]
+                zipped = zip(v, c) if random.getrandbits(1) else zip(c, v)
+                pseudo_word = ''.join([a for b in zipped for a in b])[:L]
+            else:
+                pseudo_word = ''.join(random.sample(
+                                      string.ascii_lowercase, L))
             if pseudo_word not in self.inv_word_mapping:
                 return pseudo_word
 
