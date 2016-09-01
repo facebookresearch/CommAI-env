@@ -19,7 +19,7 @@ from core.environment import Environment
 from core.config_loader import JSONConfigLoader, PythonConfigLoader
 import learners
 from core.session import Session
-from view.console import ConsoleView
+from view.console import ConsoleView, BaseView
 
 
 def main():
@@ -40,6 +40,9 @@ def main():
     op.add_option('-l', '--learner',
                   default='learners.human_learner.HumanLearner',
                   help='Defines the type of learner.')
+    op.add_option('-v', '--view',
+                  default='BaseView',
+                  help='Viewing mode.')
     op.add_option('--max-reward-per-task',
                   default=10, type=int,
                   help='Maximum reward that we can give to a learner for'
@@ -63,9 +66,9 @@ def main():
                       opt.max_reward_per_task)
     # a learning session
     session = Session(env, learner, opt.time_delay)
-    # console interface
-    # TODO: Add an option to have a simpler view (e.g. only printing statistics)
-    view = ConsoleView(env, session, serializer, opt.show_world)
+    # setup view
+    view = create_view(opt.view, opt.learner, env, session, serializer,
+                        opt.show_world)
     try:
         # send the interface to the human learner
         learner.set_view(view)
@@ -82,6 +85,14 @@ def main():
         raise
     else:
         view.finalize()
+
+
+def create_view(view_type, learner_type, env, session, serializer, show_world):
+    if learner_type == 'learners.human_learner.HumanLearner' \
+            or view_type == 'ConsoleView':
+        return ConsoleView(env, session, serializer, show_world)
+    else:
+        return BaseView(env, session)
 
 
 def create_learner(learner_type, serializer):

@@ -11,12 +11,92 @@ from core.channels import InputChannel
 locale.setlocale(locale.LC_ALL, '')
 code = locale.getpreferredencoding()
 
-class ConsoleView:
 
-    def __init__(self, env, session, serializer, show_world=False):
+class BaseView(object):
+
+    def __init__(self, env, session):
         # TODO: Move environment and session outside of the class
         self._env = env
         self._session = session
+
+        # observe basic high level information about the session and environment
+        env.task_updated.register(
+            self.on_task_updated)
+        session.total_reward_updated.register(
+            self.on_total_reward_updated)
+        session.total_time_updated.register(
+            self.on_total_time_updated)
+
+        self.logger = logging.getLogger(__name__)
+        # we save information for display later
+        self.info = {'reward': 0, 'time': 0, 'current_task': 'None'}
+
+    def on_total_reward_updated(self, reward):
+        self.info['reward'] = reward
+        self.paint_info_win()
+
+    def on_total_time_updated(self, time):
+        self.info['time'] = time
+        self.paint_info_win()
+        self._stdscr.nodelay(1)
+        key = self._stdscr.getch()
+        if key == ord('+'):
+            self._session.add_sleep(-0.001)
+        elif key == ord('-'):
+            self._session.add_sleep(0.001)
+        if key == ord('0'):
+            self._session.reset_sleep()
+
+    def on_task_updated(self, task):
+        if 'current_task' in self.info:
+            self.info['current_task'] = task.get_name()
+            self.paint_info_win()
+
+    def paint_info_win(self):
+        self._info_win.addstr(0, 0, 'Total time: {0}'.format(
+            self.info['time']))
+        self._info_win.clrtobot()
+        self._info_win.addstr(1, 0, 'Total reward: {0}'.format(
+            self.info['reward']))
+        self._info_win.clrtobot()
+        if 'current_task' in self.info:
+            self._info_win.addstr(2, 0, 'Current Task: {0}'.format(
+                self.info['current_task']))
+            self._info_win.clrtobot()
+        self._info_win.refresh()
+
+    def initialize(self):
+        # initialize curses
+        self._stdscr = curses.initscr()
+
+        # TODO generalize this:
+        begin_x = 0
+        begin_y = 0
+        # self._info_win_width = 20
+        self._info_win_height = 4
+        self.height, self.width = self._stdscr.getmaxyx()
+        self._win = self._stdscr.subwin(self.height, self.width, begin_y,
+                                        begin_x)
+        # create info box with reward and time
+        self._info_win = self._win.subwin(self._info_win_height,
+                                          self.width,
+                                          0,
+                                          0)
+
+        curses.noecho()
+        curses.cbreak()
+
+    def finalize(self):
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
+
+
+class ConsoleView(BaseView):
+
+    def __init__(self, env, session, serializer, show_world=False):
+        super(ConsoleView, self).__init__(env, session)
+
         # for visualization purposes, we keep an internal buffer of the
         # input and output stream so when they are cleared from task to
         # task, we can keep the history intact.
@@ -42,13 +122,7 @@ class ConsoleView:
         # connect the channels with the observed input bits
         session.env_token_updated.register(self.on_env_token_updated)
         session.learner_token_updated.register(self.on_learner_token_updated)
-        session.total_reward_updated.register(
-            self.on_total_reward_updated)
-        session.total_time_updated.register(
-            self.on_total_time_updated)
-        self.logger = logging.getLogger(__name__)
-        # we save information for display later
-        self.info = {'reward': 0, 'time': 0}
+        del self.info['current_task']
 
     def on_env_token_updated(self, token):
         self._env_channel.consume_bit(token)
@@ -91,31 +165,6 @@ class ConsoleView:
             self._env_channel.get_undeserialized())
         self._win.addstr(self._teacher_seq_y, 0, env_output.encode(code))
         self._win.refresh()
-
-    def on_total_reward_updated(self, reward):
-        self.info['reward'] = reward
-        self.paint_info_win()
-
-    def on_total_time_updated(self, time):
-        self.info['time'] = time
-        self.paint_info_win()
-        self._stdscr.nodelay(1)
-        key = self._stdscr.getch()
-        if key == ord('+'):
-            self._session.add_sleep(-0.001)
-        elif key == ord('-'):
-            self._session.add_sleep(0.001)
-        if key == ord('0'):
-            self._session.reset_sleep()
-
-    def paint_info_win(self):
-        self._info_win.addstr(0, 0, 'Total time: {0}'.format(
-            self.info['time']))
-        self._info_win.clrtobot()
-        self._info_win.addstr(1, 0, 'Total reward: {0}'.format(
-            self.info['reward']))
-        self._info_win.clrtobot()
-        self._info_win.refresh()
 
     def on_world_updated(self, world):
         if world:
@@ -168,11 +217,6 @@ class ConsoleView:
                              0)
         curses.noecho()
         curses.cbreak()
-
-    def finalize(self):
-        curses.nocbreak()
-        curses.echo()
-        curses.endwin()
 
     def get_input(self):
         self._user_input_label_win.addstr(0, 0, 'input:')
