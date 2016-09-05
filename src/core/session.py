@@ -13,7 +13,6 @@ from core.aux.observer import Observable
 from collections import defaultdict
 import time
 
-
 class Session:
     def __init__(self, environment, learner,
                  default_sleep=0.01):
@@ -47,20 +46,23 @@ class Session:
         self.total_reward_updated(self._total_reward)
         # loop until stopped
         self._stop = False
+
         while not self._stop:
             # first speaks the environment one token (one bit)
             token, reward = self._env.next(token)
             self.env_token_updated(token)
             # reward the learner if it has been set
-            if reward is not None:
-                self._learner.reward(reward)
-                self.accumulate_reward(reward)
+            self._learner.try_reward(reward)
+            self.accumulate_reward(reward)
+
             # allow some time before processing the next iteration
             if self._sleep > 0:
                 time.sleep(self._sleep)
+
             # then speaks the learner one token
             token = self._learner.next(token)
             self.learner_token_updated(token)
+
             # and we loop
             self._total_time += 1
             self._task_time[self._current_task.get_name()] += 1
@@ -87,9 +89,10 @@ class Session:
     def accumulate_reward(self, reward):
         '''Records the reward if the learner hasn't exceeded the maximum
         possible amount of reward allowed for the current task.'''
-        self._total_reward += reward
-        if reward != 0:
-            self.total_reward_updated(self._total_reward)
+        if reward is not None:
+            self._total_reward += reward
+            if reward != 0:
+                self.total_reward_updated(self._total_reward)
 
     def on_task_updated(self, task):
         self._current_task = task

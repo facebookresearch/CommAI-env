@@ -193,7 +193,7 @@ class StandardSerializer:
     '''
     def __init__(self):
         self.SILENCE_TOKEN = ' '
-        self.SILENCE_ENCODING = '\0'
+        self.SILENCE_ENCODING = u' '
         self.logger = logging.getLogger(__name__)
 
     def to_binary(self, message):

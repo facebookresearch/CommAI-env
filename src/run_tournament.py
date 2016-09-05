@@ -43,10 +43,12 @@ def main():
     op.add_option('-v', '--view',
                   default='BaseView',
                   help='Viewing mode.')
+    op.add_option('--learner-cmd',
+                  help='The cmd to run to launch RemoteLearner.')
     op.add_option('--max-reward-per-task',
                   default=10, type=int,
                   help='Maximum reward that we can give to a learner for'
-                  ' a given task')
+                  ' a given task.')
     opt, args = op.parse_args()
     if len(args) == 0:
         op.error("Tasks schedule configuration file required.")
@@ -58,7 +60,7 @@ def main():
     # the bit signal
     serializer = StandardSerializer()
     # create a learner (the human learner takes the serializer)
-    learner = create_learner(opt.learner, serializer)
+    learner = create_learner(opt.learner, serializer, opt.learner_cmd)
     # create our tasks and put them into a scheduler to serve them
     task_scheduler = create_tasks_from_config(tasks_config_file)
     # construct an environment
@@ -95,7 +97,7 @@ def create_view(view_type, learner_type, env, session, serializer, show_world):
         return BaseView(env, session)
 
 
-def create_learner(learner_type, serializer):
+def create_learner(learner_type, serializer, learner_cmd):
     if learner_type == 'learners.human_learner.HumanLearner':
         return learners.human_learner.HumanLearner(serializer)
     else:
@@ -107,8 +109,8 @@ def create_learner(learner_type, serializer):
         m = __import__(mod, fromlist=[cname])
         c = getattr(m, cname)
         # instantiate the learner
-        return c()
 
+        return c(learner_cmd) if 'RemoteLearner' in cname else c()
 
 def create_tasks_from_config(tasks_config_file):
     ''' Returns a TaskScheduler based on either:

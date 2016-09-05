@@ -9,10 +9,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.channels import InputChannel, OutputChannel
+from learners.base import BaseLearner
 import logging
+import re
 
 
-class HumanLearner:
+class HumanLearner(BaseLearner):
     def __init__(self, serializer):
         '''
         Takes the serialization protocol
@@ -61,4 +63,5 @@ class HumanLearner:
         self.logger.debug("Received input from the human: '{0}'".format(output))
         if output:
             self.speaking = True
+            output = re.compile('\.+').sub('.', output)
             self._output_channel.set_message(output)

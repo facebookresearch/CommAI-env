@@ -11,9 +11,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import random
 from core.serializer import StandardSerializer, IdentitySerializer
+from learners.base import BaseLearner
 
 
-class SampleRepeatingLearner:
+class SampleRepeatingLearner(BaseLearner):
     def reward(self, reward):
         # YEAH! Reward!!! Whatever...
         pass
@@ -24,7 +25,7 @@ class SampleRepeatingLearner:
         return input
 
 
-class SampleSilentLearner:
+class SampleSilentLearner(BaseLearner):
     def reward(self, reward):
         # YEAH! Reward!!! Whatever...
         pass
@@ -33,7 +34,7 @@ class SampleSilentLearner:
         return 0
 
 
-class SampleMemorizingLearner:
+class SampleMemorizingLearner(BaseLearner):
     def __init__(self):
         self.memory = []
         self.teacher_stopped_talking = False
@@ -60,7 +61,7 @@ class SampleMemorizingLearner:
         return output
 
 
-class SampleRandomWordsLearner:
+class SampleRandomWordsLearner(BaseLearner):
     def __init__(self, min_length=2, max_length=3):
         # recording the last word
         self.memory = []
@@ -115,7 +116,7 @@ class SampleRandomWordsLearner:
         return output
 
 
-class RandomCharacterLearner:
+class RandomCharacterLearner(BaseLearner):
 
     # just for testing the char-level environment
     def __init__(self, logging_path=None):
