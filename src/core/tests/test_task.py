@@ -20,10 +20,6 @@ class TestEvents(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 super(TestTask, self).__init__(*args, **kwargs)
 
-            @task.on_init()
-            def init_handler(self, event):
-                pass
-
             @task.on_start()
             def start_handler(self, event):
                 pass
@@ -43,14 +39,12 @@ class TestEvents(unittest.TestCase):
         tt = TestTask(max_time=10)
         triggers = tt.get_triggers()
         handlers = map(lambda t: t.event_handler, triggers)
-        self.assertEqual(5, len(triggers))
-        self.failUnless(TestTask.init_handler.im_func in handlers)
+        self.assertEqual(4, len(triggers))
         self.failUnless(TestTask.start_handler.im_func in handlers)
         self.failUnless(TestTask.message_handler.im_func in handlers)
         self.failUnless(TestTask.timeout_handler.im_func in handlers)
         self.failUnless(TestTask.ended_handler.im_func in handlers)
         types = dict((t.event_handler, t.type) for t in triggers)
-        self.assertEqual(task.Init, types[TestTask.init_handler.im_func])
         self.assertEqual(task.Start, types[TestTask.start_handler.im_func])
         self.assertEqual(task.MessageReceived,
                          types[TestTask.message_handler.im_func])
@@ -62,10 +56,6 @@ class TestEvents(unittest.TestCase):
         class BaseTask(task.Task):
             def __init__(self, *args, **kwargs):
                 super(BaseTask, self).__init__(*args, **kwargs)
-
-            @task.on_init()
-            def init_handler(self, event):
-                pass
 
             @task.on_start()
             def start_handler(self, event):
@@ -83,8 +73,7 @@ class TestEvents(unittest.TestCase):
         tt = ConcreteTask(max_time=10)
         triggers = tt.get_triggers()
         handlers = map(lambda t: t.event_handler, triggers)
-        self.assertEqual(2, len(triggers))
-        self.failUnless(BaseTask.init_handler.im_func in handlers)
+        self.assertEqual(1, len(triggers))
         # The start_handler must be the one of the overridden task
         self.failUnless(ConcreteTask.start_handler.im_func in handlers)
         self.failIf(BaseTask.start_handler.im_func in handlers)
@@ -94,12 +83,12 @@ class TestEvents(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 super(TestTask, self).__init__(*args, **kwargs)
 
-            @task.on_init()
-            def init_handler(self, event):
-                def start_handler(self, event):
+            @task.on_start()
+            def start_handler(self, event):
+                def end_handler(self, event):
                     pass
-                self.start_handler_func = start_handler
-                self.add_handler(task.on_start()(start_handler))
+                self.end_handler_func = end_handler
+                self.add_handler(task.on_ended()(end_handler))
 
         triggers = []
         tt = TestTask(max_time=10)
@@ -110,18 +99,18 @@ class TestEvents(unittest.TestCase):
 
             def raise_event(self, event):
                 # we only generate an init event
-                tt.init_handler(event)
+                tt.start_handler(event)
 
             def _register_task_trigger(self, task, trigger):
                 self.triggers.append(trigger)
 
-        # raise the init event
-        tt.init(EnvironmentMock(triggers))
+        # raise the start event
+        tt.start(EnvironmentMock(triggers))
         triggers.extend(tt.get_triggers())
         handlers = map(lambda t: t.event_handler, triggers)
         self.assertEqual(2, len(triggers))
-        self.failUnless(TestTask.init_handler.im_func in handlers)
-        self.failUnless(tt.start_handler_func in handlers)
+        self.failUnless(TestTask.start_handler.im_func in handlers)
+        self.failUnless(tt.end_handler_func in handlers)
 
 
 def main():

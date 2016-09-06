@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init, on_ended
+    on_state_changed, on_timeout, on_output_message, on_ended
 import tasks.competition.messages as msg
 from tasks.competition.base import BaseTask
 from tasks.competition.objects_properties import global_properties
@@ -37,9 +37,9 @@ class TurningTask(BaseTask):
         super(TurningTask, self).__init__(
             max_time=3 * TIME_TURN, world=world)
 
-    @on_init()
-    def on_init(self, event):
-        # during initalization task, save the direction the learner is facing
+    @on_start()
+    def on_start(self, event):
+        # during initalization of task, save the direction the learner is facing
         self.state.init_dir = self.get_world().state.learner_direction
         # randomly choose a target direction and save it too
         self.target_turn = random.choice(['left', 'right'])
@@ -50,8 +50,6 @@ class TurningTask(BaseTask):
             self.state.target_direction = \
                 self.get_world().get_clockwise_direction(-1)
 
-    @on_start()
-    def on_start(self, event):
         # ask the learner to turn in the target direction
         self.set_message("Turn {0}.".format(self.target_turn))
 
@@ -71,8 +69,8 @@ class MovingTask(BaseTask):
         super(MovingTask, self).__init__(
             max_time=3 * TIME_MOVE, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # during initalization task, save the learner's position
         self.state.initial_pos = self.get_world().state.learner_pos
         # save the destination position one step forward from the learner is
@@ -80,8 +78,6 @@ class MovingTask(BaseTask):
             self.get_world().state.learner_direction]
         self.state.dest_pos = self.state.initial_pos + dp
 
-    @on_start()
-    def on_start(self, event):
         # ask the learner to move forward
         self.set_message("Move forward.")
 
@@ -99,8 +95,8 @@ class MovingRelativeTask(BaseTask):
         super(MovingRelativeTask, self).__init__(
             max_time=2 * TIME_TURN + 2 * TIME_MOVE, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # during initalization task, save the direction the learner is facing
         self.state.init_dir = self.get_world().state.learner_direction
         # randomly choose a target direction and save the position
@@ -116,8 +112,6 @@ class MovingRelativeTask(BaseTask):
         dp = self.get_world().valid_directions[self.state.target_dir]
         self.state.dest_pos = self.state.initial_pos + dp
 
-    @on_start()
-    def on_start(self, event):
         # Ask the learner to move in a particular direction (left or right)
         self.set_message("Move {0}.".format(self.target_turn))
 
@@ -135,9 +129,8 @@ class MovingAbsoluteTask(BaseTask):
         super(MovingAbsoluteTask, self).__init__(
             max_time=8 * TIME_TURN + 4 * TIME_MOVE, world=world)
 
-    # initialize state variables
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # during initalization task, save the direction the learner is facing
         self.state.init_dir = self.get_world().state.learner_direction
         # randomly choose a target direction and save the position
@@ -153,8 +146,6 @@ class MovingAbsoluteTask(BaseTask):
         dp = self.get_world().valid_directions[self.state.target_dir]
         self.state.dest_pos = self.state.initial_pos + dp
 
-    @on_start()
-    def on_start(self, event):
         # Ask the learner to move in a particular absolute direction
         # (north, east, south, west)
         self.set_message("You are facing {0}, move {1}.".format(
@@ -175,8 +166,8 @@ class PickUpTask(BaseTask):
         super(PickUpTask, self).__init__(
             max_time=50 * TIME_CHAR + 2 * TIME_PICK, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # choose some random object
         self.target_obj, = random.sample(objects, 1)
         # find the cell in front of the learner
@@ -193,8 +184,6 @@ class PickUpTask(BaseTask):
                              ts.initial_count + 1)
             (self.on_object_picked_up))
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("You have {indef_object} in front of you. "
                          "Pick up the {object}.".format(
                              indef_object=msg.indef_article(self.target_obj),
@@ -215,8 +204,8 @@ class PickUpAroundTask(BaseTask):
             max_time=50 * TIME_CHAR + 2 * TIME_PICK +
             4 * TIME_MOVE + 4 * TIME_TURN, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # choose a random object
         self.target_obj, = random.sample(objects, 1)
         # find a random cell around the learner
@@ -233,8 +222,6 @@ class PickUpAroundTask(BaseTask):
                              ts.initial_count + 1)
             (self.on_object_picked_up.im_func))
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("There is {indef_object} {direction} from you, "
                          "pick up the {object}.".format(
                              indef_object=msg.indef_article(self.target_obj),
@@ -257,8 +244,8 @@ class PickUpInFrontTask(BaseTask):
             max_time=50 * TIME_CHAR + 2 * TIME_PICK +
             PickUpInFrontTask.max_steps_forward * TIME_MOVE, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # choose a random object
         self.target_obj, = random.sample(objects, 1)
         ws = self.get_world().state
@@ -276,8 +263,6 @@ class PickUpInFrontTask(BaseTask):
                              ts.initial_count + 1)
             (self.on_object_picked_up.im_func))
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("There is {indef_object} {n} steps forward, "
                          "pick up the {object}."
                          .format(
@@ -299,8 +284,8 @@ class GivingTask(BaseTask):
         super(GivingTask, self).__init__(
             max_time=50 * TIME_CHAR + 2 * TIME_GIVE, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         ws = self.get_world().state
         # pick a random object
         self.state.target_obj, = random.sample(objects, 1)
@@ -311,8 +296,6 @@ class GivingTask(BaseTask):
         # inform the world that we can expect to receive such an object
         ws.teacher_accepts.add(self.state.target_obj)
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("I gave you {indef_object}. Give it back to me "
                          "by saying \"I give you {indef_object}\"."
                           .format(indef_object=msg.indef_article(
@@ -338,8 +321,8 @@ class PickUpAroundAndGiveTask(BaseTask):
             4 * TIME_MOVE + 4 * TIME_TURN,
             world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         ws = self.get_world().state
         # pick a random object
         target_obj, = random.sample(objects, 1)
@@ -360,8 +343,6 @@ class PickUpAroundAndGiveTask(BaseTask):
         # inform the world that we can expect to receive such an object
         ws.teacher_accepts.add(self.state.target_obj)
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("There is {indef_object} {direction} from you."
                          " Pick it up and give it to me.".format(
                              indef_object=msg.indef_article(
@@ -445,16 +426,14 @@ class CountingInventoryGivingTask(BaseTask):
             max_time=1000 * TIME_CHAR,
             world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         self.failed = False
         self.time_gave_me_object = None
         self.state.target_obj, = random.sample(objects, 1)
         self.state.initial_count = \
             self.get_world().state.learner_inventory[self.state.target_obj]
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("How many {0} do you have?".format(
                          msg.pluralize(self.state.target_obj, 2)))
         self.stages = ['initial-query', 'one-more-query', 'waiting-give-back',

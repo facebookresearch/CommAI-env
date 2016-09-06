@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init
+    on_state_changed, on_timeout, on_output_message
 from tasks.competition.base import BaseTask
 import tasks.competition.messages as msg
 import random
@@ -434,12 +434,9 @@ class VerbTask(Task):
         super(VerbTask, self).__init__(
             max_time=2 * TIME_VERB, world=world)
 
-    @on_init()
-    def on_init(self, event):
-        self.target_verb = random.choice(self.verbs)
-
     @on_start()
     def on_start(self, event):
+        self.target_verb = random.choice(self.verbs)
         self.set_message("Say 'I {0}' to {0}.".format(self.target_verb))
 
     @on_message(r'\.$')

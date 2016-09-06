@@ -12,8 +12,10 @@ from __future__ import unicode_literals
 import unittest
 import core.events as events
 
+
 class MyEvent(object):
     pass
+
 
 class TestEvents(unittest.TestCase):
     def __init__(self, *args, **kwargs):

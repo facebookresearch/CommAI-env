@@ -29,7 +29,6 @@ class SingleTaskScheduler():
         pass
 
 
-
 class TestEnvironment(unittest.TestCase):
 
     def testRegistering(self):
@@ -38,66 +37,65 @@ class TestEnvironment(unittest.TestCase):
                 super(TestTask, self).__init__(*args, **kwargs)
                 self.handled = False
 
-            @task.on_init()
-            def init_handler(self, event):
+            @task.on_start()
+            def start_handler(self, event):
                 self.handled = True
         tt = TestTask(max_time=10)
         env = environment.Environment(SerializerMock(), SingleTaskScheduler(tt))
-        tt.init(env)
+        tt.start(env)
         env._register_task_triggers(tt)
-        # Start cannot be handled
-        self.failIf(env.raise_event(task.Start()))
-        # Init should be handled
-        self.failUnless(env.raise_event(task.Init()))
-        # The init handler should have been executed
+        # Start should be handled
+        self.failUnless(env.raise_event(task.Start()))
+        # The start handler should have been executed
         self.failUnless(tt.handled)
         env._deregister_task_triggers(tt)
-        # Init should not be handled anymore
-        self.failIf(env.raise_event(task.Init()))
+        # Start should not be handled anymore
+        self.failIf(env.raise_event(task.Start()))
 
     def testDynRegistering(self):
         class TestTask(task.Task):
             def __init__(self, *args, **kwargs):
                 super(TestTask, self).__init__(*args, **kwargs)
-                self.init_handled = False
                 self.start_handled = False
+                self.end_handled = False
 
-            @task.on_init()
-            def init_handler(self, event):
-                self.add_handler(task.on_start()(
-                    self.start_handler.im_func))
-                self.init_handled = True
-
+            @task.on_start()
             def start_handler(self, event):
+                self.add_handler(task.on_ended()(
+                    self.end_handler.im_func))
                 self.start_handled = True
+
+            def end_handler(self, event):
+                self.end_handled = True
 
         tt = TestTask(max_time=10)
         env = environment.Environment(SerializerMock(), SingleTaskScheduler(tt))
-        tt.init(env)
+        tt.start(env)
         env._register_task_triggers(tt)
-        # Start cannot be handled
-        self.failIf(env.raise_event(task.Start()))
-        self.failIf(tt.start_handled)
-        # Init should be handled
-        self.failUnless(env.raise_event(task.Init()))
-        # The init handler should have been executed
-        self.failUnless(tt.init_handled)
-        # Now the Start should be handled
+        # End cannot be handled
+        self.failIf(env.raise_event(task.Ended()))
+        self.failIf(tt.end_handled)
+        # Start should be handled
         self.failUnless(env.raise_event(task.Start()))
+        # The start handler should have been executed
         self.failUnless(tt.start_handled)
+        # Now the End should be handled
+        self.failUnless(env.raise_event(task.Ended()))
+        # The end handler should have been executed
+        self.failUnless(tt.end_handled)
         env._deregister_task_triggers(tt)
-        # Init should not be handled anymore
-        self.failIf(env.raise_event(task.Init()))
-        tt.start_handled = False
         # Start should not be handled anymore
         self.failIf(env.raise_event(task.Start()))
-        self.failIf(tt.start_handled)
-        # Register them again! mwahaha (evil laugh)
+        tt.end_handled = False
+        # End should not be handled anymore
+        self.failIf(env.raise_event(task.Ended()))
+        self.failIf(tt.end_handled)
+        # Register them again! mwahaha (evil laugh) -- lol
         env._register_task_triggers(tt)
-        # Start should not be handled anymore
-        self.failIf(env.raise_event(task.Start()))
-        self.failIf(tt.start_handled)
+        # End should not be handled anymore
+        self.failIf(env.raise_event(task.Ended()))
+        self.failIf(tt.end_handled)
         # Deregister them again! mwahahahaha (more evil laugh)
         env._deregister_task_triggers(tt)
-        self.failIf(env.raise_event(task.Start()))
-        self.failIf(tt.start_handled)
+        self.failIf(env.raise_event(task.Ended()))
+        self.failIf(tt.end_handled)

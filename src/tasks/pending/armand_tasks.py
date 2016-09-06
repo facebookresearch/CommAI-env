@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init, on_ended
+    on_state_changed, on_timeout, on_output_message, on_ended
 from tasks.competition.base import BaseTask
 from worlds.grid_world import Point, Span
 import random
@@ -27,8 +27,8 @@ class LookTask(BaseTask):
     def __init__(self, world):
         super(LookTask, self).__init__(max_time=1000, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         self.dir = random.choice(dirs)
         dir = self.get_world().state.learner_direction
         self.set_message("Look to the " + self.dir + "," + " you are currently facing " + dir + ".")
@@ -46,8 +46,8 @@ class LookAround(Task):
     def __init__(self, world):
         super(LookAround, self).__init__(max_time=5000, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         self.visited_dirs = {'east': False, 'west': False,
                              'north': False, 'south': False}
         self.ndir = 0
@@ -84,8 +84,8 @@ class FindObjectAround(Task):
         self.dir2obj = [0,1,2,3]
         random.shuffle(self.dir2obj)
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         # random assignment of object to location
         self.state.learner_pos = self.get_world().state.learner_pos
         pos = self.state.learner_pos

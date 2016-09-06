@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import World, on_world_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_world_init
+    on_state_changed, on_timeout, on_output_message
 from collections import namedtuple, defaultdict
 import logging
 import tasks.competition.messages as msg
@@ -125,8 +125,8 @@ class GridWorld(World):
         except KeyError:
             return None
 
-    @on_world_init()
-    def on_init_grid_world(self, event):
+    @on_world_start()
+    def on_start_grid_world(self, event):
         # creates a new Point tuple using init_pos tuple as parameters
         self.state.learner_pos = Point(*self._init_pos)
         # the agent also faces one direction

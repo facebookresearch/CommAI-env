@@ -12,7 +12,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init, on_ended
+    on_state_changed, on_timeout, on_output_message, on_ended
 from worlds.grid_world import Point, Span
 import random
 
@@ -128,8 +128,7 @@ class RepeatingPhraseTask(Task):
 
 class SampleConflictingMessagesTask(Task):
     def __init__(self):
-        super(SampleConflictingMessagesTask, self).__init__(
-            max_time=1000)
+        super(SampleConflictingMessagesTask, self).__init__(max_time=1000)
 
     @on_start()
     def on_start(self, event):
@@ -153,19 +152,16 @@ class SampleConflictingMessagesTask(Task):
 
 class MovingTask(Task):
     def __init__(self, world):
-        super(MovingTask, self).__init__(
-            env, max_time=1000, world=world)
+        super(MovingTask, self).__init__(max_time=1000, world=world)
 
     # initialize state variables
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         self.state.initial_pos = self.get_world().state.learner_pos
         dp = self.get_world().valid_directions[
             self.get_world().state.learner_direction]
         self.state.dest_pos = self.state.initial_pos + dp
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("Say 'I move forward.'")
 
     # notice that we get the task state and the world state
@@ -176,18 +172,15 @@ class MovingTask(Task):
 
 class TurnLeftTask(Task):
     def __init__(self, world):
-            super(TurnLeftTask, self).__init__(
-            env, max_time=1000, world=world)
-            self.cd = ['north', 'east', 'south', 'west']
+        super(TurnLeftTask, self).__init__(max_time=1000, world=world)
+        self.cd = ['north', 'east', 'south', 'west']
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         self.state.init_direction = self.get_world().state.learner_direction
         dest_index = ((self.cd.index(self.state.init_direction)) - 1) % 4
         self.state.dest_direction = self.cd[dest_index]
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("Say 'I turn left.'")
 
     @on_state_changed(lambda ws, ts: ws.learner_direction == ts.dest_direction)
@@ -197,18 +190,15 @@ class TurnLeftTask(Task):
 
 class TurnRightTask(Task):
     def __init__(self, world):
-        super(TurnRightTask, self).__init__(
-            env, max_time=1000, world=world)
+        super(TurnRightTask, self).__init__(max_time=1000, world=world)
         self.cd = ['north', 'east', 'south', 'west']
 
-    @on_init()
-    def on_init(self, event):
+    @on_start()
+    def on_start(self, event):
         self.state.init_direction = self.get_world().state.learner_direction
         dest_index = ((self.cd.index(self.state.init_direction)) + 1) % 4
         self.state.dest_direction = self.cd[dest_index]
 
-    @on_start()
-    def on_start(self, event):
         self.set_message("Say 'I turn right.'")
 
     @on_state_changed(lambda ws, ts: ws.learner_direction == ts.dest_direction)
@@ -218,8 +208,7 @@ class TurnRightTask(Task):
 
 class LookAroundTask(Task):
     def __init__(self, world):
-        super(LookAroundTask, self).__init__(
-                env, max_time=1000, world=world)
+        super(LookAroundTask, self).__init__(max_time=1000, world=world)
 
     @on_start()
     def on_start(self, event):
@@ -232,11 +221,17 @@ class LookAroundTask(Task):
 
 class PickAnApple(Task):
     def __init__(self, world):
-        super(PickAnApple, self).__init__(
-            env, max_time=10000, world=world)
+        super(PickAnApple, self).__init__(max_time=10000, world=world)
 
-    @on_init()
-    def on_init(self, event):
+    @on_ended()
+    def cleanup(self, event):
+        # remove the objects that were laid by this task
+        # (the apple may not be there anymore, but it doesn't matter)
+        self.get_world().remove_entity(self.block_pos)
+        self.get_world().remove_entity(self.apple_pos)
+
+    @on_start()
+    def on_start(self, event):
         d = 2
         self.state.starting_apples = \
             self.get_world().state.learner_inventory['apple']
@@ -251,17 +246,6 @@ class PickAnApple(Task):
         if self.block_pos == self.apple_pos:
             self.block_pos = self.block_pos + Span(0, 1)
         self.get_world().put_entity(self.block_pos, 'block', False, False)
-        self.set_message("This shouldn't appear.")
-
-    @on_ended()
-    def cleanup(self, event):
-        # remove the objects that were laid by this task
-        # (the apple may not be there anymore, but it doesn't matter)
-        self.get_world().remove_entity(self.block_pos)
-        self.get_world().remove_entity(self.apple_pos)
-
-    @on_start()
-    def on_start(self, event):
         self.set_message("Pick up an apple.")
 
     @on_state_changed(lambda ws, ts: ws.learner_inventory['apple'] >

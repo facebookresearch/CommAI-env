@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init
+    on_state_changed, on_timeout, on_output_message
 from worlds.grid_world import Point, Span
 import random
 import re
@@ -29,17 +29,17 @@ class RepeatingTaskLogical2Objects(Task):
 
     @on_start()
     def on_start(self, event):
- 	print "Tralala"
+        print("Tralala")
 
-	#create expression
-	self.negation_1 = gl_logic_operators_verb[random.randint(0, 1)]
-	self.negation_2 = gl_logic_operators_verb[random.randint(0, 1)]
-	self.logic_operator = gl_logic_operators[random.randint(0, 1)]
-	self.objects = [gl_objects[random.randint(0, 1)], gl_objects[random.randint(0, 1)]]
+    #create expression
+    self.negation_1 = gl_logic_operators_verb[random.randint(0, 1)]
+    self.negation_2 = gl_logic_operators_verb[random.randint(0, 1)]
+    self.logic_operator = gl_logic_operators[random.randint(0, 1)]
+    self.objects = [gl_objects[random.randint(0, 1)], gl_objects[random.randint(0, 1)]]
 
 
-	#compile message and answer
-	self.answer = self.objects[:]
+    #compile message and answer
+    self.answer = self.objects[:]
 	message = ""
 	if self.negation_1 == "dont":
 		self.answer.pop(0)

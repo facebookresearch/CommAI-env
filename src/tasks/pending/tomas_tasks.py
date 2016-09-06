@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message, on_init
+    on_state_changed, on_timeout, on_output_message
 import random
 
 # This can be set to any collection of objects.

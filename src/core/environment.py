@@ -263,9 +263,7 @@ class Environment:
                 # register new event handlers for the world
                 self._register_task_triggers(self._current_world)
                 # initialize the new world
-                self._current_world.init(self)
-                # spin the wheel
-                self._current_world.start()
+                self._current_world.start(self)
             self.world_updated(self._current_world)
         # reset state
         self._task_time = 0
@@ -275,12 +273,9 @@ class Environment:
         self._output_channel_listener.clear()
         # register new event handlers
         self._register_task_triggers(self._current_task)
-        # initialize the task, sending the current environment
+        # start the task, sending the current environment
         # so it can interact by sending back rewards and messages
-        self._current_task.init(self)
-        assert not self._current_task.has_started()
-        # raise the Start event
-        self._current_task.start()
+        self._current_task.start(self)
         self.task_updated(self._current_task)
 
     def _deregister_task_triggers(self, task):

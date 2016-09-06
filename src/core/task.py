@@ -19,8 +19,6 @@ import re
 Start = namedtuple('Start', ())
 Ended = namedtuple('Ended', ())
 WorldStart = namedtuple('WorldStart', ())
-Init = namedtuple('Init', ())
-WorldInit = namedtuple('WorldInit', ())
 Timeout = namedtuple('Timeout', ())
 
 SequenceReceived = namedtuple('SequenceReceived', ('sequence',))
@@ -117,31 +115,6 @@ def on_world_start():
         f = method_to_func(f)
         # The filtering condition is always True
         global_event_handlers[f] = Trigger(WorldStart, lambda e: True, f)
-        return f
-    return register
-
-
-# Decorator for the Init event handler
-def on_init():
-    """
-    Init event decorator
-    """
-    def register(f):
-        f = method_to_func(f)
-        # The filtering condition is always True
-        global_event_handlers[f] = Trigger(Init, lambda e: True, f)
-        return f
-    return register
-
-
-# Decorator for the Init event handler
-def on_world_init():
-    """
-    WorldInit event decorator
-    """
-    def register(f):
-        # The filtering condition is always True
-        global_event_handlers[f] = Trigger(WorldInit, lambda e: True, f)
         return f
     return register
 
@@ -354,13 +327,6 @@ class ScriptSet(object):
         # remember dynamically register handlers to destroy their triggers
         self.dyn_handlers = set()
 
-    def init(self, env):
-        self._env = env
-        self._started = False
-        self._ended = False
-        # this is where all the state variables should be kept
-        self.state = State(self)
-
     def clean_dynamic_handlers(self):
         for h in self.dyn_handlers:
             del global_event_handlers[h]
@@ -372,9 +338,12 @@ class ScriptSet(object):
     def has_ended(self):
         return self._ended
 
-    def start(self):
-        self._started = True
+    def start(self, env):
+        self._env = env
         self._ended = False
+        self._started = False
+        # this is where all the state variables should be kept
+        self.state = State(self)
 
     def end(self):
         self._ended = True
@@ -439,13 +408,10 @@ class World(ScriptSet):
     def __init__(self):
         super(World, self).__init__()
 
-    def start(self):
-        super(World, self).start()
+    def start(self, env):
+        super(World, self).start(env)
         self._env.raise_event(WorldStart())
-
-    def init(self, env):
-        super(World, self).init(env)
-        self._env.raise_event(WorldInit())
+        self._started = True
 
 
 # Base class for tasks
@@ -467,13 +433,10 @@ class Task(ScriptSet):
             return True
         return False
 
-    def start(self):
-        super(Task, self).start()
+    def start(self, env):
+        super(Task, self).start(env)
         self._env.raise_event(Start())
-
-    def init(self, env):
-        super(Task, self).init(env)
-        self._env.raise_event(Init())
+        self._started = True
 
     def deinit(self):
         self._env.raise_event(Ended())
