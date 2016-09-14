@@ -1,7 +1,7 @@
 python_binary(
-    name = "run_tournament",
+    name = "run",
     py_version = "<3",
-    main_module = "experimental.germank.ai-challenge.src.run_tournament",
+    main_module = "experimental.germank.ai-challenge.src.run",
     srcs =  util.files('**/*.py'),
     deps = [
         ':aic',
@@ -10,7 +10,7 @@ python_binary(
 
 python_library(
     name = "aic",
-    srcs = glob(['**/*.py'], excludes=['run_tournament.py']),
+    srcs = glob(['**/*.py'], excludes=['run.py']),
     deps = [],
     base_module = '',
     external_deps = [

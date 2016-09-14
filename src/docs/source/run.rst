@@ -8,4 +8,4 @@ for example, by copying the sample file::
 
 Then, run it with::
 
-  python run_tournament.py tasks_config.json
+  python run.py tasks_config.json
