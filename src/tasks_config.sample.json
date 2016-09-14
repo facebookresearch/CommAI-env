@@ -93,27 +93,55 @@
     "g1": {
         "type": "tasks.competition.navigation.TurningTask",
         "world": "gw"
-      },
+    },
     "g2": {
         "type": "tasks.competition.navigation.MovingTask",
         "world": "gw"
-      }
+    },
+    "g3": {
+        "type": "tasks.competition.navigation.MovingRelativeTask",
+        "world": "gw"
+    },
+    "g4": {
+        "type": "tasks.competition.navigation.MovingAbsoluteTask",
+        "world": "gw"
+    },
+    "g6": {
+        "type": "tasks.competition.navigation.PickUpTask",
+        "world": "gw"
+    },
+    "g7": {
+        "type": "tasks.competition.navigation.PickUpInFrontTask",
+        "world": "gw"
+    },
+    "g8": {
+        "type": "tasks.competition.navigation.PickUpAroundTask",
+        "world": "gw"
+    },
+    "g9": {
+        "type": "tasks.competition.navigation.GivingTask",
+        "world": "gw"
+    },
+    "g10": {
+        "type": "tasks.competition.navigation.PickUpAroundAndGiveTask",
+        "world": "gw"
+    },
+    "g13": {
+        "type": "tasks.competition.navigation.CountingInventoryTask",
+        "world": "gw"
+    },
+    "g14": {
+        "type": "tasks.competition.navigation.CountingInventoryGivingTask",
+        "world": "gw"
+    }
   },
   "scheduler":
     {
-      "type": "core.scheduler.DependenciesTaskScheduler",
+      "type": "core.scheduler.RandomTaskScheduler",
       "args": {
           "tasks": ["k0", "g15", "k2", "k5", "k6", "k7", "k8", "k9",
             "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12",
-            "g0", "g1", "g2"],
-          "tasks_dependencies": [["k2", "k5"], ["k2", "k6"], ["k5", "k7"],
-                                ["k5", "k8"], ["k5", "k9"],
-                                ["k2", "g0"], ["g0", "g1"], ["g0", "g2"],
-                                ["k2", "m1"], ["m1", "m2"], ["m1", "m3"],
-                                ["m1", "m4"], ["m1", "m5"], ["m1", "m6"],
-                                ["m1", "m7"], ["m1", "m8"], ["m1", "m9"],
-                                ["m1", "m10"], ["m1", "m11"], ["m1", "m12"]],
-          "unlock_threshold": 1
+            "g0", "g1", "g2", "g3", "g4", "g6", "g7", "g8", "g9", "g10", "g13", "g14"]
         }
     }
 }
