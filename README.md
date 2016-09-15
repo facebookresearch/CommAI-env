@@ -6,9 +6,26 @@ described in A Roadmap towards Machine Intelligence
 
 ## Running
 
-```
+### Configuration
+
+First, you should create a configuration file stating which tasks
+and in which order, if any, are going to be fed to the learner.
+
+You can start by copying the configuration file corresponding to
+the full training set as follows:
+
+```bash
 cp tasks_config.sample.json tasks_config.json
-python run_tournament.py tasks_config.json
+```
+
+### Human-mode
+
+To run the system on a simple console interface, where you can
+impersonate the learner (human mode), run the environment as 
+follows:
+
+```bash
+python run.py tasks_config.json
 ```
 
 ## Requirements
