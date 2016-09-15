@@ -4,7 +4,9 @@ MAINE (MAchine INtelligence Environment) is a platform for training and evaluati
 
 ## Introduction
 
-MAINE is a platform for training and testing your AI system, the **Learner**, in a communication-based setup where it interacts via a bit-level interface with an *Environment*. The Environment asks the Learner to solve a number of *Tasks*, and assigns it a *Reward* for each task it solves. Tasks are an open set: they currently include some...
+MAINE is a platform for training and testing your AI system, the **Learner**, in a communication-based setup where it interacts via a bit-level interface with an *Environment*. The Environment asks the Learner to solve a number of communication-based *Tasks*, and assigns it a *Reward* for each task it solves. Examples of tasks currently implemented involve tasks where the Learner has to solve counting problems, tasks where it must memorize lists of items and answer questions about them, or follow navigation instructions through a text-based navigation scheme. Crucially, the set of tasks is open: we are constantly extending it, and we invite others to contribute.
+
+The ultimate goal of MAINE is to provide an environment in which Learners that ...
 
 
 ## Running
