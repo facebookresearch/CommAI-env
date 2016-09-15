@@ -1,7 +1,10 @@
 # MAINE
 
-MAINE is a platform for training and evaluating AI systems as described in [A Roadmap towards Machine Intelligence](http://arxiv.org/abs/1511.08130).
+MAINE (MAchine INtelligence Environment) is a platform for training and evaluating AI systems as described in [A Roadmap towards Machine Intelligence](http://arxiv.org/abs/1511.08130).
 
+## Introduction
+
+MAINE is a platform for training and testing your AI system, the **Learner**, in a communication-based setup where it interacts via a bit-level interface with an *Environment*. The Environment asks the Learner to solve a number of *Tasks*, and assigns it a *Reward* for each task it solves. Tasks are an open set: they currently include some...
 
 ## Running
 
