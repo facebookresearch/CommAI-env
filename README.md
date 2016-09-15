@@ -1,8 +1,7 @@
-# AI Challenge
+# MAINE
 
-The AI Challenge is a platform for running and evaluating AI systems as
-described in A Roadmap towards Machine Intelligence
-(http://arxiv.org/abs/1511.08130)
+MAINE is a platform for training and evaluating AI systems as described in [A Roadmap towards Machine Intelligence](http://arxiv.org/abs/1511.08130).
+
 
 ## Running
 
