@@ -16,7 +16,7 @@ The ultimate goal of MAINE is to provide an environment in which Learners can be
 The environment can be run in two simple steps:
 
 1. Creating a configuration file (for instance, by copying `task_config.sample.json`)
-2. Running the environment (in the simplest case, just providing the configuration file as an argument)
+2. Running the environment, in the simplest case, just providing the configuration file as an argument with `python run.py my_config.json` 
 
 By default, the environment will be run in **human-mode**([see below](#human-mode)). If you want to
 run the environment with a given learning algorithm, see [the corresponding section
