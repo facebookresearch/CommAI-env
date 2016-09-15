@@ -23,7 +23,7 @@ cp task_config.sample.json my_config.json
 python run.py my_config.json
 ```
 
-By default, the environment will be run in **human-mode**([see below](#human-mode)). If you want to
+By default, the environment will be run in **human-mode** ([see below](#human-mode)). If you want to
 run the environment with a given learning algorithm, see [the corresponding section
 below](#specifying-a-learning-algorithm).
 
@@ -49,6 +49,9 @@ follows:
 python run.py tasks_config.json
 ```
 
+This will provide you with a console-based user interface to interact with
+the environment. 
+
 To get a better grasp of the kind of problems the learning algorithms
 are facing, you can run the environment using the `--scrambled` flag
 which replaces each word in the observed vocabulary by a random 
@@ -57,10 +60,10 @@ pseudo-word.
 **Warning:** Note that the human-mode makes two assumptions about the input coming
 from the teacher. The first involves the character encoding. Since the input 
 actually arrives in bits but it would be very uncomfortable for a 
-human learner to read a bit stream, we transform it into a character
-stream for rendering it on screen. The second is the turn-taking convention,
+human user to read a bit stream, we transform it into a character
+stream before rendering it on screen. The second is the turn-taking convention,
 by which we hand control to the human after the environment has produced
-two consecutive spaces. None of these conventions are should be assumed
+two consecutive spaces. None of these conventions  can be safely assumed
 by the learning algorithms, as they could be modified in subsequent 
 iterations of the tasks.
 
@@ -85,7 +88,7 @@ class MySmartLearner(BaseLearner):
         # record receiving a reward
 
     def next(self, input_bit):
-        # Figure out what should be
+        # figure out what should be
         # the next bit to be spiken
         return next_bit
 ```
@@ -97,7 +100,7 @@ It is also possible to define the learning algorithm in any other programming la
 
 ### Console View
 
-Whereas for the human-mode, the default view shows a console view
+Whereas for the human-mode, the default view shows a console interface where you can appreciate the 
 
 ## Requirements
 * Python 2.6+
