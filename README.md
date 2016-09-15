@@ -35,10 +35,10 @@ The environment can be run in two simple steps:
 
 ```bash
 # Creating a configuration file (for instance, by copying the full training set)
-cp task_config.sample.json my_config.json
+cp task_config.sample.json tasks_config.json
 
 # Running the environment, in the simplest case, just providing the configuration file as an argument
-python run.py my_config.json
+python run.py tasks_config.json
 ```
 
 By default, the environment will be run in **human-mode** ([see below](#human-mode)). If you want to
@@ -68,7 +68,13 @@ python run.py tasks_config.json
 ```
 
 This will provide you with a console-based user interface to interact with
-the environment. 
+the environment that works as follows. Every time it seems like the 
+environment is quiet and expecting for the learner to answer, control 
+is transferred to the user who can input the string to be streamed back 
+to the environment. 
+
+The communication between the two, current time and the cumulative
+reward are displayed on the screen.
 
 To get a better grasp of the kind of problems the learning algorithms
 are facing, you can run the environment using the `--scrambled` flag
@@ -101,6 +107,8 @@ a given received reward. In Python, you can start from the following
 code snippet to create a Learner:
 
 ```python
+from learners.base import BaseLearner
+
 class MySmartLearner(BaseLearner):
     def reward(self, reward):
         # record receiving a reward
@@ -118,7 +126,14 @@ It is also possible to define the learning algorithm in any other programming la
 
 ### Console View
 
-Whereas for the human-mode, the default view shows a console interface where you can appreciate the 
+Whereas for the human-mode, the default view shows a console interface where you can observe the ongoing
+communication between the two parts, when running an automated learning algorithm the view defaults to a
+simpler one to allow the algorithms run faster. However, it is still possible to bring back the console view by
+passing the argument `-v ConsoleView`, or equivalently, `--view ConsoleView`. For example:
+
+```bash
+python run.py -l learners.sample_learners.SampleRepeatingLearner -v ConsoleView tasks_config.json
+```
 
 ## Requirements
 * Python 2.6+
@@ -126,8 +141,9 @@ Whereas for the human-mode, the default view shows a console interface where you
 
 ## Full documentation
 
-The full documentation can be produced using Python Sphinx. Just go to
-`src/docs` and run `make html` or `make latexpdf`.
+The full documentation can be produced using Python Sphinx. This includes more technical
+documentation describing how you can create your own tasks or descriptions of the internals of the environment. 
+Just go to `src/docs` and run `make html`.
 
 ## License
 AI Challenge is BSD-licensed. We also provide an additional patent grant.
