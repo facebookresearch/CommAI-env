@@ -4,7 +4,8 @@
 
 This document described the tasks that are currently implemented in MAINE. The document is used by MAINE developers to keep track of the task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
 
-Because of this 
+**NB: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here**
+
 
 
 # Repetition Tasks
