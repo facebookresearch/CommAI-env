@@ -6,6 +6,15 @@ described in A Roadmap towards Machine Intelligence
 
 ## Running
 
+The environment can be run in two simple steps:
+
+1. Creating a configuration file (for instance, by copying `task_config.sample.json`)
+2. Running the environment (in the simplest case, just providing the configuration file as an argument)
+
+By default, the environment will be run in **human-mode** (see below). If you want to
+run the environment with a given learning algorithm, see the **Specifying a learning algorithm** 
+section below.
+
 ### Configuration
 
 First, you should create a configuration file stating which tasks
@@ -27,6 +36,15 @@ follows:
 ```bash
 python run.py tasks_config.json
 ```
+
+To get a better grasp of the kind of problems the learning algorithms
+are facing, you can run the environment using the `--scrambled` flag
+which replaces each word in the observed vocabulary by a random 
+pseudo-word.
+
+### Specifying a learning algorithm
+
+WRITEME
 
 ## Requirements
 * Python 2.6+
