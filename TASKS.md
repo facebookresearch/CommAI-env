@@ -29,8 +29,7 @@
     * Who has a certain object with a certain property in the basket
     * List the properties that an object has in a basket only
     * List the properties that an object has in all baskets
-    * *Tell me an object with property X, an object with property Y and an object with property Z, in that order, from B’s basket*
-    * *Tell me a property of object X, a property of object Y and a property of object Z, in that order, from B’s basket*
+
 
 * Asking questions
 
@@ -39,9 +38,7 @@
     * Learner is asked to guess a number, and explicitly told how to ask for the next digit; the learner gets reward if it gets the number right, independently of whether it asked for the digits or not
     * Learner is asked to guess a number, and told it can ask for the next digit; the learner gets reward if it gets the number right, independently of whether it asked for the digits or not
 
-* *Mixing asking questions and association*
 
-    * *Reframe some of the association tasks above using the same association table, but encouraging the Learner to ask for questions if it doesn’t remember something*
 
 * Objects:
 
