@@ -2,9 +2,9 @@
 
 # Introduction
 
-This document described the tasks that are currently implemented in MAINE. The document is used by MAINE developers to keep track of the task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
+This document describes the tasks that are currently implemented or about to be implemented in MAINE. The document is used by MAINE developers to keep track of task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
 
-**NB: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here**
+**NB: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here.**
 
 
 
@@ -68,9 +68,9 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Max Time:** 1000
 * **Motivation:** learners learn the concept of being silent, negation, simple parsing, and (hopefully) similarity of the words say and repeat.
 
-### **Repeat What I say [K2][CHK]**
+### **Repeat What I Say [K2][CHK]**
 
-* **Description:** the learner has to repeat the target input that is located on the right side of the chosen words.
+* **Description:** the learner has to repeat the target input that is located on the right side of some frame words.
 * **Example 1:**
     * **Teacher:** say apple.
     * **Learner:** apple.
@@ -87,9 +87,9 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Motivation:** learners learn the concept of repetition, simple parsing, and (hopefully) similarity of the words say and repeat.
 * **Prerequisites:**
 
-### **Repeat What I say 2 [K3][CHK]**
+### **Repeat What I Say 2 [K3][CHK]**
 
-* **Description:** the learner has to repeat the target input after the teacher. The target input is located in the middle of chosen words.
+* **Description:** the learner has to repeat the target input after the teacher. The target input is located in the middle of some frame words.
 * **Example 1:**
     * **Teacher:** say apple and you will get a reward.
     * **Learner:** apple.
@@ -103,7 +103,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Motivation:** learners learn the concept of repetition, parsing, and (hopefully) similarity of the words say and repeat.
 * **Prerequisites:** [K2]
 
-### **Repeat What I say multiple times [K5][CHK]**
+### **Repeat What I Say Multiple Times [K5][CHK]**
 
 * **Description:** the learner has to repeat the word after the teacher multiple times.
 * **Example 1:**
@@ -116,9 +116,9 @@ This document described the tasks that are currently implemented in MAINE. The d
     * **Teacher:** wrong, correct answer is: apple apple.
 * **Max Time:** 10000
 * **Timeout Message**: wrong, correct answer is: [target] [target] (repeated N times).
-* **Motivation:** learners learn to repeat a word or phrase multiple times.
+* **Motivation:** learners learn to repeat a word or phrase multiple times (a simple form of counting).
 
-### **Repeat What I say multiple times 2 [K6][CHK]**
+### **Repeat What I Say Multiple Times 2 [K6][CHK]**
 
 * **Description:** the learner has to repeat the words after the teacher multiple times.
 * **Example 1:**
@@ -134,7 +134,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Timeout Message**: wrong, correct answer is: [target] [target] (repeated N times).
 * **Motivation:** learners learn to repeat a word or a phrase multiple times.
 
-### **Repea****t What I say multiple times separated by comma [K7][CHK]**
+### **Repeat What I Say Multiple Times Separated By Comma [K7][CHK]**
 * **Description:** the learner has to repeat the word after the teacher multiple times. The words should be separated by commas.
 * **Example 1:**
     * **Teacher:** say apple 3 times separated by comma.
@@ -147,9 +147,9 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Max Time:** 10000
 * **Motivation:** learners learn to repeat a symbol or a word multiple times.
 
-### **Repeat What I say multiple times separated by and [K8][CHK]**
+### **Repeat What I Say Multiple Times Separated By And [K8][CHK]**
 
-* **Description:** similar as above. The words should be separated by and.
+* **Description:** similar to above. The words should be separated by *and*.
 * **Example 1:**
     * **Teacher:** say apple 3 times separated by and.
     * **Learner:** apple and apple and apple.
@@ -161,9 +161,9 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Max Time:** 10000
 * **Motivation:** learners learn to repeat a symbol or a word multiple times.
 
-### **Repeat What I say multiple times separated by comma and and [K9][CHK]**
+### **Repeat What I Say Multiple Times Separated By Comma And And [K9][CHK]**
 
-* **Description:** similar as above. The words should be separated by comma first, and then by and.
+* **Description:** similar to above. The words should be separated by comma first, and then by *and*.
 * **Example 1:**
     * **Teacher:** say apple 3 times separated by comma and and.
     * **Learner:** apple, apple and apple.
@@ -175,9 +175,9 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Max Time:** 10000
 * **Motivation:** learners learn to repeat a symbol or a word multiple times.
 
-### **Repeat What I Say with using conjunction and negation [****A1****]**
+### **Repeat What I Say Using Conjunction And Negation [****A1****]**
 
-* **Description:** Learner is asked to repeat after the learner, but this time use the meaning of AND word and negation (don’t, do not).
+* **Description:** Learner is asked to repeat after the teacher, but this time using *and* and negation (*don’t, do not*).
 * **Example 1:**
     * **Teacher:** say apple and banana.
     * **Learner:** apple and banana.
@@ -187,19 +187,19 @@ This document described the tasks that are currently implemented in MAINE. The d
     * **Learner:** apple.
     * **Teacher:** correct. [R+1]
 * **Example 3:**
-    * **Teacher:** say apple and *do not* say banana.
+    * **Teacher:** say apple and do not say banana.
     * **Learner:** apple and banana.
     * **Teacher:** wrong, correct answer is: apple. [R+1]
 * **Example 4:**
-    * **Teacher:** *do not* say apple and *do not* say banana.
+    * **Teacher:** do not say apple and do not say banana.
     * **Learner:**
     * **Teacher:** correct. [R+1]
 * **Motivation:** Teach the learner basic logic operations
 * **MaxTime**: 1000
 
-### **Repeat What I Say with using disjunction [****A****2]**
+### **Repeat What I Say Using Disjunction [****A****2]**
 
-* **Description:** Learner is asked to repeat after the learner, but this time use the meaning of OR word.
+* **Description:** Learner is asked to repeat after the learner, but this time using *or*.
 * **Example 1:**
     * **Teacher:** say apple or banana.
     * **Learner:** apple. (or alternatively banana)
@@ -227,59 +227,30 @@ This document described the tasks that are currently implemented in MAINE. The d
 
 * **Teacher inputs:** Say 'I V' to V. where V is in a list of verbs defined in german_tasks
 
-### **Be quiet [T1]**
-
-* **Description:** the learner needs to be silent for some time
-* **Instruction:** do not say anything now
-* **Example 1:**
-    * **Teacher: -**
-    * **Learner: -**
-* **Motivation:** to learn to produce a string of spaces (" “) until the teacher is happy.
-* **Rewards:** +1 after the task Teacher output "Well done" [R+1]
-* **Max Time:** 100
-* **Prerequisites:** None
-* **Teacher inputs:** None
-* **Implemented:** No
 
 ## Counting
 
-### **task [t4]**
-
-* **Description:** the learner needs to
-* **Instruction:** C
-* **Example 1:**
-    * **Teacher:** I have an apple, an apple and a banana. How many bananas I have?
-    * **Learner:** one
-* **Motivation:** To learn
-* **Prerequisites:** unknown
-* **Teacher inputs:** generated from a simple grammar
 ### **Counting [t5]**
 * **Description:** the learner should know how many objects the teacher has based on communication only.
 * **Instruction:** Count the objects.
 * **Example 1:**
-    * **Teacher:** I have an apple, an apple and a banana. How many bananas I have?
+    * **Teacher:** I have an apple, an apple and a banana. How many bananas do I have?
     * **Learner:** one
-    * **Teacher:** How many apples I have?
+    * **Teacher:** How many apples do I have?
     * **Learner:** two
-    * **Teacher:** How many pears I have?
+    * **Teacher:** How many pears do I have?
     * **Learner:** zero
 * **Motivation:** To learn basic counting and memory.
 * **Prerequisites:** T2, T3
 * **Teacher inputs:** generated from a simple grammar
 
-*** object properties,
+
 
 ## **Objects & Properties**
 
-**Leftover todos:**
+### **Object existence 1 [T2]**
 
-* Possibly prefix regexps with r modifier
-* Using accented characters in the Italian task
-* Check timeout behaviour using new version of competition code (partially checked)
-
-### **Object ****existence 1**** [T2]**
-
-* **Description:** the learner needs to understand which objects are present, and teacher should guide him through communication when learner is wrong
+* **Description:** the learner needs to understand which objects are present, and teacher should guide it through communication when learner is wrong
 * **Instruction:** Let's play a game with fruits.
 * **Example 1:**
     * **Teacher:** I have an apple. Do I have a banana?
@@ -302,9 +273,9 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:** -
 * **Teacher inputs:** generated from a simple grammar
 
-### **Object existence task 2 [T3]**
+### **Object existence 2 [T3]**
 
-* **Description:** the learner needs to understand which objects are present, and teacher should guide him through communication when learner is wrong; increased complexity by having more objects present
+* **Description:** the learner needs to understand which objects are present, and teacher should guide it through communication when learner is wrong; increased complexity by having more objects present
 * **Instruction: -**
 * **Example 1:**
     * **Teacher:** I have an apple and a banana and no pear. Do I have a pear?
@@ -407,7 +378,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:** at the very least M1; M2 and M3 should also help. Solving M7 should make this task easier, and vice versa.
 * **Teacher inputs:** can you tell me an object that is P in B's basket? [where B and P are baskets and properties, respectively, from the global_properties dict in marco_tasks.py]
 
-### **Who has a certain object with a certain property**** [M9]****[CHK]**
+### **Who has a certain object with a certain property [M9][CHK]**
 
 * **Description:** Learner is asked about an object with a property (e.g., a green apple), and it has to list all the baskets that have the object (baskets and their objects+properties are as in M1, although the teacher can ask for an object+property combination that never occurs in the baskets).
 * **Instructions:** who has a P O in the basket?
@@ -429,7 +400,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:** at the very least M1; other association tasks might also help, both because they will also require the learner to memorize the same association table, and because they should improve its querying skills; other tasks that might help include K7, T3 and T5. Also, any task involving logical reasoning might help.
 * **Teacher inputs:** who has (a|an) P O in the basket? [where P and O are properties and objects, respectively, from the global_properties dict of marco_tasks.py; note that the indefinite article is a unless P begin with vowel]
 
-### **List the properties that an object has in a basket only [M11][****CHK****]**
+### **List the properties that an object has in a basket only [M11][CHK]**
 
 * **Description:** Learner is asked about the properties that an object has in only one basket. The learner must thus retrieve the properties of the relevant object from all baskets, and compare them.
 * **Instructions:** which properties does O have in B’s basket only?
@@ -448,7 +419,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:** at the very least M1; other basket reasoning tasks might also help, both because they will also require the learner to memorize the same association table, and because they should improve its analysis skills; also, there should be a beneficial interaction with A1 and other logical tasks.
 * **Teacher inputs:** which properties does O have in B’s basket only? [where O and P are properties and baskets, respectively, from the global_properties dict of marco_tasks.py]
 
-### **List the properties that an object has in all baskets [M12][****CHK****]**
+### **List the properties that an object has in all baskets [M12][CHK]**
 
 * **Description:** Learner is asked about the properties that an object has in all baskets. The learner must thus retrieve the properties of the relevant object from all baskets, and compare them.
 * **Instructions:** which properties does O have in all baskets?
@@ -527,7 +498,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 
 ## Question Asking
 
-### **Guess The Number Asking Questions (Explicit Model) [M13][IMP] **
+### **Guess The Number Asking Questions (Explicit Model) [M13][IMP]**
 * **Description:** The Learner is told to guess an N-digit number (N from 1 to 5), and shown explicitly how to ask for it. It gets reward when it guesses the number, but it can considerably increase the chances of getting reward if it directly asks the Teacher for the number.
 * **Instructions:** guess the N-digit number I am thinking of; you can ask me: please tell me the number.
 * **Example 1:**
@@ -666,7 +637,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 
 ### **Look [AJ1]**
 
-* **Description:** the learner must look where the teacher tells him to.
+* **Description:** the learner must look where the teacher tells it to.
 * **Instruction:** look where I say
 * **Example 1:**
     * **Teacher:** Look to the east
@@ -678,7 +649,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Teacher inputs:** look to the east, look to the west, look to the north, look to the south
 ### **Look Around [AJ2]**
 
-* **Description:** the learner must look around him
+* **Description:** the learner must look around itself
 * **Instruction:** look around
 * **Example 1:**
     * **Teacher:** Look around
@@ -693,7 +664,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:**
 * **Teacher inputs:**
 
-### **Look Around [AJ3]**
+### **Look For [AJ3]**
 
 * **Description:** the learner must find an object
 * **Instruction:** find the object I want
@@ -772,7 +743,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:** G1, G2, G3?
 * **Teacher inputs:** You are facing $DIRECTION, move $DIRECTION.
 
-### **Pick up Task [G6][IMP] **
+### **Pick up Task [G6][IMP]**
 
 * **Description:** Learner is asked to pick up an object it has at its feet.
 * **Instructions:** I have placed a O where you are. Pick up the O.
@@ -787,7 +758,7 @@ This document described the tasks that are currently implemented in MAINE. The d
 * **Prerequisites:** 
 * **Teacher inputs:** 
 
-### **Pick up in front Task ****[G7]****[IMP]**
+### **Pick up in front Task [G7][IMP]**
 
 * **Description:** Learner is asked to pick up an object it has N steps forward in front of it.
 * **Instructions:** There is a[n] O N steps forward. Pick up the O.
