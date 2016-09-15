@@ -31,10 +31,94 @@ MAINE is currently in beta-testing stage, and we welcome your feedback and contr
 
 ## Running
 
+The environment can be run in two simple steps:
+
+```bash
+# Creating a configuration file (for instance, by copying the full training set)
+cp task_config.sample.json my_config.json
+
+# Running the environment, in the simplest case, just providing the configuration file as an argument
+python run.py my_config.json
 ```
+
+By default, the environment will be run in **human-mode** ([see below](#human-mode)). If you want to
+run the environment with a given learning algorithm, see [the corresponding section
+below](#specifying-a-learning-algorithm).
+
+### Configuration
+
+First, you should create a configuration file stating which tasks
+and in which order, if any, are going to be fed to the learner.
+
+You can start by copying the configuration file corresponding to
+the full training set as follows:
+
+```bash
 cp tasks_config.sample.json tasks_config.json
-python run_tournament.py tasks_config.json
 ```
+
+### Human-mode
+
+To run the system on a simple console interface, where you can
+impersonate the learner (human mode), run the environment as 
+follows:
+
+```bash
+python run.py tasks_config.json
+```
+
+This will provide you with a console-based user interface to interact with
+the environment. 
+
+To get a better grasp of the kind of problems the learning algorithms
+are facing, you can run the environment using the `--scrambled` flag
+which replaces each word in the observed vocabulary by a random 
+pseudo-word.
+
+**Warning:** Note that the human-mode makes two assumptions about the input coming
+from the teacher. The first involves the character encoding. Since the input 
+actually arrives in bits but it would be very uncomfortable for a 
+human user to read a bit stream, we transform it into a character
+stream before rendering it on screen. The second is the turn-taking convention,
+by which we hand control to the human after the environment has produced
+two consecutive spaces. None of these conventions  can be safely assumed
+by the learning algorithms, as they could be modified in subsequent 
+iterations of the tasks.
+
+### Specifying a learning algorithm
+
+To run the environment with a given learning algorithm, you can use the
+`-l` or `--learner` flag followed by the fully qualifed name of the 
+learner's class. For example, you can use any of the sample learners:
+
+- `learners.sample_learners.SampleRepeatingLearner`
+- `learners.sample_learners.SampleMemorizingLearner`
+
+Defining a learning algorithm involves defining two functions: `next` and
+`reward`. `next` receives a bit from the environment, and should return
+the next bit spoken by the learner. `reward` notifies the learner of
+a given received reward. In Python, you can start from the following 
+code snippet to create a Learner:
+
+```python
+class MySmartLearner(BaseLearner):
+    def reward(self, reward):
+        # record receiving a reward
+
+    def next(self, input_bit):
+        # figure out what should be
+        # the next bit to be spiken
+        return next_bit
+```
+
+#### Defining a learner in programming language X
+
+It is also possible to define the learning algorithm in any other programming language. TODO: explain how.
+
+
+### Console View
+
+Whereas for the human-mode, the default view shows a console interface where you can appreciate the 
 
 ## Requirements
 * Python 2.6+
