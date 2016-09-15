@@ -1,91 +1,11 @@
 # **Task Documentation**
 
-**List of tasks:**
+# Introduction
 
-* Be silent
+This document described the tasks that are currently implemented in MAINE. The document is used by MAINE developers to keep track of the task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
 
-* Repetition:
+Because of this 
 
-    * Repeat what I say
-    * Repeat what I say 2 (with right context)
-    * Repeat what I say multiple times
-    * Repeat what I say multiple times 2 (with right context)
-    * Repeat what I say multiple times separated by comma
-    * Repeat what I say multiple times separated by and
-    * Repeat what I say multiple times separated by comma and and
-    * Logic operations within Repeat What I Say
-
-* Associations:
-
-    * Associate object with property
-    * Verify that object has property
-    * List all properties of an object
-    * List all objects with a certain property
-    * List one object with a certain property
-    * List one property of a certain object
-    * How many objects have a certain property
-    * How many properties does an object have
-    * How many properties does an object have in Italian
-    * Who has a certain object with a certain property in the basket
-    * List the properties that an object has in a basket only
-    * List the properties that an object has in all baskets
-
-
-* Asking questions
-
-    * Learner is asked to guess a number and explicitly shown how to ask about it; the learner gets reward if it gets the number right, independently of whether it asked for it or not
-    * Learner is asked to guess a number and told that it can ask about it; the learner gets reward if it gets the number right, independently of whether it asked for it or not
-    * Learner is asked to guess a number, and explicitly told how to ask for the next digit; the learner gets reward if it gets the number right, independently of whether it asked for the digits or not
-    * Learner is asked to guess a number, and told it can ask for the next digit; the learner gets reward if it gets the number right, independently of whether it asked for the digits or not
-
-
-
-* Objects:
-
-    * Single object existence
-    * *Multiple object existence*
-    * *Object counting*
-    * *Ideas:*
-        * *Giving objects to the learner and Q&A*
-        * *Placing objects near the learner (in front, left, right, …) and Q&A on objects and relations (properties)*
-        * *Spatial relationships*
-        * *Asking about the number of objects with relation to the location*
-        * *Pick / Drop objects*
-
-* Grid:
-
-    * Turning task *(to pick the object)*
-    * Move forward
-    * Moving relative
-    * Moving absolute
-    * Pick up
-    * Pick in front
-    * Pick up around
-    * Give
-    * Pick up around and give
-    * Pick up around many and give
-    * Counting in inventory
-    * Counting in inventory and giving
-    * *Navigation / Finding objects*
-
-* *Algebraic patterns*
-
-    * *No clear idea here, but inspired by Marcus/Dehaene experiments such as:*
-        * *Prime: papata mumula…*
-        * *Expected target: fefero; surprising target: ferofe*
-
-* *Paired associate inference and transitive inference*
-
-[[TOC]]
-
-**Marco last used ID counter: M16**
-
-**Germán last used ID Counter: G15**
-
-## Notation
-
-**[IMP]** → Task Implemented
-**[CHK]** → Task checked and integrated.
 
 # Repetition Tasks
 
