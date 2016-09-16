@@ -108,18 +108,18 @@ class TestChannels(unittest.TestCase):
     def testIsSient(self):
         slzr = serializer.StandardSerializer()
         oc = channels.OutputChannel(slzr)
-        self.failUnless(oc.is_silent())
+        self.assertTrue(oc.is_silent())
         oc.set_message(slzr.SILENCE_TOKEN)
-        self.failUnless(oc.is_silent())
+        self.assertTrue(oc.is_silent())
         while not oc.is_empty():
             oc.consume_bit()
-            self.failUnless(oc.is_silent())
+            self.assertTrue(oc.is_silent())
         oc.set_message('hello')
         while not oc.is_empty():
             oc.consume_bit()
             if not oc.is_empty():
-                self.failIf(oc.is_silent())
-        self.failUnless(oc.is_silent())
+                self.assertFalse(oc.is_silent())
+        self.assertTrue(oc.is_silent())
 
 
 def main():

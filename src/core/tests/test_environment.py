@@ -45,12 +45,12 @@ class TestEnvironment(unittest.TestCase):
         tt.start(env)
         env._register_task_triggers(tt)
         # Start should be handled
-        self.failUnless(env.raise_event(task.Start()))
+        self.assertTrue(env.raise_event(task.Start()))
         # The start handler should have been executed
-        self.failUnless(tt.handled)
+        self.assertTrue(tt.handled)
         env._deregister_task_triggers(tt)
         # Start should not be handled anymore
-        self.failIf(env.raise_event(task.Start()))
+        self.assertFalse(env.raise_event(task.Start()))
 
     def testDynRegistering(self):
         class TestTask(task.Task):
@@ -61,8 +61,12 @@ class TestEnvironment(unittest.TestCase):
 
             @task.on_start()
             def start_handler(self, event):
-                self.add_handler(task.on_ended()(
-                    self.end_handler.im_func))
+                try:
+                    self.add_handler(task.on_ended()(
+                        self.end_handler.im_func))
+                except AttributeError: # Python 3
+                    self.add_handler(task.on_ended()(
+                        self.end_handler.__func__))
                 self.start_handled = True
 
             def end_handler(self, event):
@@ -73,29 +77,29 @@ class TestEnvironment(unittest.TestCase):
         tt.start(env)
         env._register_task_triggers(tt)
         # End cannot be handled
-        self.failIf(env.raise_event(task.Ended()))
-        self.failIf(tt.end_handled)
+        self.assertFalse(env.raise_event(task.Ended()))
+        self.assertFalse(tt.end_handled)
         # Start should be handled
-        self.failUnless(env.raise_event(task.Start()))
+        self.assertTrue(env.raise_event(task.Start()))
         # The start handler should have been executed
-        self.failUnless(tt.start_handled)
+        self.assertTrue(tt.start_handled)
         # Now the End should be handled
-        self.failUnless(env.raise_event(task.Ended()))
+        self.assertTrue(env.raise_event(task.Ended()))
         # The end handler should have been executed
-        self.failUnless(tt.end_handled)
+        self.assertTrue(tt.end_handled)
         env._deregister_task_triggers(tt)
         # Start should not be handled anymore
-        self.failIf(env.raise_event(task.Start()))
+        self.assertFalse(env.raise_event(task.Start()))
         tt.end_handled = False
         # End should not be handled anymore
-        self.failIf(env.raise_event(task.Ended()))
-        self.failIf(tt.end_handled)
+        self.assertFalse(env.raise_event(task.Ended()))
+        self.assertFalse(tt.end_handled)
         # Register them again! mwahaha (evil laugh) -- lol
         env._register_task_triggers(tt)
         # End should not be handled anymore
-        self.failIf(env.raise_event(task.Ended()))
-        self.failIf(tt.end_handled)
+        self.assertFalse(env.raise_event(task.Ended()))
+        self.assertFalse(tt.end_handled)
         # Deregister them again! mwahahahaha (more evil laugh)
         env._deregister_task_triggers(tt)
-        self.failIf(env.raise_event(task.Ended()))
-        self.failIf(tt.end_handled)
+        self.assertFalse(env.raise_event(task.Ended()))
+        self.assertFalse(tt.end_handled)

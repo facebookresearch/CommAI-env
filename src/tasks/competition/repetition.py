@@ -42,6 +42,7 @@ class BeSilentTask(Task):
         self.set_message(random.choice(["be silent now.",
                                         "do not say anything."]))
 
+
     # silence is represented by the space character
     # catch any non-space character
     @on_message("[^ ]")
@@ -71,7 +72,7 @@ class RepeatCharacterTask(BaseTask):
     @on_start()
     def on_start(self, event):
         # randomly sample a character to be repeated
-        self.cur_char = random.choice(string.letters)
+        self.cur_char = random.choice(string.ascii_letters)
         # ask the learner to repeat the phrase sampling one of the possible
         # ways of asking that.
         self.set_message("{query_verb} {phrase}."

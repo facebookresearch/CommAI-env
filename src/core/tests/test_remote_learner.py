@@ -17,7 +17,7 @@ port = "5556"
 context = zmq.Context()
 socket = context.socket(zmq.PAIR)
 socket.connect("tcp://localhost:%s" % port)
-socket.send(str('hello'))
+socket.send_string(str('hello'))
 
 message = '00101110'
 cnt = 0

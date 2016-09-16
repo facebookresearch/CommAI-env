@@ -209,7 +209,7 @@ class PickUpAroundTask(BaseTask):
         # choose a random object
         self.target_obj, = random.sample(objects, 1)
         # find a random cell around the learner
-        self.direction = random.choice(self.get_world().valid_directions.keys())
+        self.direction = random.choice(list(self.get_world().valid_directions.keys()))
         ws = self.get_world().state
         p = ws.learner_pos + self.get_world().valid_directions[self.direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
@@ -220,7 +220,7 @@ class PickUpAroundTask(BaseTask):
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
-            (self.on_object_picked_up.im_func))
+            (self.on_object_picked_up))
 
         self.set_message("There is {indef_object} {direction} from you, "
                          "pick up the {object}.".format(
@@ -261,7 +261,7 @@ class PickUpInFrontTask(BaseTask):
             on_state_changed(lambda ws, ts:
                              ws.learner_inventory[self.target_obj] ==
                              ts.initial_count + 1)
-            (self.on_object_picked_up.im_func))
+            (self.on_object_picked_up))
 
         self.set_message("There is {indef_object} {n} steps forward, "
                          "pick up the {object}."
@@ -332,7 +332,7 @@ class PickUpAroundAndGiveTask(BaseTask):
         # save how many instances of the object the learner intially had
         self.state.learner_initial_count = ws.learner_inventory[target_obj]
         # choose some random direction
-        self.direction = random.choice(self.get_world().valid_directions.keys())
+        self.direction = random.choice(list(self.get_world().valid_directions.keys()))
         # measure a cell one step in that direction
         self.obj_pos = ws.learner_pos + \
             self.get_world().valid_directions[self.direction]

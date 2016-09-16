@@ -207,8 +207,14 @@ class StandardSerializer:
         message = codecs.encode(message, 'utf-8')
         data = []
         for c in message:
+            # get the numeric value of the character
+            try: 
+                c = ord(c)
+            except TypeError:
+                # already an int (Python 3)
+                pass
             # convert to binary
-            bin_c = bin(ord(c))
+            bin_c = bin(c)
             # remove the '0b' prefix
             bin_c = bin_c[2:]
             # pad with zeros
@@ -234,16 +240,17 @@ class StandardSerializer:
         # if we are not in strict mode, we can skip bytes to find a message
         for skip in range(int(len(data) / 8) if not strict else 1):
             try:
-                message = str('')
+                # convert data to a byte-stream
+                message = bytearray()
                 sub_data = data[skip * 8:]
                 for i in range(int(len(sub_data) / 8)):
                     b = sub_data[i * 8:(i + 1) * 8]
-                    message += chr(int(b, 2))
+                    message.append(int(b, 2))
                 message = codecs.decode(message, 'utf-8')
                 message = message.replace(self.SILENCE_ENCODING,
                                           self.SILENCE_TOKEN)
                 if skip > 0:
-                    self.logger.warn("Skipping {0} bytes to find a valid "
+                    self.logger.debug("Skipping {0} bytes to find a valid "
                                      "unicode character".format(skip))
 
                 return message

@@ -101,8 +101,8 @@ class AssociateObjectWithPropertyTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # pick some random basket, object and property
-        basket = random.choice(global_properties.keys())
-        object_ = random.choice(global_properties[basket].keys())
+        basket = random.choice(list(global_properties.keys()))
+        object_ = random.choice(list(global_properties[basket].keys()))
         self.property = random.choice(global_properties[basket][object_])
         # ask the leearner for the property
         self.set_message("{object} in {owner}'s basket is {property}. "
@@ -131,8 +131,8 @@ class VerifyThatObjectHasPropertyTask(BaseTask):
 
     @on_start()
     def give_instructions(self, event):
-        basket = random.choice(global_properties.keys())
-        object_ = random.choice(global_properties[basket].keys())
+        basket = random.choice(list(global_properties.keys()))
+        object_ = random.choice(list(global_properties[basket].keys()))
         object_properties = global_properties[basket][object_]
         # extracting the set of properties (from both baskets)
         all_properties = set(property_
@@ -178,8 +178,8 @@ class ListPropertiesofAnObjectTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # select a random object from a random basket
-        basket = random.choice(global_properties.keys())
-        object_ = random.choice(global_properties[basket].keys())
+        basket = random.choice(list(global_properties.keys()))
+        object_ = random.choice(list(global_properties[basket].keys()))
         # retrieving the properties of the selected object
         self.object_properties = set(global_properties[basket][object_])
 
@@ -225,8 +225,8 @@ class NameAPropertyOfAnObjectTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # pick some basket and object
-        basket = random.choice(global_properties.keys())
-        object_ = random.choice(global_properties[basket].keys())
+        basket = random.choice(list(global_properties.keys()))
+        object_ = random.choice(list(global_properties[basket].keys()))
         # retrieving the properties of the selected object
         self.object_properties = global_properties[basket][object_]
 
@@ -260,8 +260,8 @@ class HowManyPropertiesDoesAnObjectHaveTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # pick some object in a random basket
-        basket = random.choice(global_properties.keys())
-        object_ = random.choice(global_properties[basket].keys())
+        basket = random.choice(list(global_properties.keys()))
+        object_ = random.choice(list(global_properties[basket].keys()))
         # counting properties of selected object
         self.property_count = len(global_properties[basket][object_])
         self.set_message("how many property does {object} have "
@@ -294,8 +294,8 @@ class ListObjectsWithACertainPropertyTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # chose a random property
-        basket = random.choice(reverse_global_properties.keys())
-        property_ = random.choice(reverse_global_properties[basket].keys())
+        basket = random.choice(list(reverse_global_properties.keys()))
+        property_ = random.choice(list(reverse_global_properties[basket].keys()))
         # retrieving the objects that have this property
         self.objects = set(reverse_global_properties[basket][property_])
 
@@ -339,8 +339,8 @@ class NameAnObjectWithAPropertyTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # chose a random property
-        basket = random.choice(reverse_global_properties.keys())
-        property_ = random.choice(reverse_global_properties[basket].keys())
+        basket = random.choice(list(reverse_global_properties.keys()))
+        property_ = random.choice(list(reverse_global_properties[basket].keys()))
         # retrieving the objects that have the selected property
         self.objects = reverse_global_properties[basket][property_]
 
@@ -376,8 +376,8 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
     def give_instructions(self, event):
         # we will sample from the actual properties, plus a random
         # string representing a "property" that no object has
-        basket = random.choice(reverse_global_properties.keys())
-        basket_properties = reverse_global_properties[basket].keys()
+        basket = random.choice(list(reverse_global_properties.keys()))
+        basket_properties = list(reverse_global_properties[basket].keys())
         property_pick = random.randint(0, len(basket_properties))
         if property_pick == len(basket_properties):
             # if we picked the last integer, we will generate a fake property

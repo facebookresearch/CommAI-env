@@ -27,6 +27,9 @@ class Point(namedtuple('Point', ('x', 'y'))):
     def __eq__(self, ot):
         return self.x == ot.x and self.y == ot.y
 
+    def __hash__(self):
+        return hash((self.x, self.y))
+
     def __str__(self):
         return 'Point({0},{1})'.format(self.x, self.y)
 

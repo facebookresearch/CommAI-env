@@ -143,4 +143,4 @@ def map_tasks(arg, tasks):
     # unhashable type
     except TypeError:
         # we treat arg as a collection that should be mapped
-        return map(lambda x: map_tasks(x, tasks), arg)
+        return list(map(lambda x: map_tasks(x, tasks), arg))
