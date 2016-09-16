@@ -55,7 +55,7 @@ def main():
     # retrieve the task configuration file
     tasks_config_file = args[0]
     logger = logging.getLogger(__name__)
-    logger.info("Starting new tournament")
+    logger.info("Starting new evaluation session")
     # we choose how the environment will produce and interpret
     # the bit signal
     serializer = StandardSerializer()

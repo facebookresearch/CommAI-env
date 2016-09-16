@@ -297,11 +297,11 @@ class State(object):
         '''
         # wrap the variable in an StateVariable to report whether it changes
         if isinstance(value, defaultdict):
-            self.logger.info("Wrapping variable {0} as a defaultdict"
+            self.logger.debug("Wrapping variable {0} as a defaultdict"
                              .format(value))
             value = StateTrackingDefaultdictWrapper(value, self)
         elif isinstance(value, dict):
-            self.logger.info("Wrapping variable {0} as a dict".format(value))
+            self.logger.debug("Wrapping variable {0} as a dict".format(value))
             value = StateTrackingDictionaryWrapper(value, self)
         # apply the assignment operation
         super(State, self).__setattr__(name, value)
