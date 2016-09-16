@@ -35,7 +35,7 @@ class TestNavigation(unittest.TestCase):
         m.read()
         feedback = m.get_last_message()
         # it should be bad-learner sort of feedback
-        self.failUnless(feedback in msg.failed or feedback in msg.timeout,
+        self.assertTrue(feedback in msg.failed or feedback in msg.timeout,
                         'Unexpected negative feedback: {0}'.format(feedback))
 
     def solve_correctly_test(self, m, solve):

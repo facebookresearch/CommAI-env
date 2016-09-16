@@ -78,8 +78,11 @@ def method_to_func(f):
     """
     try:
         return f.im_func
-    except AttributeError:
-        return f
+    except AttributeError: #Python 3
+        try:
+            return f.__func__
+        except AttributeError: # not a method
+            return f
 
 
 # Decorator for the Start of Task event handler
@@ -244,7 +247,7 @@ def handler_to_trigger(f):
         else:
             return None
     except TypeError:
-        # if f is unhashable, it's definetly not a funciton
+        # if f is unhashable, it's definetly not a function
         return None
 
 
@@ -356,7 +359,10 @@ class ScriptSet(object):
         for fname in dir(self):
             try:
                 # We try to extract the function object that was registered
-                f = getattr(self, fname).im_func
+                try:
+                    f = getattr(self, fname).im_func
+                except AttributeError: # Python 3
+                    f = getattr(self, fname).__func__
                 trigger = handler_to_trigger(f)
                 if trigger:
                     triggers.append(trigger)

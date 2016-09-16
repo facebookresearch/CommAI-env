@@ -38,19 +38,19 @@ class TestEvents(unittest.TestCase):
 
         tt = TestTask(max_time=10)
         triggers = tt.get_triggers()
-        handlers = map(lambda t: t.event_handler, triggers)
+        handlers = set(map(lambda t: t.event_handler, triggers))
         self.assertEqual(4, len(triggers))
-        self.failUnless(TestTask.start_handler.im_func in handlers)
-        self.failUnless(TestTask.message_handler.im_func in handlers)
-        self.failUnless(TestTask.timeout_handler.im_func in handlers)
-        self.failUnless(TestTask.ended_handler.im_func in handlers)
+        self.assertIn(self.get_func(TestTask.start_handler), handlers)
+        self.assertIn(self.get_func(TestTask.message_handler), handlers)
+        self.assertIn(self.get_func(TestTask.timeout_handler), handlers)
+        self.assertIn(self.get_func(TestTask.ended_handler), handlers)
         types = dict((t.event_handler, t.type) for t in triggers)
-        self.assertEqual(task.Start, types[TestTask.start_handler.im_func])
+        self.assertEqual(task.Start, types[self.get_func(TestTask.start_handler)])
         self.assertEqual(task.MessageReceived,
-                         types[TestTask.message_handler.im_func])
+                         types[self.get_func(TestTask.message_handler)])
         self.assertEqual(task.Timeout,
-                         types[TestTask.timeout_handler.im_func])
-        self.assertEqual(task.Ended, types[TestTask.ended_handler.im_func])
+                         types[self.get_func(TestTask.timeout_handler)])
+        self.assertEqual(task.Ended, types[self.get_func(TestTask.ended_handler)])
 
     def testInheritance(self):
         class BaseTask(task.Task):
@@ -72,11 +72,11 @@ class TestEvents(unittest.TestCase):
 
         tt = ConcreteTask(max_time=10)
         triggers = tt.get_triggers()
-        handlers = map(lambda t: t.event_handler, triggers)
+        handlers = set(map(lambda t: t.event_handler, triggers))
         self.assertEqual(1, len(triggers))
         # The start_handler must be the one of the overridden task
-        self.failUnless(ConcreteTask.start_handler.im_func in handlers)
-        self.failIf(BaseTask.start_handler.im_func in handlers)
+        self.assertIn(self.get_func(ConcreteTask.start_handler), handlers)
+        self.assertFalse(self.get_func(BaseTask.start_handler) in handlers)
 
     def testDynamicHandlers(self):
         class TestTask(task.Task):
@@ -107,10 +107,19 @@ class TestEvents(unittest.TestCase):
         # raise the start event
         tt.start(EnvironmentMock(triggers))
         triggers.extend(tt.get_triggers())
-        handlers = map(lambda t: t.event_handler, triggers)
+        handlers = set(map(lambda t: t.event_handler, triggers))
         self.assertEqual(2, len(triggers))
-        self.failUnless(TestTask.start_handler.im_func in handlers)
-        self.failUnless(tt.end_handler_func in handlers)
+        self.assertIn(self.get_func(TestTask.start_handler), handlers)
+        self.assertIn(self.get_func(tt.end_handler_func), handlers)
+
+    def get_func(self, method):
+        try:
+            return method.im_func
+        except AttributeError: # Python 3
+            try:
+                return method.__func__
+            except AttributeError: # Python 3 (unbound method == func)
+                return method
 
 
 def main():

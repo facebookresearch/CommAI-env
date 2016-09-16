@@ -10,7 +10,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import unittest
-import core.serializer as serializer
+import sys
+from core import serializer
 
 
 class TestSerializer(unittest.TestCase):

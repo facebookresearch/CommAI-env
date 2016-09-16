@@ -31,7 +31,7 @@ class TestEvents(unittest.TestCase):
         em.register(self,
                     events.Trigger(MyEvent, lambda e: True, on_start))
         em.raise_event(MyEvent())
-        self.failUnless(self.event_raised)
+        self.assertTrue(self.event_raised)
 
 
 def main():

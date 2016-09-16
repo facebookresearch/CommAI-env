@@ -75,7 +75,7 @@ class TestObjectsProperties(unittest.TestCase):
         # (if it did, then this would be a good response, and it's not
         # what we are testing here)
         m.send(answer[0])
-        self.failIf(m.is_silent(), "failed to interrupt teacher: "
+        self.assertFalse(m.is_silent(), "failed to interrupt teacher: "
                     "correct answer detected too late.")
         # send the rest of the answer with the termination marker
         m.send("{0}.".format(answer[1:]))
@@ -229,7 +229,7 @@ class TestObjectsProperties(unittest.TestCase):
                             if property_ in
                             global_properties[basket][object_]]
             answer = random.choice(all_answers)
-            self.failUnless(all_answers, "There are no objects {0} "
+            self.assertTrue(all_answers, "There are no objects {0} "
                             "in {1}'s basket".format(property_, basket))
             return answer, all_answers
         self.do_test_battery(

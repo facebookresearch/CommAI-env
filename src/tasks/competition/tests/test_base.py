@@ -41,7 +41,7 @@ class TestBase(unittest.TestCase):
             m.send(message)
             blen = m.read()
             self.assertEqual(blen, 0)
-            self.failIf(m.get_last_message() == "Interrupted.")
+            self.assertFalse(m.get_last_message() == "Interrupted.")
             m.send("Respectful.")
             blen = m.read()
             self.assertGreater(blen, 0)
