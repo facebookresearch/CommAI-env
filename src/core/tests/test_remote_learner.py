@@ -13,22 +13,28 @@ from __future__ import unicode_literals
 import zmq
 import random
 
-port = "5556"
-context = zmq.Context()
-socket = context.socket(zmq.PAIR)
-socket.connect("tcp://localhost:%s" % port)
-socket.send_string(str('hello'))
 
-message = '00101110'
-cnt = 0
-while True:
-    reward = socket.recv()  # 1 or 0, or '-1' for None
-    print(reward)
-    msg_in = socket.recv()
-    print(msg_in)
+def main():
+    port = "5556"
+    context = zmq.Context()
+    socket = context.socket(zmq.PAIR)
+    socket.connect("tcp://localhost:%s" % port)
+    socket.send_string(str('hello'))
 
-    # think...
-    msg_out = str(random.getrandbits(1) if cnt % 7 == 0 else 1)
-    # msg_out = str(message[cnt % 8])
-    socket.send(msg_out)
-    cnt = cnt + 1
+    message = '00101110'
+    cnt = 0
+    while True:
+        reward = socket.recv()  # 1 or 0, or '-1' for None
+        print(reward)
+        msg_in = socket.recv()
+        print(msg_in)
+
+        # think...
+        msg_out = str(random.getrandbits(1) if cnt % 7 == 0 else 1)
+        if cnt % 2 == 0:
+            msg_out = str(message[cnt % 8])
+        socket.send(msg_out)
+        cnt = cnt + 1
+
+if __name__ == '__main__':
+    main()

@@ -45,7 +45,7 @@ class LearnerMock(object):
     def next(self, token):
         return token
 
-    def reward(self, r):
+    def try_reward(self, r):
         pass
 
 

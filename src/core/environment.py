@@ -94,11 +94,12 @@ class Environment:
         # achieving the goal
         if not self._current_task.has_ended():
             # Check if a Timeout occurred
-            if not self._current_task.check_timeout(self._task_time):
-                # Process the input from the learner and raise events
-                if learner_input is not None:
-                    # record the input from the learner and deserialize it
-                    self._input_channel.consume_bit(learner_input)
+            self._current_task.check_timeout(self._task_time)
+            # Process the input from the learner and raise events
+            if learner_input is not None:
+                # record the input from the learner and deserialize it
+                # TODO this bit is dropped otherwise on a timeout...
+                self._input_channel.consume_bit(learner_input)
             # We are in the middle of the task, so no rewards are given
             reward = None
         else:
