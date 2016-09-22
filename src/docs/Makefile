@@ -85,17 +85,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/AI-Challenge.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/commAI-env.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/AI-Challenge.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/commAI-env.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/AI-Challenge"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/AI-Challenge"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/commAI-env"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/commAI-env"
 	@echo "# devhelp"
 
 epub:
