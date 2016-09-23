@@ -126,12 +126,11 @@ a super class learner `learners.base.RemoteLearner` which sets up a `zeromq` soc
 environment. The environment acts as a server.  For convenience, the user can specify the command to launch the learner
 so that it is launched with the environment in the same process.
 
-The contract is as follows:
-- When the session is created, the environment awaits a handshake from a learner, and then they begin talking.
+When the session is created, the environment and learner are initialized:
 - The learner begins by sending a handshake 'hello' to the environment.
-- Loop: accept reward (1 byte), accept environment bit (1 byte), send reply bit (1 byte).
+- Loop: accept reward, accept environment bit, send reply bit.
 
-C++ Learner Example:
+Example:
 
 ```c++
 #include <string.h>
@@ -155,10 +154,10 @@ int main()
    // talk
    while (true)
    {
-      // acknowledge reward
+      // receive reward
       zmq_recv(to_env, reply, 1, 0);
 
-      // acknowledge teacher/env
+      // receive teacher/env bit
       zmq_recv(to_env, reply, 1, 0);
 
       // reply
@@ -193,6 +192,7 @@ python run.py -l learners.sample_learners.SampleRepeatingLearner -v ConsoleView 
 
 ## Requirements
 * Python 2.6+
+* zeromq (for remote learners)
 
 
 ## Full documentation
