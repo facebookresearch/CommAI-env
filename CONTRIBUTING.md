@@ -1,4 +1,4 @@
-# Contributing to AI Challenge
+# Contributing to commAI-env
 We want to make contributing to this project as easy and transparent as
 possible.
 
@@ -33,5 +33,5 @@ outlined on that page and do not file a public issue.
 Mainly follow the guidelines in PEP 8.
 
 ## License
-By contributing to AI Challenge, you agree that your contributions will be licensed
-under its BSD license.
+By contributing to commAI-env, you agree that your contributions will be
+licensed under its BSD license.
