@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# AI-Competition documentation build configuration file, created by
+# CommAI-env documentation build configuration file, created by
 # sphinx-quickstart on Wed Aug  3 14:31:58 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'AI-Competition'
+project = u'CommAI-env'
 copyright = u'2016, Facebook'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -182,7 +182,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'AI-Competitiondoc'
+htmlhelp_basename = 'CommAI-envdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -202,7 +202,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'AI-Competition.tex', u'AI-Competition Documentation',
+  ('index', 'CommAI-env.tex', u'CommAI-env Documentation',
    u'Facebook', 'manual'),
 ]
 
@@ -232,7 +232,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ai-Competition', u'ai-Competition Documentation',
+    ('index', 'CommAI-env', u'CommAI-env Documentation',
      [u'Facebook'], 1)
 ]
 
@@ -246,8 +246,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'AI-Competition', u'AI-Competition Documentation',
-   u'Facebook', 'AI-Competition', 'One line description of project.',
+  ('index', 'CommAI-env', u'CommAI-env Documentation',
+   u'Facebook', 'CommAI-env', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -1,7 +1,7 @@
 Introduction
 ------------
 
-The code in the AI-Competition models a simulation scenario in which a
+The code in the CommAI-env models a simulation scenario in which a
 **Learner** communicates with an **Environment** who impersonates a teacher
 asking the Learner to perform tasks and rewarding it when it does so. The tasks
 are performed through natural language communication, in the same way as the
@@ -48,4 +48,4 @@ ultimately of the same elements of a Task: some state variables and
 Triggers and can interact with the Learner. The goal of this entity is to have
 consistent across tasks states and behaviors. A Task can access the state
 variables of the world, and listen for changes on them. The World, on the other
-hand, cannot access the Task that is being run on. 
+hand, cannot access the Task that is being run on.

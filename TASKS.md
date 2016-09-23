@@ -2,7 +2,7 @@
 
 # Introduction
 
-This document describes the tasks that are currently implemented or about to be implemented in MAINE. The document is used by MAINE developers to keep track of task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
+This document describes the tasks that are currently implemented or about to be implemented in CommAI-env. The document is used by CommAI-env developers to keep track of task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
 
 **NB: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here.**
 

@@ -1,9 +1,9 @@
-.. AI-Competition documentation master file, created by
+.. CommAI-env documentation master file, created by
    sphinx-quickstart on Wed Aug  3 14:31:58 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to AI-Competition's documentation!
+Welcome to CommAI-env's documentation!
 ==========================================
 
 .. include:: intro.rst
