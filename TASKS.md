@@ -261,7 +261,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Prerequisites:** -
 * **Teacher inputs:** generated from a simple grammar
 
-### **Object existence 2 [T3]**
+### **Object existence 2 [T3][IMP]**
 
 * **Description:** the learner needs to understand which objects are present, and teacher should guide it through communication when learner is wrong; increased complexity by having more objects present
 * **Instruction: -**
@@ -623,7 +623,7 @@ This document describes the tasks that are currently implemented or about to be 
 
 ## **Navigation & Proprioception**
 
-### **Look [AJ1]**
+### **Look [AJ1][IMP]**
 
 * **Description:** the learner must look where the teacher tells it to.
 * **Instruction:** look where I say
@@ -635,7 +635,8 @@ This document describes the tasks that are currently implemented or about to be 
 * **Motivation:** learners learn to look around, gather information about its information.
 * **Prerequisites:**
 * **Teacher inputs:** look to the east, look to the west, look to the north, look to the south
-### **Look Around [AJ2]**
+
+### **Look Around [AJ2][IMP]**
 
 * **Description:** the learner must look around itself
 * **Instruction:** look around
@@ -652,7 +653,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Prerequisites:**
 * **Teacher inputs:**
 
-### **Look For [AJ3]**
+### **Look For [AJ3][IMP]**
 
 * **Description:** the learner must find an object
 * **Instruction:** find the object I want

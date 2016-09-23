@@ -99,9 +99,47 @@ number_questions = ['please tell me the number.',
 delimiters = r'(?:, | and |, and | )'
 
 
-class ObjectExistenceTask(BaseTask):
+class ObjectExistenceTask1(BaseTask):
+    def __init__(self):
+        super(ObjectExistenceTask1, self).__init__(max_time=3000)
+
+    @on_start()
+    def on_start(self, event):
+        self.obj = random.choice(global_objects)
+        self.obj_question = random.choice(global_objects)
+
+        s = "Let's play game with objects. "
+        s += "I have " + self.obj + ". "
+        s += "Do I have " + self.obj_question + "?"
+        self.set_message(s)
+
+    @on_message("(yes|no).$")
+    def on_message(self, event):
+        if event.is_message("yes", '.'):
+            if self.obj == self.obj_question:
+                self.set_reward(1, "Correct!")
+            else:
+                s = "Wrong, I do not have " + self.obj_question + ". "
+                s += "Do I have " + self.obj_question + "?"
+                self.set_message(s)
+            return
+
+        if event.is_message("no", '.'):
+            if self.obj != self.obj_question:
+                self.set_reward(1, "Correct!")
+            else:
+                s = "Wrong, I do have " + self.obj_question + ". "
+                s += "Do I have " + self.obj_question + "?"
+                self.set_message(s)
+
+    @on_timeout()
+    def on_timeout(self, event):
+        self.set_reward(0, "You are too slow! Let's try something else.")
+
+
+class ObjectExistenceTask2(BaseTask):
     def __init__(self, world=None):
-        super(ObjectExistenceTask, self).__init__(
+        super(ObjectExistenceTask2, self).__init__(
             world=world, max_time=3000)
 
     @on_start()

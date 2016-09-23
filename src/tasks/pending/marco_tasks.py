@@ -139,13 +139,13 @@ class ItalianHowManyPropertiesDoesAnObjectHaveTask(Task):
                 or
                 (len(self.alphabetic_property_count)>0 and
                  (event.message[-(len(self.alphabetic_property_count)+1):] == (self.alphabetic_property_count+'.')))):
-            italian_msg.congratulations=['ottimo lavoro.',
+            italian_msg_congratulations=['ottimo lavoro.',
                                               'bravo.',
                                               'congratulazioni.',
                                               'giusto.',
                                               'corretto.']
 
-            self.set_reward(1,random.choice(italian_msg.congratulations))
+            self.set_reward(1,random.choice(italian_msg_congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -154,7 +154,7 @@ class ItalianHowManyPropertiesDoesAnObjectHaveTask(Task):
         # no choice if there is no alphabetic version, else flip a
         # coin to decide whether to return digit or string version
         if (len(self.alphabetic_property_count)>0 and
-            random.randint(0,1)==1):
+                random.randint(0, 1) == 1):
             formatted_count=self.alphabetic_property_count
         self.set_message("la risposta corretta e': " + formatted_count + ".")
 
@@ -168,9 +168,9 @@ class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
     @on_start()
     def give_instructions(self, event):
         # picking a random nuber of digits between 1 and 5
-        self.digits = random.randint(1,5)
+        self.digits = random.randint(1, 5)
         # generating a random number with that number of digits
-        self.target_number=str(random.randint(1,9)) # first value shouldn't be 0, although this doesn't really
+        self.target_number=str(random.randint(1, 9)) # first value shouldn't be 0, although this doesn't really
                                                     # matter for our current purposes
         self.target_number+=''.join(["%s" % random.randint(0, 9) for i in range(1, self.digits)]) # this relies
                                                                   # on weird limit properties of Python's range
@@ -199,7 +199,7 @@ class GuessTheNumberAskingQuestionsExplicitModelTask(Task):
         elif self.re_query.match(event.message):
             self.set_message(self.target_number + '.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(msg.congratulations))
+            self.set_reward(1, random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -214,9 +214,9 @@ class GuessTheNumberAskingQuestionsTask(Task):
     @on_start()
     def give_instructions(self, event):
         # picking a random nuber of digits between 1 and 5
-        self.digits = random.randint(1,5)
+        self.digits = random.randint(1, 5)
         # generating a random number with that number of digits
-        self.target_number=str(random.randint(1,9)) # first value shouldn't be 0, although this doesn't really
+        self.target_number=str(random.randint(1, 9)) # first value shouldn't be 0, although this doesn't really
                                                     # matter for our current purposes
         self.target_number+=''.join(["%s" % random.randint(0, 9) for i in range(1, self.digits)]) # this relies
                                                                   # on weird limit properties of Python's range
@@ -245,7 +245,7 @@ class GuessTheNumberAskingQuestionsTask(Task):
         elif self.re_query.match(event.message):
             self.set_message(self.target_number + '.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(msg.congratulations))
+            self.set_reward(1, random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -304,7 +304,7 @@ class GuessTheNumberAskingForDigitsExplicitModelTask(Task):
             else:
                 self.set_message('the number has only ' + str(self.digits) + ' digits.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(msg.congratulations))
+            self.set_reward(1, random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -368,7 +368,7 @@ class GuessTheNumberAskingForDigitsTask(Task):
             else:
                 self.set_message('the number has only ' + str(self.digits) + ' digits.')
         elif event.message[-(self.digits+1):] == (self.target_number + '.'):
-            self.set_reward(1,random.choice(msg.congratulations))
+            self.set_reward(1, random.choice(msg.congratulations))
 
     @on_timeout()
     def give_away_answer(self,event):
@@ -421,7 +421,7 @@ def generate_local_prime_and_target_mappings(prime_cardinality):
 # the following function generates prime and target strings, according
 # to the tables passed as arguments
 def generate_prime_and_target(primes,targets,string_length,prime_cardinality):
-    raw_prime = [random.randint(0, (prime_cardinality-1)) for i in
+    raw_prime = [random.randint(0, (prime_cardinality - 1)) for i in
                  range(string_length)]
     prime = ''.join(chr(ord('a') + primes[x]) for x in raw_prime)
     target = ''.join(chr(ord('a') + targets[x]) for x in raw_prime)
@@ -510,10 +510,6 @@ class GlobalTwoAssociatedCharacters(Task):
     def __init__(self):
         super(GlobalTwoAssociatedCharacters, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("global primes: " + str(global_primes))
-#        self.logger.debug("global targets: " + str(global_targets))
 
     @on_start()
     def give_instructions(self, event):
@@ -536,10 +532,6 @@ class GlobalCharacterPrimeTarget(Task):
     def __init__(self):
         super(GlobalCharacterPrimeTarget, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("global primes: " + str(global_primes))
-#        self.logger.debug("global targets: " + str(global_targets))
 
     @on_start()
     def give_instructions(self, event):
@@ -597,14 +589,10 @@ class GlobalTwoAssociatedDelimitedStringsMax4(Task):
     def __init__(self):
         super(GlobalTwoAssociatedDelimitedStringsMax4, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("global primes: " + str(global_primes))
-#        self.logger.debug("global targets: " + str(global_targets))
 
     @on_start()
     def give_instructions(self, event):
-        self.string_length = random.randint(1,4)
+        self.string_length = random.randint(1, 4)
         self.prime,self.target=generate_prime_and_target(global_primes,global_targets,self.string_length,global_prime_cardinality)
         self.set_message(self.prime + '#' + self.target + ".")
         self.instructions_completed = False
@@ -625,10 +613,6 @@ class GlobalTwoAssociatedStringsMax4(Task):
     def __init__(self):
         super(GlobalTwoAssociatedStringsMax4, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("global primes: " + str(global_primes))
-#        self.logger.debug("global targets: " + str(global_targets))
 
     @on_start()
     def give_instructions(self, event):
@@ -656,14 +640,10 @@ class LocalTwoAssociatedDelimitedStringsMax4(Task):
     def __init__(self):
         super(LocalTwoAssociatedDelimitedStringsMax4, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("local primes " + str(self.primes))
-#        self.logger.debug("local targets " + str(self.targets))
 
     @on_start()
     def give_instructions(self, event):
-        string_length = random.randint(1,4)
+        string_length = random.randint(1, 4)
         self.prime,self.target=generate_prime_and_target(self.primes,self.targets,
                                                          self.string_length,global_prime_cardinality)
         self.set_message(self.prime + '#' + self.target + ".")
@@ -689,10 +669,6 @@ class LocalTwoAssociatedStringsMax4(Task):
     def __init__(self):
         super(LocalTwoAssociatedStringsMax4, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("local primes " + str(self.primes))
-#        self.logger.debug("local targets " + str(self.targets))
 
     @on_start()
     def give_instructions(self, event):
@@ -718,10 +694,6 @@ class GlobalStringPrimeTargetMax4(Task):
     def __init__(self):
         super(GlobalStringPrimeTargetMax4, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("global primes: " + str(global_primes))
-#        self.logger.debug("global targets: " + str(global_targets))
 
     @on_start()
     def give_instructions(self, event):
@@ -750,10 +722,6 @@ class LocalStringPrimeTargetMax4(Task):
     def __init__(self):
         super(LocalStringPrimeTargetMax4, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("local primes " + str(self.primes))
-#        self.logger.debug("local targets " + str(self.targets))
 
     @on_start()
     def give_instructions(self, event):
@@ -780,10 +748,6 @@ class GlobalStringPrimeTargetMin5Max10(Task):
     def __init__(self, env):
         super(GlobalStringPrimeTargetMin5Max10, self).__init__(
             max_time=500)
-        # debug
-#        self.logger=logging.getLogger(__name__)
-#        self.logger.debug("global primes: " + str(global_primes))
-#        self.logger.debug("global targets: " + str(global_targets))
 
     @on_start()
     def give_instructions(self, event):

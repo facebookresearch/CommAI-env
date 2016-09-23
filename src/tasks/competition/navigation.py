@@ -19,7 +19,7 @@ import random
 # use the set of objects from the objects-properties association tasks.
 objects = set(obj for basket, objects in global_properties.items()
                   for obj in objects)
-
+dirs = ['east', 'west', 'north', 'south']
 
 TIME_CHAR = 8
 TIME_VERB = (len("Say 'I xxxxxxxxxxxx' to xxxxxxxxxxxx.") +
@@ -209,7 +209,8 @@ class PickUpAroundTask(BaseTask):
         # choose a random object
         self.target_obj, = random.sample(objects, 1)
         # find a random cell around the learner
-        self.direction = random.choice(list(self.get_world().valid_directions.keys()))
+        self.direction = random.choice(list(self.get_world().valid_directions
+                                            .keys()))
         ws = self.get_world().state
         p = ws.learner_pos + self.get_world().valid_directions[self.direction]
         self.state.initial_count = ws.learner_inventory[self.target_obj]
@@ -332,7 +333,8 @@ class PickUpAroundAndGiveTask(BaseTask):
         # save how many instances of the object the learner intially had
         self.state.learner_initial_count = ws.learner_inventory[target_obj]
         # choose some random direction
-        self.direction = random.choice(list(self.get_world().valid_directions.keys()))
+        self.direction = random.choice(list(self.get_world().valid_directions
+                                            .keys()))
         # measure a cell one step in that direction
         self.obj_pos = ws.learner_pos + \
             self.get_world().valid_directions[self.direction]
@@ -512,3 +514,96 @@ class CountingInventoryGivingTask(BaseTask):
         if self.stage in ['waiting-give-back', 'final-query']:
             # cleanup
             self.get_world().state.teacher_accepts.remove(self.state.target_obj)
+
+
+class LookTask(BaseTask):
+    # look in a predifined direction.
+    def __init__(self, world):
+        super(LookTask, self).__init__(max_time=1000, world=world)
+
+    @on_start()
+    def on_start(self, event):
+        self.dir = random.choice(dirs)
+        dir = self.get_world().state.learner_direction
+        self.set_message("Look to the " + self.dir + "," +
+                         " you are currently facing " + dir + ".")
+
+    @on_message(r"I look\.$")
+    def on_message(self, event):
+        dir = self.get_world().state.learner_direction
+        if dir == self.dir:
+            self.set_reward(1, "Congratulations! "
+                            "You are looking in the right direction.")
+
+
+class LookAroundTask(Task):
+    # the learner must look around his current position
+
+    def __init__(self, world):
+        super(LookAroundTask, self).__init__(max_time=5000, world=world)
+
+    @on_start()
+    def on_start(self, event):
+        self.visited_dirs = {'east': False, 'west': False,
+                             'north': False, 'south': False}
+        self.ndir = 0
+        dir = self.get_world().state.learner_direction
+        self.set_message("Look around. You are facing " + dir + ".")
+        self.state.learner_pos = self.get_world().state.learner_pos
+
+    @on_state_changed(lambda ws, ts: ws.learner_pos != ts.learner_pos)
+    def on_moved(self, event):
+        self.set_reward(0, "You are not allowed to move.")
+
+    @on_message(r"I look\.$")
+    def on_message(self, event):
+        dir = self.get_world().state.learner_direction
+        if dir in self.visited_dirs and not self.visited_dirs[dir]:
+            self.visited_dirs[dir] = True
+            self.ndir += 1
+            ddir = len(self.visited_dirs) - self.ndir
+            if ddir == 0:
+                self.set_reward(1, "Congratulations!")
+            else:
+                self.set_message(str(ddir) + " directions to go.")
+        elif dir in self.visited_dirs:
+            self.set_message("You already look here.")
+
+
+class FindObjectAroundTask(Task):
+    # set 4 objects around the learner, ask to find one of them.
+    def __init__(self, world):
+        super(FindObjectAroundTask, self).__init__(max_time=10000,
+                                                   world=world)
+        self.dir2obj = [0, 1, 2, 3]
+        random.shuffle(self.dir2obj)
+
+    @on_start()
+    def on_start(self, event):
+        # random assignment of object to location
+        self.state.learner_pos = self.get_world().state.learner_pos
+        pos = self.state.learner_pos
+        pe = self.get_world().put_entity
+        for i in range(0, len(dirs)):
+            np = pos + self.get_world().valid_directions[dirs[i]]
+            pe(np, objects[self.dir2obj[i]], True, True)
+        self.dir = random.choice(self.dir2obj)
+        self.obj = objects[self.dir2obj[self.dir]]
+        self.instructions_completed = False
+        self.set_message("Pick the " + self.obj + " next to you.")
+        obj_count = self.get_world().state.learner_inventory[self.obj]
+        self.add_handler(
+            on_state_changed(
+                lambda ws, ts: ws.learner_inventory[self.obj] == obj_count + 1)
+            (self.on_object_picked.im_func)
+        )
+
+    @on_ended()
+    def on_ended(self, event):
+        pos = self.state.learner_pos
+        for i in range(0, len(dirs)):
+            np = pos + self.get_world().valid_directions[dirs[i]]
+            self.get_world().remove_entity(np)
+
+    def on_object_picked(self, event):
+        self.set_reward(1, 'Well done!')
