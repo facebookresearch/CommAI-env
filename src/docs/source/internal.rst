@@ -13,7 +13,7 @@ or::
   make latexpdf
 
 This documentation can be made publicly available at the URL
-https://facebookresearch.github.io/commAI-env/ simply by checking out
+https://facebookresearch.github.io/CommAI-env/ simply by checking out
 the GitHub repo and running the following command at the root of the project::
 
     make gh-pages
