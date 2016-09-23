@@ -15,9 +15,13 @@ from tasks.competition.base import BaseTask
 import tasks.competition.messages as msg
 import random
 import string
+import itertools
+import copy
 
 # task-specific messages
 verbs = ["say", "repeat"]
+negation = ["do not", "don\'t"]
+
 # FIXME: replace with association's objects and properties?
 phrases = ["apple", "banana", "cat", "hello world"]
 context = ["and you will get a reward",
@@ -41,7 +45,6 @@ class BeSilentTask(Task):
         self.flag_failed = False
         self.set_message(random.choice(["be silent now.",
                                         "do not say anything."]))
-
 
     # silence is represented by the space character
     # catch any non-space character
@@ -420,6 +423,125 @@ class RepeatWhatISayMultipleTimesSeparatedByCATask(BaseTask):
                             negative_feedback=random.choice(msg.failed),
                             answer=self.target
                         ))
+
+
+class RepeatWhatISayDisjunction(BaseTask):
+    def __init__(self, world=None):
+        super(RepeatWhatISayDisjunction, self).__init__(world=world,
+                                                        max_time=1000)
+
+    @on_start()
+    def on_start(self, event):
+        # randomly sample two objects
+        self.cur_phrases = [random.choice(phrases), random.choice(phrases)]
+
+        # ask the learner to repeat the phrase sampling one of the possible
+        # ways of asking that.
+        self.set_message("{query_verb} {phrase1} or {phrase2}."
+                         .format(
+                             query_verb=random.choice(verbs),
+                             phrase1=self.cur_phrases[0],
+                             phrase2=self.cur_phrases[1])
+                         )
+
+        # compute the answer
+        self.answers = copy.deepcopy(self.cur_phrases)
+
+    # we wait for the learner to send a message finalized by a full stop.
+    @on_message(r'\.$')
+    def on_message(self, event):
+        for answer in self.answers:
+            print(answer)
+            if event.is_message_exact(answer, '.'):
+                    # if the message sent by the learner equals the teacher's
+                    # selected phrase followed by a period, reward the learner.
+                    self.set_reward(1, random.choice(msg.congratulations))
+                    break
+
+            # If we reached thsi point, it fails the task.
+            self.fail_learner()
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # if the learner has not produced any plausible answer by the max_time
+        # allowed, fail the learner sending appropriate feedback.
+        self.fail_learner()
+
+    def fail_learner(self):
+        # fail the learner sending a random fail feedback message
+        self.set_reward(0, random.choice(msg.failed))
+
+
+class RepeatWhatISayConjunctionNegation(BaseTask):
+    def __init__(self, world=None):
+        super(RepeatWhatISayConjunctionNegation, self).__init__(world=world,
+                                                                max_time=1000)
+
+    @on_start()
+    def on_start(self, event):
+        # randomly sample two objects
+        self.cur_phrases = [random.choice(phrases), random.choice(phrases)]
+        # randomly sample existence of negation for first and second object
+        self.negation1 = random.choice([0, 1])
+        self.negation2 = random.choice([0, 1])
+
+        # ask the learner to repeat the phrase sampling one of the possible
+        # ways of asking that.
+        self.set_message("{negation1} {query_verb} {phrase1} and {negation2} "
+                         "{query_verb} {phrase2}."
+                         .format(
+                             negation1=random.choice(negation)
+                             if self.negation1 == 1 else "",
+                             query_verb=random.choice(verbs),
+                             phrase1=self.cur_phrases[0],
+                             negation2=random.choice(negation)
+                             if self.negation2 == 1 else "",
+                             phrase2=self.cur_phrases[1])
+                         )
+
+        # compute the answer
+        self.answer_parts = []
+        if self.negation1 == 1 and self.negation2 == 0 \
+                and self.cur_phrases[0] != self.cur_phrases[1]:
+            self.answer_parts.append(self.cur_phrases[1])
+        else:
+            self.answer_parts.append(self.cur_phrases[0])
+            if self.negation2 == 0:
+                self.answer_parts.append(self.cur_phrases[0])
+                self.answer_parts.append(self.cur_phrases[1])
+            elif self.cur_phrases[0] != self.cur_phrases[1]:
+                    self.answer_parts.append(self.cur_phrases[0])
+
+        # generate all permutations of objects separated by and
+        self.answers = []
+        for answer in itertools.permutations(list(set(self.answer_parts))):
+            self.answers.append(" and ".join(answer))
+        # in case of no object (e.g., do not say x and do not say y) add space
+        if not self.answers:
+            self.answer.append(" ")
+
+    # we wait for the learner to send a message finalized by a full stop.
+    @on_message(r'\.$')
+    def check_response(self, event):
+        for answer in self.answers:
+            if event.is_message_exact(answer, '.'):
+                # if the message sent by the learner equals the teacher's
+                # selected phrase followed by a period, reward the learner.
+                self.set_reward(1, random.choice(msg.congratulations))
+                break
+            # If we reached thsi point, it fails the task.
+            self.fail_learner()
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # if the learner has not produced any plausible answer by the max_time
+        # allowed, fail the learner sending appropriate feedback.
+        self.fail_learner()
+
+    def fail_learner(self):
+        # fail the learner sending a random fail feedback message
+        self.set_reward(0, random.choice(msg.failed))
+
 
 # timing constants
 TIME_CHAR = 8

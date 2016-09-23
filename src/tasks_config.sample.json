@@ -38,8 +38,24 @@
         "type": "tasks.competition.repetition.RepeatWhatISayMultipleTimesSeparatedByCATask",
         "world": "gw"
     },
+    "a1": {
+        "type": "tasks.competition.repetition.RepeatWhatISayDisjunction",
+        "world": "gw"
+    },
+    "a2": {
+        "type": "tasks.competition.repetition.RepeatWhatISayConjunctionNegation",
+        "world": "gw"
+    },
     "g0": {
         "type": "tasks.competition.repetition.VerbTask",
+        "world": "gw"
+    },
+    "t1": {
+        "type": "tasks.competition.counting.SimpleCountingTask",
+        "world": "gw"
+    },
+    "t2": {
+        "type": "tasks.competition.objects_properties.ObjectExistenceTask",
         "world": "gw"
     },
     "m1": {
@@ -140,6 +156,8 @@
       "type": "core.scheduler.RandomTaskScheduler",
       "args": {
           "tasks": ["k0", "g15", "k2", "k5", "k6", "k7", "k8", "k9",
+            "a1", "a2",
+            "t1", "t2",
             "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12",
             "g0", "g1", "g2", "g3", "g4", "g6", "g7", "g8", "g9", "g10", "g13", "g14"]
         }

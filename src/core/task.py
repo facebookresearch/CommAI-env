@@ -52,6 +52,13 @@ class MessageReceived():
         return self.message[-(len(msg) + len(suffix)):-len(suffix)] == msg and\
             suffix == self.message[-len(suffix):]
 
+    def is_message_exact(self, msg, suffix=''):
+        '''Checks if the received message exactly matches the one in the parameter'''
+        preffix = self.message[0:-(len(msg) + len(suffix))]
+        m = re.search("^\s*$", preffix)
+        return self.message[-(len(msg) + len(suffix)):-len(suffix)] == msg and\
+            suffix == self.message[-len(suffix):] and m
+
     def get_match(self, ngroup=0):
         '''If the regular expression in the Trigger condition had groups,
         it can retreive what they captured.'''

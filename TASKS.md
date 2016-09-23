@@ -46,7 +46,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Example 1:**
     * **Teacher:** say a.
     * **Learner:** a.
-    * **Teacher:** correct. [R+1] 
+    * **Teacher:** correct. [R+1]
 * **Example 2:**
     * **Teacher:** repeat a.
     * **Learner:** blablabla.
@@ -59,8 +59,8 @@ This document describes the tasks that are currently implemented or about to be 
 * **Description:** the learner is asked not to repeat the character after the teacher.
 * **Example 1:**
     * **Teacher:**  do not say a.
-    * **Learner:** 
-    * **Teacher:** correct. [R+1] 
+    * **Learner:**
+    * **Teacher:** correct. [R+1]
 * **Example 2:**
     * **Teacher:** don’t repeat a.
     * **Learner:** blablabla.
@@ -74,7 +74,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Example 1:**
     * **Teacher:** say apple.
     * **Learner:** apple.
-    * **Teacher:** correct. [R+1] 
+    * **Teacher:** correct. [R+1]
 * **Example 2:**
     * **Teacher:** repeat hello world.
     * **Learner:** hello world.
@@ -175,7 +175,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Max Time:** 10000
 * **Motivation:** learners learn to repeat a symbol or a word multiple times.
 
-### **Repeat What I Say Using Conjunction And Negation [****A1****]**
+### **Repeat What I Say Using Conjunction And Negation [A1][IMP]:**
 
 * **Description:** Learner is asked to repeat after the teacher, but this time using *and* and negation (*don’t, do not*).
 * **Example 1:**
@@ -197,7 +197,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Motivation:** Teach the learner basic logic operations
 * **MaxTime**: 1000
 
-### **Repeat What I Say Using Disjunction [****A****2]**
+### **Repeat What I Say Using Disjunction [A2][IMP]:**
 
 * **Description:** Learner is asked to repeat after the learner, but this time using *or*.
 * **Example 1:**
@@ -211,7 +211,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Motivation:** Teach the learner basic logic operations
 * **MaxTime**: 1000
 
-### **Verbs [G0][IMP]:** 
+### **Verbs [G0][IMP]:**
 
 * **Description:** Learner is asked to do something.
 * **Instructions:** Say 'I V' to V.
@@ -230,17 +230,13 @@ This document describes the tasks that are currently implemented or about to be 
 
 ## Counting
 
-### **Counting [t5]**
+### **Counting [T1][IMP]:**
 * **Description:** the learner should know how many objects the teacher has based on communication only.
 * **Instruction:** Count the objects.
 * **Example 1:**
     * **Teacher:** I have an apple, an apple and a banana. How many bananas do I have?
     * **Learner:** one
-    * **Teacher:** How many apples do I have?
-    * **Learner:** two
-    * **Teacher:** How many pears do I have?
-    * **Learner:** zero
-* **Motivation:** To learn basic counting and memory.
+* **Motivation:** To learn basic counting.
 * **Prerequisites:** T2, T3
 * **Teacher inputs:** generated from a simple grammar
 
@@ -248,25 +244,17 @@ This document describes the tasks that are currently implemented or about to be 
 
 ## **Objects & Properties**
 
-### **Object existence 1 [T2]**
+### **Object existence 1 [T2][IMP]:**
 
 * **Description:** the learner needs to understand which objects are present, and teacher should guide it through communication when learner is wrong
 * **Instruction:** Let's play a game with fruits.
 * **Example 1:**
     * **Teacher:** I have an apple. Do I have a banana?
     * **Learner:** yes
-    * **Teacher:** wrong, I do not have a banana. Do I have a banana?
-    * **Learner:** no
-    * **Teacher:** correct [R+1]
+    * **Teacher:** wrong, I do not have a banana.
 * **Example 2:**
     * **Teacher:** I have an apple. Do I have a banana?
     * **Learner:** no
-    * **Teacher:** correct [R+1]
-* **Example 3:**
-    * **Teacher:** I have an apple. Do I have an apple?
-    * **Learner:** no
-    * **Teacher:** wrong, I do have an apple. Do I have an apple?
-    * **Learner:** yes
     * **Teacher:** correct [R+1]
 * **Motivation:** To learn about presence of objects.
 * **Max_time:** 3000
@@ -524,7 +512,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Timeout Message:**
     * if you asked: [question model], I would have said: [target number].
 * **Prerequisites:** The repetition tasks, any counting task might also help.
-* **Teacher inputs:** 
+* **Teacher inputs:**
     * At beginning: guess the D-digit number I am thinking of; you can ask me: [question model].
     * In response to request for number: [target number].
 * **Accepted variations of request (question model):** please tell me the number., what’s the number?, what is the number?, can you tell me the number?
@@ -550,7 +538,7 @@ This document describes the tasks that are currently implemented or about to be 
 * **Timeout Message:**
     * if you asked: [question model], I would have said: [target number].
 * **Prerequisites:** Clearly, this should benefit from the more explicit M13 (and any other tasks the latter depends upon). Ability to memorize information across tasks (as developed, e.g., in the association tasks) should also help, because the Learner should remember and be able to use the questions that were taught in M13
-* **Teacher inputs:** 
+* **Teacher inputs:**
     * At beginning: guess the D-digit number I am thinking of; you can ask me for the number.
     * In response to request for number: [target number].
 * **Accepted variations of request:** same as in M13
@@ -594,7 +582,7 @@ This document describes the tasks that are currently implemented or about to be 
     * Else:
         * the number is [target number].
 * **Prerequisites:** The repetition tasks, any counting task might also help, the association tasks because of the memory demands.
-* **Teacher inputs:** 
+* **Teacher inputs:**
     * At beginning: guess the D-digit number I am thinking of; you can ask me: [question model].
     * In response to request for digit:
         * If there is still a digit that hasn’t been requested: [next digit].
@@ -626,7 +614,7 @@ This document describes the tasks that are currently implemented or about to be 
     * Else:
         * the number is [target number].
 * **Prerequisites:** M15, and its dependencies
-* **Teacher inputs:** 
+* **Teacher inputs:**
     * At beginning: guess the D-digit number I am thinking of; you can ask me for the next digit.
     * In response to request for digit:
         * If there is still a digit that hasn’t been requested: [next digit].
@@ -755,8 +743,8 @@ This document describes the tasks that are currently implemented or about to be 
 * **Rewards:** +1 for correct answer
 * **MaxTime**: Len(Instructions) + TIME_PICK
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Pick up in front Task [G7][IMP]**
 
@@ -774,8 +762,8 @@ This document describes the tasks that are currently implemented or about to be 
 * **Rewards:** +1 for correct answer
 * **MaxTime**: Len(Instructions) + 4 TIME_LOOK +  2 * MAX_N * TIME_MOVE + 3 TIME_PICK
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Pick up around Task [G8][IMP]**
 
@@ -793,8 +781,8 @@ This document describes the tasks that are currently implemented or about to be 
 * **Rewards:** +1 for correct answer
 * **MaxTime**: Len(Instructions) + 4 TIME_LOOK +  TIME_MOVE + 3 TIME_PICK
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Giving [G9][IMP]**
 
@@ -806,10 +794,10 @@ This document describes the tasks that are currently implemented or about to be 
     * **Teacher:** You gave me an apple. [+1].
 * **Motivation:** Teach the learner how to give things to the teacher. Later this will be useful to ask it to give you N objects.
 * **Rewards:** +1 for correct answer
-* **MaxTime**: 
+* **MaxTime**:
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Pick up around and give [G10][IMP]**
 
@@ -827,10 +815,10 @@ This document describes the tasks that are currently implemented or about to be 
     * **Teacher:** You gave me an apple.
 * **Motivation:** Teach the learner how to find things near it.
 * **Rewards:** +1 for correct answer
-* **MaxTime**: 
+* **MaxTime**:
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Pick up around many and give [G12]**
 
@@ -856,10 +844,10 @@ This document describes the tasks that are currently implemented or about to be 
     * **Teacher:** You gave me a banana [+1].
 * **Motivation:** Combines enumeration skills and counting with picking up and giving.
 * **Rewards:** +1 for correct answer
-* **MaxTime**: 
+* **MaxTime**:
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Counting in inventory [G13][IMP]**
 
@@ -868,13 +856,13 @@ This document describes the tasks that are currently implemented or about to be 
 * **Example:**
     * **Teacher:** How many apples do you have?
     * **Learner:** two.
-    * **Teacher**: No, you have one. [0] 
+    * **Teacher**: No, you have one. [0]
 * **Motivation:** Teach the learner to count and memorize the amount of objects in its inventory. Problem: it's much easier just to try one, two, three...
 * **Rewards:** +1 for correct answer
-* **MaxTime**: 
+* **MaxTime**:
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
+* **Prerequisites:**
+* **Teacher inputs:**
 
 ### **Counting in inventory with giving [G14][IMP]**
 
@@ -891,8 +879,7 @@ This document describes the tasks that are currently implemented or about to be 
     * **Learner:** two.
 * **Motivation:** Teach the learner to keep track of the items in its inventory in relation to the actions it performs.
 * **Rewards:** +1 for correct answer
-* **MaxTime**: 
+* **MaxTime**:
 * **Timeout Message**: Generic "time is out" message.
-* **Prerequisites:** 
-* **Teacher inputs:** 
-
+* **Prerequisites:**
+* **Teacher inputs:**

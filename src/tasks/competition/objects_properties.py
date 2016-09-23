@@ -72,15 +72,21 @@ global_properties = {
 
 # it's handy to have a reverse dictionary with the properties in the
 # above lists as keys, and the objects as values
-reverse_global_properties = {}
+rev_global_properties = {}
 for basket in global_properties:
-    reverse_global_properties[basket] = {}
+    rev_global_properties[basket] = {}
     for object in global_properties[basket]:
         for property in global_properties[basket][object]:
-            if property not in reverse_global_properties[basket]:
-                reverse_global_properties[basket][property] = []
-            reverse_global_properties[basket][property].append(object)
+            if property not in rev_global_properties[basket]:
+                rev_global_properties[basket][property] = []
+            rev_global_properties[basket][property].append(object)
 
+# create a list of objects
+global_objects = []
+for p in global_properties:
+    for o in global_properties[p]:
+        global_objects.append(o)
+global_objects = list(set(global_objects))
 
 # a list of questions about a number, shared by multiple tasks
 number_questions = ['please tell me the number.',
@@ -91,6 +97,79 @@ number_questions = ['please tell me the number.',
 # when an enumeration is given, each element but the last could be followed by:
 # ', ', ' and ', or ', and ' or ' '
 delimiters = r'(?:, | and |, and | )'
+
+
+class ObjectExistenceTask(BaseTask):
+    def __init__(self, world=None):
+        super(ObjectExistenceTask, self).__init__(
+            world=world, max_time=3000)
+
+    @on_start()
+    def give_instructions(self, event):
+
+        separator = ""
+        counter = {}
+        message = ""
+
+        # pick how many objects in total will be enumerated
+        total = random.randint(1, 5)
+        for i in range(0, total):
+            # for last object change separator from "," to "and"
+            if i == total - 2:
+                separator = " and "
+            elif i == total - 1:
+                separator = ""
+            else:
+                separator = ", "
+
+            # pick object
+            obj = random.choice(global_objects)
+
+            # build up message
+            message += msg.indef_article(obj)
+            message += separator
+
+            # update counter
+            if obj not in counter:
+                counter[obj] = 0
+            counter[obj] += 1
+
+        # pick object to ask the question
+        object_in_question = random.choice(global_objects)
+
+        self.answer = "Yes" if counter.get(object_in_question, 0) > 0 else "No"
+
+        self.give_away_message = "I do have {object}." \
+            if self.answer == "Yes" else "I do not have {object}."
+        self.give_away_message = self.give_away_message \
+                        .format(object=msg.indef_article(object_in_question))
+        self.give_away_message = "Wrong. " + self.give_away_message
+        self.set_message('I have {listing_objects}. Do I have {object}? '
+                            .format(
+                                listing_objects=message,
+                                object=msg.indef_article(object_in_question)
+                            ))
+
+    @on_message(r'\.')
+    def check_response(self, event):
+        # check if given answer matches
+        if event.is_message(self.answer, '.'):
+            # if the message sent by the learner equals the teacher's selected
+            # phrase followed by a period, reward the learner.
+            self.set_reward(1, random.choice(msg.congratulations))
+        else:
+            # If the learner said anything else, it fails the task.
+            self.fail_learner()
+
+    @on_timeout()
+    def on_timeout(self, event):
+        # if the learner has not produced any plausible answer by the max_time
+        # allowed, fail the learner sending appropriate feedback.
+        self.fail_learner()
+
+    def fail_learner(self):
+        # fail the learner sending a random fail feedback message
+        self.set_reward(0, self.give_away_message)
 
 
 class AssociateObjectWithPropertyTask(BaseTask):
@@ -294,10 +373,10 @@ class ListObjectsWithACertainPropertyTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # chose a random property
-        basket = random.choice(list(reverse_global_properties.keys()))
-        property_ = random.choice(list(reverse_global_properties[basket].keys()))
+        basket = random.choice(list(rev_global_properties.keys()))
+        property_ = random.choice(list(rev_global_properties[basket].keys()))
         # retrieving the objects that have this property
-        self.objects = set(reverse_global_properties[basket][property_])
+        self.objects = set(rev_global_properties[basket][property_])
 
         self.set_message("which objects are {property} in "
                          "{owner}'s basket?".format(
@@ -339,10 +418,10 @@ class NameAnObjectWithAPropertyTask(BaseTask):
     @on_start()
     def give_instructions(self, event):
         # chose a random property
-        basket = random.choice(list(reverse_global_properties.keys()))
-        property_ = random.choice(list(reverse_global_properties[basket].keys()))
+        basket = random.choice(list(rev_global_properties.keys()))
+        property_ = random.choice(list(rev_global_properties[basket].keys()))
         # retrieving the objects that have the selected property
-        self.objects = reverse_global_properties[basket][property_]
+        self.objects = rev_global_properties[basket][property_]
 
         self.set_message("can you tell me an object that is {property} "
                          "in {owner}'s basket?".format(
@@ -376,8 +455,8 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
     def give_instructions(self, event):
         # we will sample from the actual properties, plus a random
         # string representing a "property" that no object has
-        basket = random.choice(list(reverse_global_properties.keys()))
-        basket_properties = list(reverse_global_properties[basket].keys())
+        basket = random.choice(list(rev_global_properties.keys()))
+        basket_properties = list(rev_global_properties[basket].keys())
         property_pick = random.randint(0, len(basket_properties))
         if property_pick == len(basket_properties):
             # if we picked the last integer, we will generate a fake property
@@ -389,7 +468,7 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
             # let's retrieve the objects and count them
             property_ = basket_properties[property_pick]
             self.object_count = len(
-                reverse_global_properties[basket][property_])
+                rev_global_properties[basket][property_])
 
         self.set_message("how many objects are {property} in {owner}'s basket?"
                          .format(
@@ -465,7 +544,7 @@ class WhoHasACertainObjectWithACertainPropertyTask(BaseTask):
                            for object_ in object_properties])
         properties_set = set([property_
                               for basket, property_objects
-                              in reverse_global_properties.items()
+                              in rev_global_properties.items()
                               for property_ in property_objects])
         # now we build a random object+property combination from the
         # sets of objects and properties in both baskets
