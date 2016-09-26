@@ -28,6 +28,7 @@ context = ["and you will get a reward",
            "and a reward is yours",
            "and you will pass this task",
            "and you will solve this problem"]
+
 # repetition tasks configuration
 repeat_min = 2
 repeat_max = 3
@@ -428,7 +429,7 @@ class RepeatWhatISayMultipleTimesSeparatedByCATask(BaseTask):
 class RepeatWhatISayDisjunction(BaseTask):
     def __init__(self, world=None):
         super(RepeatWhatISayDisjunction, self).__init__(world=world,
-                                                        max_time=1000)
+                                                        max_time=3000)
 
     @on_start()
     def on_start(self, event):
@@ -475,7 +476,7 @@ class RepeatWhatISayDisjunction(BaseTask):
 class RepeatWhatISayConjunctionNegation(BaseTask):
     def __init__(self, world=None):
         super(RepeatWhatISayConjunctionNegation, self).__init__(world=world,
-                                                                max_time=1000)
+                                                                max_time=3000)
 
     @on_start()
     def on_start(self, event):

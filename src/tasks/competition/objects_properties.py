@@ -2,8 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from core.task import Task, on_start, on_message, on_sequence,\
-    on_state_changed, on_timeout, on_output_message
+from core.task import on_start, on_message, on_timeout
 from tasks.competition.base import BaseTask
 import tasks.competition.messages as msg
 import random
@@ -100,8 +99,8 @@ delimiters = r'(?:, | and |, and | )'
 
 
 class ObjectExistenceTask1(BaseTask):
-    def __init__(self):
-        super(ObjectExistenceTask1, self).__init__(max_time=3000)
+    def __init__(self, world=None):
+        super(ObjectExistenceTask1, self).__init__(world=world, max_time=3000)
 
     @on_start()
     def on_start(self, event):
