@@ -1,6 +1,6 @@
 # CommAI-env
 
-CommAI-env (Communication-based AI Environment) is a platform for training and evaluating AI systems as described in [A Roadmap towards Machine Intelligence](http://arxiv.org/abs/1511.08130).
+CommAI-env (Environment for Communication-based AI) is a platform for training and evaluating AI systems as described in [A Roadmap towards Machine Intelligence](http://arxiv.org/abs/1511.08130).
 
 ## Introduction
 
