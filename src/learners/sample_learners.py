@@ -41,6 +41,22 @@ class SampleSilentLearner(BaseLearner):
         return output
 
 
+class SampleNotSilentLearner(BaseLearner):
+    def __init__(self):
+        self.serializer = StandardSerializer()
+        self.some_text_code = self.serializer.to_binary('A')
+        self.some_text_i = 0
+
+    def reward(self, reward):
+        # YEAH! Reward!!! Whatever...
+        self.some_text_i = 0
+
+    def next(self, input):
+        output = self.some_text_code[self.some_text_i]
+        self.some_text_i = (self.some_text_i + 1) % len(self.some_text_code)
+        return output
+
+
 class SampleMemorizingLearner(BaseLearner):
     def __init__(self):
         self.memory = ''
