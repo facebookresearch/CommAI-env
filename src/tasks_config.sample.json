@@ -10,6 +10,10 @@
       "type": "tasks.competition.repetition.BeSilentTask",
       "world": "gw"
     },
+    "k1": {
+      "type": "tasks.competition.repetition.DoNotBeSilent",
+      "world": "gw"
+    },
     "g15": {
         "type": "tasks.competition.repetition.RepeatCharacterTask",
         "world": "gw"

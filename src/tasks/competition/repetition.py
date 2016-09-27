@@ -78,7 +78,7 @@ class DoNotBeSilent(Task):
         # initialize a variable to keep track if the learner has been failed
         self.flag_failed = True
         self.set_message(random.choice(["do not be silent now.",
-                                        "say anything."]))
+                                        "say anything you want."]))
 
     # silence is represented by the space character
     # catch any non-space character

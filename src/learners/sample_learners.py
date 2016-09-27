@@ -44,7 +44,7 @@ class SampleSilentLearner(BaseLearner):
 class SampleNotSilentLearner(BaseLearner):
     def __init__(self):
         self.serializer = StandardSerializer()
-        self.some_text_code = self.serializer.to_binary('A')
+        self.some_text_code = self.serializer.to_binary('blablabla')
         self.some_text_i = 0
 
     def reward(self, reward):
