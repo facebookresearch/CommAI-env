@@ -6,7 +6,7 @@ CommAI-env (Environment for Communication-based AI) is a platform for training a
 
 CommAI-env is a platform for training and testing an AI system, the **Learner** (coded in an arbitrary language of the system developer's choice), in a communication-based setup where it interacts via a bit-level interface with an **Environment**.  The Environment asks the Learner to solve a number of communication-based **Tasks**, and assigns it a **Reward** for each task instance it successfully completes.
 
-The Learner is presented, in random order, with multiple instances of all tasks, and it has to solve as many of them as possible in order to maximize reward. Examples of tasks currently implemented include counting problems, tasks where the Learnes must memorize lists of items and answer questions about them, or follow navigation instructions through a text-based navigation scheme (see [this document](../master/TASKS.md) for detailed descriptions of the tasks). The set of tasks is open: we are constantly extending it, and we invite others to contribute.
+The Learner is presented, in random order, with multiple instances of all tasks, and it has to solve as many of them as possible in order to maximize reward. Examples of tasks currently implemented include counting problems, tasks where the Learners must memorize lists of items and answer questions about them, or follow navigation instructions through a text-based navigation scheme (see [this document](../master/TASKS.md) for detailed descriptions of the tasks). The set of tasks is open: we are constantly extending it, and we invite others to contribute.
 
 The ultimate goal of CommAI-env is to provide an environment in which Learners can be trained, from ground up, to be able to genuinely interact with humans through language.  While the tasks might appear almost trivial (but try solving them in the *scrambled* mode we support, where your knowledge of English won't be of help!), we believe that most of them are beyond the grasp of current learning-based algorithms, and that a Learner able to solve them all would have already made great strides towards the level of communicative intelligence required to interact with, and learn further from human teachers. **NB: We do not claim that the tasks in CommAI-env are covering all skills an intelligent communicative agent should possess. Our claim is that, in order to solve CommAI-env, an intelligent agent must have very general learning capabilities, such that it should be able to acquire all the further tasks it needs fast, through interaction with humans or by other means.**
 
@@ -94,7 +94,7 @@ iterations of the tasks.
 ### Specifying a learning algorithm
 
 To run the environment with a given learning algorithm, you can use the
-`-l` or `--learner` flag followed by the fully qualifed name of the
+`-l` or `--learner` flag followed by the fully qualified name of the
 learner's class. For example, you can use any of the sample learners:
 
 - `learners.sample_learners.SampleRepeatingLearner`
@@ -115,7 +115,7 @@ class MySmartLearner(BaseLearner):
 
     def next(self, input_bit):
         # figure out what should be
-        # the next bit to be spiken
+        # the next bit to be spoken
         return next_bit
 ```
 
@@ -202,4 +202,4 @@ documentation describing how you can create your own tasks or descriptions of th
 Just go to `src/docs` and run `make html`.
 
 ## License
-AI Challenge is BSD-licensed. We also provide an additional patent grant.
+CommAI-env is BSD-licensed. We also provide an additional patent grant.
