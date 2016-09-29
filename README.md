@@ -202,4 +202,4 @@ documentation describing how you can create your own tasks or descriptions of th
 Just go to `src/docs` and run `make html`.
 
 ## License
-AI Challenge is BSD-licensed. We also provide an additional patent grant.
+CommAI-env is BSD-licensed. We also provide an additional patent grant.
