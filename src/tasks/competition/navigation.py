@@ -17,8 +17,8 @@ from tasks.competition.objects_properties import global_properties
 import random
 
 # use the set of objects from the objects-properties association tasks.
-objects = set(obj for basket, objects in global_properties.items()
-                  for obj in objects)
+objects = list(set(obj for basket, objects in global_properties.items()
+                   for obj in objects))
 dirs = ['east', 'west', 'north', 'south']
 
 TIME_CHAR = 8
