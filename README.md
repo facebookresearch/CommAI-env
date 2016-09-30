@@ -35,7 +35,7 @@ The environment can be run in two simple steps:
 
 ```bash
 # Creating a configuration file (for instance, by copying the full training set)
-cp task_config.sample.json tasks_config.json
+cp tasks_config.sample.json tasks_config.json
 
 # Running the environment, in the simplest case, just providing the configuration file as an argument
 python run.py tasks_config.json
