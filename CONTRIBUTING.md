@@ -1,12 +1,11 @@
 # Contributing to CommAI-env
-We want to make contributing to this project as easy and transparent as
-possible.
+We actively welcome you to fork the repository for your own research and experimentation.
 
 ## Our Development Process
 We will keep this source updated with the latest changes of the project.
 
 ## Pull Requests
-We actively welcome your pull requests.
+We actively welcome your pull requests for bugfixes or similar such issues.
 
 1. Fork the repo and create your branch from `master`.
 2. If you've added code that should be tested, add tests.

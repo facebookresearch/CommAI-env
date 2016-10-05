@@ -205,8 +205,13 @@ Just go to `src/docs` and run `make html`.
 
 ## Join the commAI-env community
 
-Facebook page: https://www.facebook.com/groups/1329249007088140/
-See the CONTRIBUTING file for information about how to help out.
+We encourage you to fork the repository for your own research and experimentation.
+
+Join our Facebook page, for general discussion about the project:
+https://www.facebook.com/groups/1329249007088140
+
+We actively welcome your pull requests for bugfixes or similar such issues.
+See the CONTRIBUTING file for more details.
 
 ## License
 CommAI-env is BSD-licensed. We also provide an additional patent grant.
