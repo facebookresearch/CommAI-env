@@ -102,6 +102,7 @@ class ConsoleView(BaseView):
         # task, we can keep the history intact.
         self.input_buffer = ''
         self.output_buffer = ''
+        self.panic = 'SKIP'
         # record what the learner says
         self._learner_channel = InputChannel(serializer)
         # record what the environment says
@@ -228,6 +229,9 @@ class ConsoleView(BaseView):
             self.width - self._user_input_win_x).decode(code)
         curses.noecho()
         self._user_input_win.clear()
+        if inputstr == self.panic:
+            inputstr = ''
+            self._env._task_time = float('inf')
         return inputstr
 
     def channel_to_str(self, text, bits):
