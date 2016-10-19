@@ -728,10 +728,10 @@ class ListThePropertiesThatAnObjectHasInAllBasketsTask(BaseTask):
         # get the properties that are present in all the baskets
         # for the selected object
         shared_properties_set = set.intersection(*[
-            set(prop for prop in global_properties[basket])
+            set(prop for prop in global_properties[basket][object_])
             for basket in object_baskets])
         # if set is empty, we put 'none' in it
-        if shared_properties_set:
+        if len(shared_properties_set) == 0:
             shared_properties_set.add('none')
         return shared_properties_set
 
