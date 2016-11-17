@@ -4,7 +4,9 @@
 
 This document describes the tasks that are currently implemented or about to be implemented in CommAI-env. The document is used by CommAI-env developers to keep track of task specifications. However, it should also be useful to users/system developers interested in a high-level view of the tasks, their relations and motivation.
 
-**NB: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here.**
+**NB1: We did not try to enforce consistency in the specifics of task implementation. For example: in some tasks the Teacher gives more explicit instructions to the learner whereas in others, it doesn't. In some tasks, the Learner must explicitly terminate its message with a period, and in other it doesn't, etc. We consider this sort of noise beneficial, as a smart Learner should be able to cope with high degrees of variability even when encountering similar situations.**
+
+**NB2: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here.**
 
 
 
