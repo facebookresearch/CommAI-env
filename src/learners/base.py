@@ -28,25 +28,25 @@ class BaseLearner:
 
 
 class RemoteLearner(BaseLearner):
-    def __init__(self, cmd, port='5556'):
+    def __init__(self, cmd, port):
         try:
             import zmq
         except ImportError:
             raise ImportError("Must have zeromq for remote learner.")
 
-        self.port = port
+        self.port = port if port is not None else 5556
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PAIR)
         self.socket.bind("tcp://*:%s" % port)
 
         # launch learner
-        subprocess.Popen(cmd.split())
+        subprocess.Popen((cmd + ' ' + str(self.port)).split())
         handshake_in = self.socket.recv()
         assert handshake_in == 'hello'  # handshake
 
     # send to learner, and get response;
-    def next(self, input):
-        self.socket.send(str(input))
+    def next(self, inp):
+        self.socket.send(str(inp))
         reply = self.socket.recv()
         return reply
 

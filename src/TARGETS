@@ -1,0 +1,51 @@
+python_binary(
+    name = "run",
+    py_version = "<3",
+    main_module = "experimental.germank.ai-challenge.src.run",
+    srcs =  ["run.py"],
+    deps = [
+        ':aic',
+    ]
+)
+
+python_library(
+    name = "aic",
+    srcs = glob(['**/*.py'], excludes=['run_tournament.py']),
+    deps = [],
+    base_module = '',
+    external_deps = [
+        ("pyzmq", "any"),
+    ]
+)
+
+python_binary(
+    name = "test_remote_learner",
+    py_version = "<3",
+    main_module =
+        "experimental.germank.ai-challenge.src.core.tests.test_remote_learner",
+    srcs =  util.files('core/tests/test_remote_learner.py'),
+    external_deps = [
+        ("pyzmq", "any"),
+    ]
+)
+
+cpp_binary(
+    name = "test_cpp_learner",
+    srcs = [
+          "core/tests/test_cpp_learner.cc",
+    ],
+    external_deps = [
+          "zeromq",
+    ],
+)
+
+lua_binary(
+    name = "test_torch_learner",
+    srcs = [
+        "core/tests/test_torch_learner.lua"
+    ],
+    deps = [
+        "@/deeplearning/torch:all_modules",
+    ],
+    main_module="core.tests.test_torch_learner"
+)
