@@ -161,7 +161,7 @@ class TestObjectsProperties(unittest.TestCase):
         self.do_test_battery(objects_properties.VerifyThatObjectHasPropertyTask,
                              get_correct_answer)
 
-    def testListPropertiesofAnObject(self):
+    def testListPropertiesOfAnObject(self):
         def get_correct_answer(m):
             # find the answer in the instructions
             object_, basket = m.search_last_message(
@@ -170,7 +170,7 @@ class TestObjectsProperties(unittest.TestCase):
             self.assertIn(object_, global_properties[basket])
             answer = self.enum_to_string(global_properties[basket][object_])
             return answer,
-        self.do_test_battery(objects_properties.ListPropertiesofAnObjectTask,
+        self.do_test_battery(objects_properties.ListPropertiesOfAnObjectTask,
                              get_correct_answer)
 
     def testNameAPropertyOfAnObject(self):

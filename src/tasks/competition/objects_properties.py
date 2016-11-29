@@ -286,9 +286,9 @@ class VerifyThatObjectHasPropertyTask(BaseTask):
         self.set_message('the right answer is: ' + self.answer + '.')
 
 
-class ListPropertiesofAnObjectTask(BaseTask):
+class ListPropertiesOfAnObjectTask(BaseTask):
     def __init__(self, world=None):
-        super(ListPropertiesofAnObjectTask, self).__init__(
+        super(ListPropertiesOfAnObjectTask, self).__init__(
             world=world, max_time=3500)
 
     @on_start()
@@ -390,6 +390,9 @@ class HowManyPropertiesDoesAnObjectHaveTask(BaseTask):
     def check_response(self, event):
         # check if the answer matches any of the possible ways of expressing
         # the correct number.
+        # NB: note that here a longer digit string ending with the currect
+        # number will be considered correct (e.g., 321 when the correct answer
+        # is 1)
         if any(event.is_message(correct_alt, '.')
                for correct_alt in msg.number_to_strings(self.property_count)):
             self.set_reward(1, random.choice(msg.congratulations))
@@ -415,36 +418,47 @@ class ListObjectsWithACertainPropertyTask(BaseTask):
         # retrieving the objects that have this property
         self.objects = set(rev_global_properties[basket][property_])
 
-        self.set_message("which objects are {property} in "
-                         "{owner}'s basket?".format(
+        self.question = "which objects are {property} in {owner}'s basket?".format(
                              property=property_,
-                             owner=basket))
+                             owner=basket)
+        self.set_message(self.question)
 
         # building a regexp to match the answer
         enum_re = delimiters.join(
             [r'([a-z]+)'] * len(self.objects))
         # final string must be delimited by period
         enum_re += r'\.$'
-        # register a handler that get triggers when an enumeration
-        # as described by the regular expression is found.
-        self.add_handler(on_message(enum_re)(self.check_response))
+        self.re_query = re.compile(enum_re)
 
     # on_message handler created dynamically when the number of
     # expected responses is known
+    @on_message(r'\.')
     def check_response(self, event):
-        # get the elements in the matched enumeration
-        potential_objects = set(event.get_match_groups())
-        # if the elements match the expected objects, reward the learner
-        if self.objects == potential_objects:
+        re_out=self.re_query.search(event.message)
+        if (re_out):
+            potential_objects=set(re_out.groups())
+        else:
+            potential_objects=set()
+        if (self.objects == potential_objects):
             self.set_reward(1, random.choice(msg.congratulations))
+        else:
+            answer = self.get_shuffled_correct_objects(self.objects)
+            feedback = 'the right objects are: {answer}. please try again. '.format(
+                answer=answer)
+            feedback += self.question
+            self.set_message(feedback)
 
     @on_timeout()
     def give_away_answer(self, event):
-        correct_objects = list(self.objects)
-        random.shuffle(correct_objects)
-        self.set_message('the right objects are: {answer}.'.format(
-            answer=" ".join(correct_objects)
+        answer = self.get_shuffled_correct_objects(self.objects)
+        self.set_message('you are too slow. the right objects are: {answer}.'.format(
+            answer=answer
         ))
+
+    def get_shuffled_correct_objects(self,ordered_correct_objects):
+        correct_objects = list(ordered_correct_objects)
+        random.shuffle(correct_objects)
+        return " ".join(correct_objects)
 
 
 class NameAnObjectWithAPropertyTask(BaseTask):
@@ -460,13 +474,12 @@ class NameAnObjectWithAPropertyTask(BaseTask):
         # retrieving the objects that have the selected property
         self.objects = rev_global_properties[basket][property_]
 
-        self.set_message("can you tell me an object that is {property} "
-                         "in {owner}'s basket?".format(
+        self.question = "can you tell me an object that is {property} in {owner}'s basket?".format(
                              property=property_,
-                             owner=basket
-                         ))
+                             owner=basket)
+        self.set_message(self.question)
 
-    @on_message()
+    @on_message('\.')
     def check_response(self, event):
             # traverse objects list, and see if you find one that is
             # matching
@@ -474,11 +487,16 @@ class NameAnObjectWithAPropertyTask(BaseTask):
                    for object_ in self.objects):
                 # is match found, give reward
                 self.set_reward(1, random.choice(msg.congratulations))
+            else:
+                feedback = 'one right answer is: {answer}. please try again. '.format(
+                    answer=random.choice(self.objects))
+                feedback += self.question
+                self.set_message(feedback)
 
     @on_timeout()
     def give_away_answer(self, event):
         # randomly random right property
-        self.set_message('one right answer is: {answer}.'.format(
+        self.set_message('you are too slow. one right answer is: {answer}.'.format(
             answer=random.choice(self.objects)
         ))
 
@@ -494,9 +512,10 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
         # string representing a "property" that no object has
         basket = random.choice(list(rev_global_properties.keys()))
         basket_properties = list(rev_global_properties[basket].keys())
-        property_pick = random.randint(0, len(basket_properties))
-        if property_pick == len(basket_properties):
-            # if we picked the last integer, we will generate a fake property
+        # added slots to make random properties more likely
+        property_pick = random.randint(0, len(basket_properties)+5)
+        if property_pick >= len(basket_properties):
+            # if we picked the last integer or higher, we will generate a fake property
             # for which the answer should be 0
             property_ = self.get_random_property(basket_properties)
             self.object_count = 0
@@ -507,11 +526,10 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
             self.object_count = len(
                 rev_global_properties[basket][property_])
 
-        self.set_message("how many objects are {property} in {owner}'s basket?"
-                         .format(
-                             property=property_,
-                             owner=basket
-                         ))
+        self.question = "how many objects are {property} in {owner}'s basket?".format(
+                            property=property_,
+                            owner=basket)
+        self.set_message(self.question)
 
     def get_random_property(self, basket_properties):
         # return a random property that is not in basket_properties
@@ -525,18 +543,26 @@ class HowManyObjectsHaveACertainPropertyTask(BaseTask):
                 break
         return property_
 
-    @on_message()
+    @on_message('\.')
     def check_response(self, event):
         # check if the answer matches any of the possible ways of expressing
         # the correct number.
+        # NB: note that here a longer digit string ending with the currect
+        # number will be considered correct (e.g., 321 when the correct answer
+        # is 1)
         if any(event.is_message(correct_alt, '.')
                for correct_alt in msg.number_to_strings(self.object_count)):
             self.set_reward(1, random.choice(msg.congratulations))
+        else:
+            feedback = 'the right answer is: {answer}. please try again. '.format(
+                answer=msg.number_to_string(self.object_count))
+            feedback += self.question
+            self.set_message(feedback)
 
     @on_timeout()
     def give_away_answer(self, event):
         # inform the answer randomly choosing a numeric or alphabetic format.
-        self.set_message('the right answer is: {answer}.'.format(
+        self.set_message('you are too slow. the right answer is: {answer}.'.format(
             answer=msg.number_to_string(self.object_count)
         ))
 
@@ -560,16 +586,16 @@ class WhoHasACertainObjectWithACertainPropertyTask(BaseTask):
         if not self.basket_set:
             self.basket_set.add('nobody')
 
-        self.set_message("who has {property_object} in the basket?".format(
-            property_object=msg.indef_article(property_ + " " + object_)))
+        self.question = "who has {property_object} in the basket?".format(
+            property_object=msg.indef_article(property_ + " " + object_))
+        self.set_message(self.question)
 
         # building a regexp to match the answer
         enum_re = delimiters.join(
             [r'([a-z]+)'] * len(self.basket_set))
         # final string must be delimited by period
         enum_re += r'\.$'
-        # add a handler to match the response
-        self.add_handler(on_message(enum_re)(self.check_response))
+        self.re_query = re.compile(enum_re)
 
     def get_random_object_property(self):
         # we traverse the baskets building sets of all the objects and
@@ -589,22 +615,33 @@ class WhoHasACertainObjectWithACertainPropertyTask(BaseTask):
         property_ = random.choice(list(properties_set))
         return object_, property_
 
-    # on_message handler created dynamically when the number of
-    # expected responses is known
+    @on_message(r'\.')
     def check_response(self, event):
-        # retrieve the set of matched elements
-        potential_baskets = set(event.get_match_groups())
-        # if the elements match the expected set of baskets, reward the learner
-        if self.basket_set == potential_baskets:
+        re_out=self.re_query.search(event.message)
+        if (re_out):
+            potential_baskets=set(re_out.groups())
+        else:
+            potential_baskets=set()
+        if (self.basket_set == potential_baskets):
             self.set_reward(1, random.choice(msg.congratulations))
+        else:
+            answer = self.get_shuffled_correct_baskets(self.basket_set)
+            feedback = 'the right answer is: {answer}. please try again. '.format(
+                answer=answer)
+            feedback += self.question
+            self.set_message(feedback)
 
     @on_timeout()
     def give_away_answer(self, event):
-        correct_baskets = list(self.basket_set)
-        random.shuffle(correct_baskets)
-        self.set_message('the right baskets are: {answer}.'.format(
-            answer=" ".join(correct_baskets)
+        answer = self.get_shuffled_correct_baskets(self.basket_set)
+        self.set_message('you are too slow. the right answer is: {answer}.'.format(
+            answer=answer
         ))
+
+    def get_shuffled_correct_baskets(self,ordered_correct_baskets):
+        correct_baskets = list(ordered_correct_baskets)
+        random.shuffle(correct_baskets)
+        return " ".join(correct_baskets)
 
 
 class ListThePropertiesThatAnObjectHasInABasketOnlyTask(BaseTask):
@@ -619,11 +656,10 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(BaseTask):
         # choose one of the baskets
         basket = random.choice(object_baskets)
         # ask the learner
-        self.set_message("which properties does {object} have "
-                         "in {owner}'s basket only?".format(
+        self.question = "which properties does {object} have in {owner}'s basket only?".format(
                              object=object_,
-                             owner=basket
-                         ))
+                             owner=basket)
+        self.set_message(self.question)
         # construct the expected answer which is given by the
         # properties of the object in the given basket minus
         # the properties in all the rest of the baskets:
@@ -636,8 +672,7 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(BaseTask):
             [r'([a-z]+)'] * len(self.distinctive_properties_set))
         # final string must be delimited by period
         enum_re += r'\.$'
-        # add a handler to match the response
-        self.add_handler(on_message(enum_re)(self.check_response))
+        self.re_query = re.compile(enum_re)
 
     def get_expected_answer(self, object_, basket, object_baskets):
         # get the properties for the object in the chosen basket
@@ -679,20 +714,33 @@ class ListThePropertiesThatAnObjectHasInABasketOnlyTask(BaseTask):
         # return the object together with the baskets where it occurs
         return object_, baskets_with_object[object_]
 
-    # on_message handler created dynamically when the number of
-    # expected responses is known
+    @on_message('\.')
     def check_response(self, event):
-        potential_properties = set(event.get_match_groups())
+        re_out=self.re_query.search(event.message)
+        if (re_out):
+            potential_properties=set(re_out.groups())
+        else:
+            potential_properties=set()
         if self.distinctive_properties_set == potential_properties:
             self.set_reward(1, random.choice(msg.congratulations))
+        else:
+            answer = self.get_shuffled_correct_properties(self.distinctive_properties_set)
+            feedback = 'the right properties are: {answer}. please try again. '.format(
+                answer=answer)
+            feedback += self.question
+            self.set_message(feedback)
 
     @on_timeout()
     def give_away_answer(self, event):
-        correct_properties = list(self.distinctive_properties_set)
-        random.shuffle(correct_properties)
-        self.set_message('the right properties are: {answer}.'.format(
-            answer=" ".join(correct_properties)
+        answer = self.get_shuffled_correct_properties(self.distinctive_properties_set)
+        self.set_message('you are too slow. the right properties are: {answer}.'.format(
+            answer=answer
         ))
+
+    def get_shuffled_correct_properties(self,ordered_correct_properties):
+        correct_properties = list(ordered_correct_properties)
+        random.shuffle(correct_properties)
+        return " ".join(correct_properties)
 
 
 class ListThePropertiesThatAnObjectHasInAllBasketsTask(BaseTask):
@@ -705,10 +753,9 @@ class ListThePropertiesThatAnObjectHasInAllBasketsTask(BaseTask):
         # get an object that appears in a least two baskets
         object_, object_baskets = self.get_object_in_many_baskets()
         # ask the learner
-        self.set_message("which properties does {object} have "
-                         "in all baskets?".format(
-                             object=object_
-                         ))
+        self.question = "which properties does {object} have in all baskets?".format(
+                             object=object_)
+        self.set_message(self.question)
         # construct the expected answer which is given by the
         # properties of the object in the given basket minus
         # the properties in all the rest of the baskets:
@@ -721,8 +768,7 @@ class ListThePropertiesThatAnObjectHasInAllBasketsTask(BaseTask):
             [r'([a-z]+)'] * len(self.shared_properties_set))
         # final string must be delimited by period
         enum_re += r'\.$'
-        # add a handler to match the response
-        self.add_handler(on_message(enum_re)(self.check_response))
+        self.re_query = re.compile(enum_re)
 
     def get_expected_answer(self, object_, object_baskets):
         # get the properties that are present in all the baskets
@@ -755,17 +801,31 @@ class ListThePropertiesThatAnObjectHasInAllBasketsTask(BaseTask):
         # return the object together with the baskets where it occurs
         return object_, baskets_with_object[object_]
 
-    # on_message handler created dynamically when the number of
-    # expected responses is known
+    @on_message('\.')
     def check_response(self, event):
-        potential_properties = set(event.get_match_groups())
+        re_out=self.re_query.search(event.message)
+        if (re_out):
+            potential_properties=set(re_out.groups())
+        else:
+            potential_properties=set()
         if self.shared_properties_set == potential_properties:
             self.set_reward(1, random.choice(msg.congratulations))
+        else:
+            answer = self.get_shuffled_correct_properties(self.shared_properties_set)
+            feedback = 'the right properties are: {answer}. please try again. '.format(
+                answer=answer)
+            feedback += self.question
+            self.set_message(feedback)
+
 
     @on_timeout()
     def give_away_answer(self, event):
-        correct_properties = list(self.shared_properties_set)
-        random.shuffle(correct_properties)
-        self.set_message('the right properties are: {answer}.'.format(
-            answer=" ".join(correct_properties)
+        answer = self.get_shuffled_correct_properties(self.shared_properties_set)
+        self.set_message('you are too slow. the right properties are: {answer}.'.format(
+            answer=answer
         ))
+
+    def get_shuffled_correct_properties(self,ordered_correct_properties):
+        correct_properties = list(ordered_correct_properties)
+        random.shuffle(correct_properties)
+        return " ".join(correct_properties)
