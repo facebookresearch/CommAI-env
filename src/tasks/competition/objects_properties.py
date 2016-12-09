@@ -7,6 +7,7 @@ from tasks.competition.base import BaseTask
 import tasks.competition.messages as msg
 import random
 import string
+import re
 
 # global data structures to be called by multiple tasks
 

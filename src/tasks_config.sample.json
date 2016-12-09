@@ -71,7 +71,7 @@
         "world": "gw"
     },
     "m3": {
-        "type": "tasks.competition.objects_properties.ListPropertiesofAnObjectTask",
+        "type": "tasks.competition.objects_properties.ListPropertiesOfAnObjectTask",
         "world": "gw"
     },
     "m4": {
