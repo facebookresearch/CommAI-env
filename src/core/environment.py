@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 from core.events import EventManager
 from core.task import StateChanged, MessageReceived, \
     SequenceReceived, OutputSequenceUpdated, OutputMessageUpdated
-from core.aux.observer import Observable
+from core.obs.observer import Observable
 from core.serializer import ScramblingSerializerWrapper
 from core.channels import InputChannel, OutputChannel
 from collections import defaultdict

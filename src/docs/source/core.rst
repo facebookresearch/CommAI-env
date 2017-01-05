@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    core.aux
+    core.obs
 
 Submodules
 ----------

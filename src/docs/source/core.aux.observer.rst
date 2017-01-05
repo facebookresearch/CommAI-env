@@ -1,7 +1,7 @@
-core.aux.observer module
+core.obs.observer module
 ========================
 
-.. automodule:: core.aux.observer
+.. automodule:: core.obs.observer
     :members:
     :undoc-members:
     :show-inheritance:

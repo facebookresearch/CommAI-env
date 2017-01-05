@@ -1,4 +1,4 @@
-core.aux package
+core.obs package
 ================
 
 Submodules
@@ -6,12 +6,12 @@ Submodules
 
 .. toctree::
 
-   core.aux.observer
+   core.obs.observer
 
 Module contents
 ---------------
 
-.. automodule:: core.aux
+.. automodule:: core.obs
     :members:
     :undoc-members:
     :show-inheritance:

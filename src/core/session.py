@@ -9,7 +9,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from core.aux.observer import Observable
+from core.obs.observer import Observable
 from collections import defaultdict
 import time
 

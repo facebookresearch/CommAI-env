@@ -14,7 +14,7 @@ import core.task as task
 import core.session as session
 import core.serializer as serializer
 import core.environment as environment
-from core.aux.observer import Observable
+from core.obs.observer import Observable
 
 
 class NullTask(task.Task):
