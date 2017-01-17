@@ -1,0 +1,26 @@
+{
+  "worlds": {
+    "gw": {
+      "type": "worlds.grid_world.GridWorld"
+    }
+  },
+  "tasks":
+  {
+    "1V1L": {
+      "type": "tasks.micro.micro.Repeat1V1L"
+    },
+    "3V1L": {
+      "type": "tasks.micro.micro.Repeat3V1L"
+    },
+    "3V2L": {
+      "type": "tasks.micro.micro.Repeat3V2L"
+    }
+  },
+  "scheduler":
+    {
+      "type": "core.scheduler.RandomTaskScheduler",
+      "args": {
+          "tasks": ["3V1L"]
+        }
+    }
+}
