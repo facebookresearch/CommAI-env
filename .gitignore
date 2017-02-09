@@ -5,4 +5,4 @@ src/tasks-config.json
 src/results.out
 src/docs/source/internal.rst
 Makefile
-src/experimental/
+src/exp/
