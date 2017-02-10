@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 import subprocess
 
 
-class BaseLearner:
+class BaseLearner(object):
     def try_reward(self, reward):
         if reward is not None:
             self.reward(reward)

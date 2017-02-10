@@ -43,6 +43,7 @@ class HumanLearner(BaseLearner):
             self.logger.debug("Output buffer is empty, filling with silence")
             # Add one silence token to the buffer
             self._output_channel.set_message(self._serializer.SILENCE_TOKEN)
+
         # Get the bit to return
         output = self._output_channel.consume_bit()
         # Interpret the bit from the learner
@@ -65,3 +66,14 @@ class HumanLearner(BaseLearner):
             self.speaking = True
             output = re.compile('\.+').sub('.', output)
             self._output_channel.set_message(output)
+
+
+class ManualHumanLearner(HumanLearner):
+    def __init__(self, serializer):
+        super(ManualHumanLearner, self).__init__(serializer)
+
+    def next(self, input):
+        # If the buffer is empty, ask for what to do
+        while self._output_channel.is_empty():
+            self.ask_for_input()
+        return super(ManualHumanLearner, self).next(input)

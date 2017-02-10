@@ -49,8 +49,15 @@ class MessageReceived():
 
     def is_message(self, msg, suffix=''):
         '''Checks if the received message matches the one in the parameter'''
-        return self.message[-(len(msg) + len(suffix)):-len(suffix)] == msg and\
-            suffix == self.message[-len(suffix):]
+        # if the suffix is empty we need, the semantics that would be
+        # reasonable for 0 have to be expressed with None
+        if len(suffix) > 0:
+            is_match = self.message[-(len(msg) + len(suffix)):
+                                    -len(suffix)] == msg and\
+                        suffix == self.message[-len(suffix):]
+        else:
+            is_match = self.message[-len(msg):] == msg
+        return is_match
 
     def is_message_exact(self, msg, suffix=''):
         '''Checks if the received message exactly matches the one in the parameter'''
