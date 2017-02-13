@@ -14,13 +14,25 @@
     },
     "3V2L": {
       "type": "tasks.micro.micro.Repeat3V2L"
+    },
+    "Task0": {
+      "type": "tasks.micro.nano.Task0"
+    },
+    "Task1": {
+      "type": "tasks.micro.nano.Task1"
+    },
+    "Task11": {
+      "type": "tasks.micro.nano.Task11"
+    },
+    "Task10": {
+      "type": "tasks.micro.nano.Task10"
     }
   },
   "scheduler":
     {
       "type": "core.scheduler.RandomTaskScheduler",
       "args": {
-          "tasks": ["3V1L"]
+          "tasks": ["Task0","Task1","Task11","Task11"]
         }
     }
 }
