@@ -95,13 +95,6 @@ def main():
         view.finalize()
 
 
-def create_view(view_type, learner_type, env, session, serializer, show_world):
-    if learner_type.startswith('learners.human_learner') \
-            or view_type == 'ConsoleView':
-        return ConsoleView(env, session, serializer, show_world)
-    else:
-        return BaseView(env, session)
-
 def getc(typename):
     # TODO: move into some misc aux functions module
     # dynamically load the class given by typename
@@ -113,8 +106,17 @@ def getc(typename):
     c = getattr(m, cname)
     if not c:
         raise RuntimeError("type {0} not found in module {1}".format(cname,
-                            mod))
+                                                                     mod))
     return c
+
+
+def create_view(view_type, learner_type, env, session, serializer, show_world):
+    if learner_type.startswith('learners.human_learner') \
+            or view_type == 'ConsoleView':
+        return ConsoleView(env, session, serializer, show_world)
+    else:
+        View = getc('view.console.%s' % view_type)
+        return View(env, session)
 
 
 def create_learner(learner_type, serializer, learner_cmd, learner_port=None):
@@ -123,8 +125,8 @@ def create_learner(learner_type, serializer, learner_cmd, learner_port=None):
         return c(serializer)
     else:
         # instantiate the learner
+        return c(learner_cmd, learner_port) if 'RemoteLearner' in c else c()
 
-        return c(learner_cmd, learner_port) if 'RemoteLearner' in cname else c()
 
 def create_serializer(serializer_type):
     c = getc(serializer_type)

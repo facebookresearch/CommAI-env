@@ -238,3 +238,43 @@ class ConsoleView(BaseView):
         length = self._scroll_msg_length - 10
         return "{0:_>{length}}[{1: <8}]".format(
             text[-length:], bits[-7:], length=length)
+
+class PlainView(object):
+
+    def __init__(self, env, session):
+        # TODO: Move environment and session outside of the class
+        self._env = env
+        self._session = session
+
+        # observe basic high level information about the session and environment
+        env.task_updated.register(
+            self.on_task_updated)
+        session.total_reward_updated.register(
+            self.on_total_reward_updated)
+        session.total_time_updated.register(
+            self.on_total_time_updated)
+
+        self.logger = logging.getLogger(__name__)
+        # we save information for display later
+        self.info = {'reward': 0, 'time': 0, 'current_task': 'None'}
+
+    def on_total_reward_updated(self, reward):
+        self.info['reward'] = reward
+        print('reward', reward)
+
+    def on_total_time_updated(self, time):
+        self.info['time'] = time
+
+    def on_task_updated(self, task):
+        if 'current_task' in self.info:
+            self.info['current_task'] = task.get_name()
+            print('\n', task.get_name())
+
+    def paint_info_win(self):
+        return
+
+    def initialize(self):
+        return
+
+    def finalize(self):
+        return
