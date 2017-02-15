@@ -263,3 +263,82 @@ class StandardSerializer:
         if len(data) < 8:
             return False
         return self.to_text(data) is not None
+
+
+class GeneralSerializer:
+    '''
+    Transforms text into bits and back using specified mapping.
+    Expects an index to symbol mapping `i2s`.
+    silence_idx is which index in mapping is silence, defaults to 0
+    '''
+    def __init__(self, i2s, silence_idx):
+        self.SILENCE_TOKEN = ' '
+        self.SILENCE_ENCODING = silence_idx if silence_idx is not None else 0
+
+        self.i2s = i2s
+        self.s2i = {}
+        for k, v in self.i2s.items:
+            self.s2i[v] = k
+
+        self.L = math.ceil(math.log(len(self.i2s), 2))
+
+        # pad end of dictionary with silence
+        for k in range(len(self.i2s), math.pow(2, self.L)):
+            self.i2s[k] = self.SILENCE_TOKEN
+
+        assert i2s[self.SILENCE_ENCODING] == self.SILENCE_TOKEN, \
+                                                'mapping conflict for silence'
+
+        self.logger = logging.getLogger(__name__)
+
+    def to_binary(self, message):
+        '''
+        Given a text message, returns a binary string (still represented as a
+        character string).
+        '''
+        message = codecs.encode(message, 'ascii')
+
+        data = []
+        for c in message:
+            c = self.s2i[c]
+            bin_c = bin(c)[2:]
+            bin_c = bin_c.zfill(self.L)
+            data.append(bin_c)
+
+        return ''.join(data)
+
+    def to_text(self, data):
+        '''Transforms a binary string into text.
+
+        Given a binary string, returns the encoded text. If the
+        string cannot be deserialized, returns None.
+
+        Args:
+            data: the binary string to deserialze.
+
+        Returns: A string with containing the decoded text.
+        '''
+        buff = codecs.encode(data, 'ascii')
+        text = u''
+        while buff != "":
+            idx = int(buff[:self.L], 2)
+            text = text + self.i2s[idx]
+            buff = buff[self.L:]
+        return text
+
+    def can_deserialize(self, data):
+        if len(data) < self.L:
+            return False
+        return self.to_text(data) is not None
+
+
+class ASCIISerializer:
+    '''
+    Transforms text into bits and back according to ASCII format.
+    '''
+    def __init__(self):
+        i2s = {}
+        for k in range(0, 255):
+            i2s[k] = chr(k)
+
+        return GeneralSerializer(i2s, ord(' '))
