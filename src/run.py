@@ -125,7 +125,7 @@ def create_learner(learner_type, serializer, learner_cmd, learner_port=None):
         return c(serializer)
     else:
         # instantiate the learner
-        return c(learner_cmd, learner_port) if 'RemoteLearner' in c else c()
+        return c(learner_cmd, learner_port) if 'RemoteLearner' in str(c) else c()
 
 
 def create_serializer(serializer_type):
