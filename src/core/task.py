@@ -487,3 +487,9 @@ class Task(ScriptSet):
             the message will be blocked.
         '''
         super(Task, self).set_message(message, priority)
+
+    def get_default_output(self):
+        '''Returns the token that should be spoken by the task whenever there
+        is no content in buffer.
+        '''
+        return self._env._serializer.SILENCE_TOKEN

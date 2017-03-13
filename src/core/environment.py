@@ -103,21 +103,23 @@ class Environment:
             # We are in the middle of the task, so no rewards are given
             reward = None
         else:
-            # If the task is ended and there is nothing else to say,
+            # If the task has ended and there is nothing else to say,
             # issue a silence and then return reward and move to next task
             if self._output_channel.is_empty():
+                # TODO: taks separation should be implemented at the task-level
                 if self._task_separator_issued:
-                    # Have nothing more to say
+                    # I have nothing to say, I have nothing to say, I have...
                     # reward the learner if necessary and switch to new task
                     reward = self._reward if self._reward is not None else 0
                     self._switch_new_task()
                     self._task_separator_issued = False
                 else:
                     self._output_channel.set_message(
-                        self._serializer.SILENCE_TOKEN)
+                        self._current_task.get_default_output())
                     self._task_separator_issued = True
                     reward = None
             else:
+                self.logger.debug("Consuming bit {0}".format(learner_input))
                 # TODO: decide what to do here.
                 # Should we consume the bit or not?
                 self._input_channel.consume_bit(learner_input)
@@ -125,7 +127,9 @@ class Environment:
                 reward = None
         # Get one bit from the output buffer and ship it
         if self._output_channel.is_empty():
-            self._output_channel.set_message(self._serializer.SILENCE_TOKEN)
+            # demand for some output from the task (usually, silence)
+            self._output_channel.set_message(
+                self._current_task.get_default_output())
         output = self._output_channel.consume_bit()
 
         # we hear to ourselves
@@ -188,9 +192,8 @@ class Environment:
         self.logger.debug('Setting reward {0} with message "{1}"'
                           ' and priority {2}'
                           .format(reward, message, priority))
-        # adds a final space to the final message of the task
-        # to separate the next task instructions
-        self.set_message(message, priority)
+        if message:
+            self.set_message(message, priority)
 
     def set_message(self, message, priority=0):
         ''' Saves the message in the output buffer so it can be delivered
