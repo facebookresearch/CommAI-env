@@ -339,6 +339,8 @@ class ScriptSet(object):
         self._env = None
         self._started = False
         self._ended = False
+        # observable events
+        self.ended_updated = Observable()
         # a bit ugly, but there are worse things in life
         self.state_updated = Observable()
         # remember dynamically register handlers to destroy their triggers
@@ -364,6 +366,7 @@ class ScriptSet(object):
 
     def end(self):
         self._ended = True
+        self.ended_updated(self)
 
     def get_triggers(self):
         '''Returns the set of triggers that have been registered for this
@@ -449,7 +452,7 @@ class Task(ScriptSet):
         # let it finish
         if t >= self._max_time and self._env._output_channel.is_empty():
             self._env.event_manager.raise_event(Timeout())
-            self._ended = True
+            self.end()
             return True
         return False
 

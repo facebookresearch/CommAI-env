@@ -89,7 +89,6 @@ class Environment:
         # Make sure we have a task
         if not self._current_task:
             self._switch_new_task()
-
         # If the task has not reached the end by either Timeout or
         # achieving the goal
         if not self._current_task.has_ended():
@@ -100,6 +99,15 @@ class Environment:
                 # record the input from the learner and deserialize it
                 # TODO this bit is dropped otherwise on a timeout...
                 self._input_channel.consume_bit(learner_input)
+
+            # fill the output buffer if the task hasn't produced any output
+            if self._output_channel.is_empty():
+                # demand for some output from the task (usually, silence)
+                self._output_channel.set_message(
+                    self._current_task.get_default_output())
+                # remember if this was acting as a task separator
+                if self._current_task.has_ended():
+                    self._task_separator_issued = True
             # We are in the middle of the task, so no rewards are given
             reward = None
         else:
@@ -119,20 +127,14 @@ class Environment:
                     self._task_separator_issued = True
                     reward = None
             else:
-                self.logger.debug("Consuming bit {0}".format(learner_input))
-                # TODO: decide what to do here.
-                # Should we consume the bit or not?
-                self._input_channel.consume_bit(learner_input)
-                # If there is still something to say, continue saying it
+                # Do Nothing until the output channel is empty
                 reward = None
         # Get one bit from the output buffer and ship it
-        if self._output_channel.is_empty():
-            # demand for some output from the task (usually, silence)
-            self._output_channel.set_message(
-                self._current_task.get_default_output())
+
         output = self._output_channel.consume_bit()
 
-        # we hear to ourselves
+        # we hear to ourselves (WARNING: this can still generate behavior
+        # in the task via the OutputMessageUpdated event)
         self._output_channel_listener.consume_bit(output)
         # advance time
         self._task_time += 1
@@ -192,8 +194,7 @@ class Environment:
         self.logger.debug('Setting reward {0} with message "{1}"'
                           ' and priority {2}'
                           .format(reward, message, priority))
-        if message:
-            self.set_message(message, priority)
+        self.set_message(message, priority)
 
     def set_message(self, message, priority=0):
         ''' Saves the message in the output buffer so it can be delivered
@@ -233,18 +234,26 @@ class Environment:
             return True
         return False
 
-    def _switch_new_task(self):
-        '''
-        Asks the task scheduler for a new task,
-        reset buffers and time, and registers the event handlers
-        '''
+    def _deregister_current_task(self):
         # deregister previous event managers
         if self._current_task:
             self._current_task.deinit()
             self._deregister_task_triggers(self._current_task)
 
+    def _on_task_ended(self, task):
+        assert (task == self._current_task)
+        # when a task ends, it doesn't process any more events
+        self._deregister_current_task()
+
+    def _switch_new_task(self):
+        '''
+        Asks the task scheduler for a new task,
+        reset buffers and time, and registers the event handlers
+        '''
         # pick a new task
         self._current_task = self._task_scheduler.get_next_task()
+        # register to the ending event
+        self._current_task.ended_updated.register(self._on_task_ended)
         try:
             # This is to check whether the user didn't mess up in instantiating
             # the class
