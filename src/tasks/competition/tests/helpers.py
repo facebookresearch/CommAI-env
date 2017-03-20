@@ -129,7 +129,8 @@ class SingleTaskScheduler():
 
 
 @contextlib.contextmanager
-def task_messenger(task_funct, world_funct=None):
+def task_messenger(task_funct, world_funct=None,
+                   serializer=serializer.StandardSerializer()):
     '''
     Returns an EnvironmentMessenger to interact with the created task.
     Args:
@@ -138,13 +139,12 @@ def task_messenger(task_funct, world_funct=None):
         world_func (functor): takes an environment and returns a world
             object.
     '''
-    slzr = serializer.StandardSerializer()
     if world_funct:
         world = world_funct()
         task = task_funct(world)
     else:
         task = task_funct()
     scheduler = SingleTaskScheduler(task)
-    env = environment.Environment(slzr, scheduler)
-    m = EnvironmentMessenger(env, slzr)
+    env = environment.Environment(serializer, scheduler)
+    m = EnvironmentMessenger(env, serializer)
     yield m

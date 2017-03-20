@@ -9,22 +9,40 @@ from core.task import on_start, on_message, on_timeout, on_output_message, Task
 # period 10
 # say 11
 
-
+default_patient = False
 class NanoTask(Task):
-    def __init__(self, max_time=1000):
+    def __init__(self, max_time=1000, patient=default_patient):
         super(NanoTask, self).__init__(
             max_time=max_time)
+        self.patient = patient
 
     def get_default_output(self):
-        # This is the code for silence in nano-lang
-        return '00'
+        # Pad with 0s at the end
+        return '0'
 
+    @on_start()
+    def reset_received_reward(self, event):
+        self.received_reward = False
+
+    def set_reward(self, reward):
+        if self.patient:
+            if not self.received_reward:
+                self.received_reward = reward
+        else:
+            super(NanoTask, self).set_reward(reward)
+
+    @on_timeout()
+    def on_timeout(self, timeout):
+        if self.patient:
+            assert self.received_reward
+            # import pdb; pdb.set_trace()
+            super(Task, self).set_reward(self.received_reward)
 
 # in task0, the learner must only produce the 0 bit until the end of the task
 class Task0(NanoTask):
-    def __init__(self):
+    def __init__(self, patient=default_patient):
         super(Task0, self).__init__(
-            max_time=1000)
+            max_time=6, patient=patient)
 
     @on_start()
     def give_instructions(self, event):
@@ -32,6 +50,7 @@ class Task0(NanoTask):
 
     @on_output_message(r'1000')
     def reward_at_end(self, event):
+        self.finished_talking = True
         self.set_reward(1)
 
     @on_message(r'1')
@@ -42,9 +61,9 @@ class Task0(NanoTask):
 # in task1, the learner must produce 1 right after the environment stops speaking
 # (and 0 while env is talking)
 class Task1(NanoTask):
-    def __init__(self):
+    def __init__(self, patient=default_patient):
         super(Task1, self).__init__(
-            max_time=1000)
+            max_time=8, patient=patient)
 
     @on_start()
     def give_instructions(self, event):
@@ -68,9 +87,9 @@ class Task1(NanoTask):
 
 # task11 is like task1, but not the learner must produce a 11 bit sequence
 class Task11(NanoTask):
-    def __init__(self):
+    def __init__(self, patient=default_patient):
         super(Task11, self).__init__(
-            max_time=1000)
+            max_time=10, patient=patient)
 
     @on_start()
     def give_instructions(self, event):
@@ -98,9 +117,9 @@ class Task11(NanoTask):
 
 # task10 is like task11, but not the learner must produce a 10 bit sequence
 class Task10(NanoTask):
-    def __init__(self):
+    def __init__(self, patient=default_patient):
         super(Task10, self).__init__(
-            max_time=1000)
+            max_time=10, patient=patient)
 
     @on_start()
     def give_instructions(self, event):

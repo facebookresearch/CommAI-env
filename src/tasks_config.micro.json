@@ -32,7 +32,7 @@
     {
       "type": "core.scheduler.RandomTaskScheduler",
       "args": {
-          "tasks": ["Task0","Task1","Task11","Task11"]
+          "tasks": ["Task0","Task1", "Task10", "Task11"]
         }
     }
 }
