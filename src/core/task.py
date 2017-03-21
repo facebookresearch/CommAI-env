@@ -413,9 +413,13 @@ class ScriptSet(object):
     # ### API for the scripts ###
     def set_reward(self, reward, message='', priority=0):
         self._env.set_reward(reward, message, priority)
+        self.end()
 
     def set_message(self, message, priority=0):
         self._env.set_message(message, priority)
+
+    def add_message(self, message):
+        self._env.add_message(message)
 
     def ignore_last_char(self):
         '''
@@ -461,8 +465,14 @@ class Task(ScriptSet):
         self._env.raise_event(Start())
         self._started = True
 
-    def deinit(self):
+    def end(self):
+        super(Task, self).end()
         self._env.raise_event(Ended())
+
+    def deinit(self):
+        '''You can override this function to do anything just before the task
+        is deallocated'''
+        pass
 
     # ### API for the scripts ###
     def get_time(self):

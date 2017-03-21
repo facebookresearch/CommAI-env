@@ -119,6 +119,11 @@ class OutputChannel:
                 insert_point))
         self._set_buffer(self._binary_buffer[:insert_point] + new_binary)
 
+    def add_message(self, message):
+        new_binary = self.serializer.to_binary(message)
+        # append the binary encoding to the end of the current buffer
+        self._set_buffer(self._binary_buffer + new_binary)
+
     def clear(self):
         self._set_buffer('')
 

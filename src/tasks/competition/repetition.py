@@ -550,7 +550,7 @@ TIME_VERB = (len("Say 'I xxxxxxxxxxxx' to xxxxxxxxxxxx.") +
              len("You xxxxxxxxxxxxed.")) * TIME_CHAR
 
 
-class VerbTask(Task):
+class VerbTask(BaseTask):
     verbs = ('sing', 'smile', 'rest', 'relax', 'jump', 'dance')
     verbs_past = ('sang', 'smiled', 'rested', 'relaxed', 'jumped', 'danced')
 

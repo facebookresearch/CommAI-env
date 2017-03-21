@@ -70,7 +70,7 @@ class TestNavigation(unittest.TestCase):
     #
 
     # this has been moved into repetition
-    def testAssociateObjectWithProperty(self):
+    def testVerbTask(self):
         def solve(m):
             # find the answer in the instructions
             verb, = m.search_last_message(r"'I (\w+)'")

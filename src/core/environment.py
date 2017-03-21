@@ -64,8 +64,8 @@ class Environment:
         self._reward = None
         # Current task time
         self._task_time = None
-        # Task separator issued
-        self._task_separator_issued = False
+        # Task deinitialized
+        self._current_task_deinitialized = False
         # Internal logger
         self.logger = logging.getLogger(__name__)
 
@@ -105,27 +105,21 @@ class Environment:
                 # demand for some output from the task (usually, silence)
                 self._output_channel.set_message(
                     self._current_task.get_default_output())
-                # remember if this was acting as a task separator
-                if self._current_task.has_ended():
-                    self._task_separator_issued = True
             # We are in the middle of the task, so no rewards are given
             reward = None
         else:
             # If the task has ended and there is nothing else to say,
-            # issue a silence and then return reward and move to next task
+            # deinitialize the task and if there is still nothing more to
+            # say, move to the next task
+            if self._output_channel.is_empty() and not \
+                    self._current_task_deinitialized:
+                # this triggers the Ended event on the task
+                self._current_task.deinit()
+                self._current_task_deinitialized = True
             if self._output_channel.is_empty():
-                # TODO: taks separation should be implemented at the task-level
-                if self._task_separator_issued:
-                    # I have nothing to say, I have nothing to say, I have...
-                    # reward the learner if necessary and switch to new task
-                    reward = self._reward if self._reward is not None else 0
-                    self._switch_new_task()
-                    self._task_separator_issued = False
-                else:
-                    self._output_channel.set_message(
-                        self._current_task.get_default_output())
-                    self._task_separator_issued = True
-                    reward = None
+                reward = self._reward if self._reward is not None else 0
+                self._current_task_deinitialized = False
+                self._switch_new_task()
             else:
                 # Do Nothing until the output channel is empty
                 reward = None
@@ -190,11 +184,15 @@ class Environment:
         '''Sets the reward that is going to be given
         to the learner once the task has sent all the remaining message'''
         self._reward = reward
-        self._current_task.end()
         self.logger.debug('Setting reward {0} with message "{1}"'
                           ' and priority {2}'
                           .format(reward, message, priority))
         self.set_message(message, priority)
+
+    def add_message(self, message):
+        self.logger.debug('Appending message "{0}" with priority {1}'
+                           .format(message, self._output_priority))
+        self._output_channel.add_message(message)
 
     def set_message(self, message, priority=0):
         ''' Saves the message in the output buffer so it can be delivered
@@ -237,7 +235,6 @@ class Environment:
     def _deregister_current_task(self):
         # deregister previous event managers
         if self._current_task:
-            self._current_task.deinit()
             self._deregister_task_triggers(self._current_task)
 
     def _on_task_ended(self, task):

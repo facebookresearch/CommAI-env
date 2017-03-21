@@ -30,3 +30,11 @@ class BaseTask(Task):
             if event.message[-1] != ' ':
                 # i will ignore what the learner just said by forgetting it
                 self.ignore_last_char()
+
+    # send out a silence to separate tasks if needed
+    def deinit(self):
+        silence = self.get_default_output()
+        output_text = self._env._output_channel_listener.get_text()
+        task_separator_issued = output_text.endswith(silence)
+        if not task_separator_issued:
+            self.add_message(silence)
