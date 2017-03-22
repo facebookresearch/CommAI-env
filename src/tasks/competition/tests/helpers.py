@@ -79,7 +79,7 @@ class EnvironmentMessenger:
             nbits += 1
         return nbits
 
-    def get_text(self):
+    def get_full_message(self):
         return self._input_channel.get_text()
 
     def get_last_message(self, n_silence=2):
@@ -101,14 +101,21 @@ class EnvironmentMessenger:
         else:
             return input_text[last_silence + n_silence:]
 
-    def search_last_message(self, pattern):
-        message = self.get_last_message()
+    def search_on(self, message, pattern):
         match = re.search(pattern, message)
         if match is None:
             raise RuntimeError("'{0}' did not find any match on '{1}'".format(
                 pattern, message
             ))
         return match.groups()
+
+    def search_last_message(self, pattern):
+        message = self.get_last_message()
+        return self.searh_on(message, pattern)
+
+    def search_full_message(self, pattern):
+        message = self.get_full_message()
+        return self.search_on(message, pattern)
 
     def get_cumulative_reward(self):
         return self.cum_reward

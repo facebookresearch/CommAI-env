@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from core.task import on_start, on_message, on_timeout, on_output_message
+from core.task import Task, on_start, on_message, on_timeout, on_output_message
 from tasks.competition.base import BaseTask
 import logging
 import random
@@ -46,7 +46,7 @@ def rotate_sequence(steps,sequence):
             rotated_sequence += sequence[i-steps+string_length]
     return rotated_sequence
 
-class ReverseXTask(BaseTask):
+class ReverseXTask(Task):
     def __init__(self, world=None):
         super(ReverseXTask, self).__init__(world=world, max_time=0)
         # NB: max_time will be dynamically adjusted below
