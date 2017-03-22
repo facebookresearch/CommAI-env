@@ -10,11 +10,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import zmq
-import random
-
 
 def main():
+    import zmq
+    import random
+
     port = "5556"
     context = zmq.Context()
     socket = context.socket(zmq.PAIR)
@@ -37,4 +37,7 @@ def main():
         cnt = cnt + 1
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except ImportError:
+        pass

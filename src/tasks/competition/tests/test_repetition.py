@@ -89,8 +89,8 @@ class TestRepetitionTasks(unittest.TestCase):
         m.send()
         while not m.is_silent():
             # repeat the previous char sent by the teacher
-            m.send(m.get_text()[-1])
-        m.send(m.get_text()[-1])
+            m.send(m.get_full_message()[-1])
+        m.send(m.get_full_message()[-1])
         # read feedback, if any
         m.read()
         self.assertEqual(m.get_cumulative_reward(), 0,

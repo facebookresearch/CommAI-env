@@ -111,7 +111,7 @@ class EnvironmentMessenger:
 
     def search_last_message(self, pattern):
         message = self.get_last_message()
-        return self.searh_on(message, pattern)
+        return self.search_on(message, pattern)
 
     def search_full_message(self, pattern):
         message = self.get_full_message()
