@@ -69,7 +69,7 @@ class IncrementalTaskScheduler:
         return self.tasks[self.task_ptr]
 
     def reward(self, reward):
-        self.reward_count += 1
+        self.reward_count += reward
 
 # TODO: Create a BatchedScheduler that takes as an argument another
 #       scheduler and just repeats the given tasks N times.

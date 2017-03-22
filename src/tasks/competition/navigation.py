@@ -399,7 +399,7 @@ class CountingInventoryTask(BaseTask):
         self.set_message("How many {0} do you have?".format(
                          msg.pluralize(self.target_obj, 2)))
 
-    @on_message("(\w+)\.$")
+    @on_message("(\d+)\.$")
     def on_something_said(self, event):
         # find out the correct answer
         count = self.get_world().state.learner_inventory[self.target_obj]
