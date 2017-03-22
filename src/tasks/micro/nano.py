@@ -10,6 +10,8 @@ from core.task import on_start, on_message, on_timeout, on_output_message, Task
 # say 11
 
 default_patient = False
+
+
 class NanoTask(Task):
     def __init__(self, max_time=1000, patient=default_patient):
         super(NanoTask, self).__init__(
@@ -18,10 +20,16 @@ class NanoTask(Task):
 
     def get_default_output(self):
         # Pad with 0s at the end
+        self.task_separator_issued = True
         return '0'
+
+    def deinit(self):
+        if not self.task_separator_issued:
+            self.add_message(self.get_default_output())
 
     @on_start()
     def reset_received_reward(self, event):
+        self.task_separator_issued = False
         self.received_reward = False
 
     def set_reward(self, reward):
@@ -37,6 +45,7 @@ class NanoTask(Task):
             assert self.received_reward
             # import pdb; pdb.set_trace()
             super(Task, self).set_reward(self.received_reward)
+
 
 # in task0, the learner must only produce the 0 bit until the end of the task
 class Task0(NanoTask):
