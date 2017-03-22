@@ -16,9 +16,8 @@ import operator
 from optparse import OptionParser
 from core.environment import Environment
 from core.config_loader import JSONConfigLoader, PythonConfigLoader
-import learners
 from core.session import Session
-from view.console import ConsoleView, BaseView
+from view.console import ConsoleView
 
 
 def main():
@@ -115,7 +114,10 @@ def create_view(view_type, learner_type, env, session, serializer, show_world):
             or view_type == 'ConsoleView':
         return ConsoleView(env, session, serializer, show_world)
     else:
-        View = getc('view.console.%s' % view_type)
+        try:
+            View = getc('view.console.%s' % view_type)
+        except Exception:
+            View = getc(view_type)
         return View(env, session)
 
 

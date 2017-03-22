@@ -412,6 +412,7 @@ class ScriptSet(object):
 
     # ### API for the scripts ###
     def set_reward(self, reward, message='', priority=0):
+        self._reward = reward
         self._env.set_reward(reward, message, priority)
         self.end()
 

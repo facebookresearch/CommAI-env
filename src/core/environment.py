@@ -72,6 +72,7 @@ class Environment:
         # signals
         self.world_updated = Observable()
         self.task_updated = Observable()
+        self.reward_given = Observable()
 
         # Register channel observers
         self._input_channel.sequence_updated.register(
@@ -111,31 +112,35 @@ class Environment:
             # If the task has ended and there is nothing else to say,
             # deinitialize the task and if there is still nothing more to
             # say, move to the next task
-            if self._output_channel.is_empty() and not \
-                    self._current_task_deinitialized:
+            if self._output_channel.is_empty() \
+                    and not self._current_task_deinitialized:
                 # this triggers the Ended event on the task
                 self._current_task.deinit()
                 self._current_task_deinitialized = True
+
             if self._output_channel.is_empty():
-                reward = self._reward if self._reward is not None else 0
+                self._reward = self._reward if self._reward is not None else 0
+                reward = self._allowable_reward(self._reward)
+
+                self._task_scheduler.reward(reward)
+                self.reward_given(self._current_task, reward)
+
                 self._current_task_deinitialized = False
                 self._switch_new_task()
             else:
                 # Do Nothing until the output channel is empty
                 reward = None
-        # Get one bit from the output buffer and ship it
 
+        # Get one bit from the output buffer and ship it
         output = self._output_channel.consume_bit()
 
         # we hear to ourselves (WARNING: this can still generate behavior
         # in the task via the OutputMessageUpdated event)
         self._output_channel_listener.consume_bit(output)
+
         # advance time
         self._task_time += 1
-        if reward is not None:
-            # process the reward (clearing it if it's not allowed)
-            reward = self._allowable_reward(reward)
-            self._task_scheduler.reward(reward)
+
         return output, reward
 
     def get_reward_per_task(self):
