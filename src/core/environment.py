@@ -241,6 +241,7 @@ class Environment:
         # deregister previous event managers
         if self._current_task:
             self._deregister_task_triggers(self._current_task)
+            self._current_task.ended_updated.deregister(self._on_task_ended)
 
     def _on_task_ended(self, task):
         assert (task == self._current_task)
