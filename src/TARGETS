@@ -8,13 +8,28 @@ python_binary(
     ]
 )
 
+python_binary(
+    name = "train",
+    py_version = "<3",
+    main_module = "experimental.germank.ai-challenge.src.experimental.baselines.train",
+    srcs =  ["experimental/baselines/train.py", "experimental/baselines/exp.py"],
+    deps = [
+        '@/pytorch/pytorch:torch',
+        '@/visdom/py:visdom',
+        ':aic',
+    ]
+)
+
 python_library(
     name = "aic",
     srcs = glob(['**/*.py'], excludes=['run_tournament.py']),
-    deps = [],
+    deps = [
+        '@/pytorch/pytorch:torch',
+    ],
     base_module = '',
     external_deps = [
         ("pyzmq", "any"),
+        ("numpy", "any")
     ]
 )
 
