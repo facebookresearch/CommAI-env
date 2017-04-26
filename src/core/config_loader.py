@@ -52,7 +52,11 @@ class JSONConfigLoader:
         Given a json configuartion file, it returns a scheduler object
         set up as described in the file.
         '''
-        config = json.load(open(tasks_config_file))
+        if isinstance(tasks_config_file, str):
+            config = json.load(open(tasks_config_file))
+        elif isinstance(tasks_config_file, dict):
+            config = tasks_config_file
+
         # instantiate the worlds (typically there is only one)
         worlds = dict((world_id, self.instantiate_world(world_config['type']))
                       for world_id, world_config in config['worlds'].items())
