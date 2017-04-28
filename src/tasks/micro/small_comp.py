@@ -8,20 +8,22 @@ import random
 import math
 
 # TODO
-# Require full stop at end
-# Refactor all simple tasks into seqmantask where you just write
-#   the get response string and max time and proposed string hooks
 # Generate the classes and compositions programmatically
+# Odd and even version of the simplified rotate tasks
+# Composition with the simplified rotate tasks
 
 # The small composition task use the following vocabulary:
 # V reverse function
 # P repeat function
-# O rotate function
+# O rotate right by 1 function
+# T rotate right by 2 function
+# A rotate left by 1 function
+# E rotate left by 2 function
 # C concatenate function
 # 0/1 alphabet for argument strings
 
 # constant to keep same input string length across tasks
-max_string_length = 12
+max_string_length = 4
 
 
 def to_odd(n):
@@ -184,38 +186,101 @@ class EvenRepeatNXTask(RepeatNXTask):
                                                 world=world, n_odd=False)
 
 
+# class RotateRXTask(SeqManTask):
+#     def __init__(self, max_string_length=6, world=None, n_odd=None):
+#         super(RotateRXTask, self).__init__(max_string_length=max_string_length,
+#                                             world=world, max_time=0)
+#         # NB: max_time will be dynamically adjusted below
+# #        self.logger = logging.getLogger(__name__)
+#         self.n_odd = n_odd
+
+#     @on_start()
+#     def give_instructions(self, event):
+#         self.response_check = False
+#         proposed_string = self.get_random_01_sequence(self.max_string_length)
+#         steps = random.randint(1, len(proposed_string))
+
+# #        if self.n_odd is not None:
+# #           steps = int(to_odd(steps) if self.n_odd else to_even(steps))
+
+#         message = "O" + str(steps) + "," + proposed_string + "."
+#         self.set_message(message)
+#         self.set_response_string(rotate_sequence(steps, proposed_string), message)
+
+
+# class OddRotateRXTask(RotateRXTask):
+#     def __init__(self, max_string_length=6, world=None):
+#         super(OddRotateRXTask, self).__init__(max_string_length=max_string_length,
+#                                               world=world, n_odd=True)
+
+
+# class EvenRotateRXTask(RotateRXTask):
+#     def __init__(self, max_string_length=6, world=None):
+#         super(EvenRotateRXTask, self).__init__(max_string_length=max_string_length,
+#                                                world=world, n_odd=False)
+
 class RotateRXTask(SeqManTask):
     def __init__(self, max_string_length=6, world=None, n_odd=None):
         super(RotateRXTask, self).__init__(max_string_length=max_string_length,
-                                            world=world, max_time=0)
-        # NB: max_time will be dynamically adjusted below
-#        self.logger = logging.getLogger(__name__)
+                                           world=world, max_time=0)
+        #        self.logger = logging.getLogger(__name__)
+
+    def initialize_instructions(self, task_code, direction, steps):
+        self.response_check = False
+        proposed_string = self.get_random_01_sequence(max_string_length)
+
+        message = task_code + proposed_string + "."
+        self.set_message(message)
+        rotated_string = ""
+        if (direction == "R"):
+            rotated_string = rotate_sequence(steps, proposed_string)
+        else:
+            rotated_string = reverse_sequence(rotate_sequence(steps, reverse_sequence(proposed_string)))
+        self.set_response_string(rotated_string,
+            message)
+
+class RotateR1Task(RotateRXTask):
+    def __init__(self, world=None, n_odd=None):
+        super(RotateR1Task, self).__init__(world=world)
+        #        self.logger = logging.getLogger(__name__)
         self.n_odd = n_odd
 
     @on_start()
     def give_instructions(self, event):
-        self.response_check = False
-        proposed_string = self.get_random_01_sequence(self.max_string_length)
-        steps = random.randint(1, len(proposed_string))
+        self.initialize_instructions("O","R",1)
 
-        if self.n_odd is not None:
-            steps = int(to_odd(steps) if self.n_odd else to_even(steps))
+class RotateR2Task(RotateRXTask):
+    def __init__(self, world=None, n_odd=None):
+        super(RotateR2Task, self).__init__(world=world)
+        #        self.logger = logging.getLogger(__name__)
+        self.n_odd = n_odd
 
-        message = "O" + str(steps) + "," + proposed_string + "."
-        self.set_message(message)
-        self.set_response_string(rotate_sequence(steps, proposed_string), message)
-
-
-class OddRotateRXTask(RotateRXTask):
-    def __init__(self, max_string_length=6, world=None):
-        super(OddRotateRXTask, self).__init__(max_string_length=max_string_length,
-                                              world=world, n_odd=True)
+    @on_start()
+    def give_instructions(self, event):
+        self.initialize_instructions("T","R",2)
 
 
-class EvenRotateRXTask(RotateRXTask):
-    def __init__(self, max_string_length=6, world=None):
-        super(EvenRotateRXTask, self).__init__(max_string_length=max_string_length,
-                                               world=world, n_odd=False)
+
+class RotateL1Task(RotateRXTask):
+    def __init__(self, world=None, n_odd=None):
+        super(RotateL1Task, self).__init__(world=world)
+        #        self.logger = logging.getLogger(__name__)
+        self.n_odd = n_odd
+
+    @on_start()
+    def give_instructions(self, event):
+        self.initialize_instructions("A","L",1)
+
+class RotateL2Task(RotateRXTask):
+    def __init__(self, world=None, n_odd=None):
+        super(RotateL2Task, self).__init__(world=world)
+        #        self.logger = logging.getLogger(__name__)
+        self.n_odd = n_odd
+
+    @on_start()
+    def give_instructions(self, event):
+        self.initialize_instructions("E","L",2)
+
 
 
 class ConcatenateXYTask(SeqManTask):

@@ -24,6 +24,18 @@
     "RotateRXTask": {
       "type": "tasks.micro.small_comp.RotateRXTask"
     },
+    "RotateR1Task": {
+      "type": "tasks.micro.small_comp.RotateR1Task"
+    },
+    "RotateR2Task": {
+      "type": "tasks.micro.small_comp.RotateR2Task"
+    },
+    "RotateL1Task": {
+      "type": "tasks.micro.small_comp.RotateL1Task"
+    },
+    "RotateL2Task": {
+      "type": "tasks.micro.small_comp.RotateL2Task"
+    },
     "ConcatenateXYTask": {
       "type": "tasks.micro.small_comp.ConcatenateXYTask"
     },
@@ -68,7 +80,7 @@
     {
       "type": "core.scheduler.RandomTaskScheduler",
       "args": {
-          "tasks": ["FlipXTask"]
+          "tasks": ["RotateR2Task"]
       }
     }
 }
