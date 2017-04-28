@@ -42,6 +42,11 @@ def repeat_sequence(repetitions,sequence):
 def reverse_sequence(sequence):
     return sequence[::-1]
 
+def flip_sequence(sequence):
+    flipped_sequence = ""
+    for i in range(len(sequence)):
+        flipped_sequence += str(1-int(sequence[i]))
+    return flipped_sequence
 
 def rotate_sequence(steps,sequence):
     string_length = len(sequence)
@@ -129,6 +134,19 @@ class EvenReverseXTask(ReverseXTask):
                                                world=world)
         self.odd = False
 
+class FlipXTask(SeqManTask):
+    def __init__(self, max_string_length=6, world=None):
+        super(FlipXTask, self).__init__(max_string_length=max_string_length,
+                                            world=world, max_time=0)
+        # NB: max_time will be dynamically adjusted below
+#        self.logger = logging.getLogger(__name__)
+    @on_start()
+    def give_instructions(self, event):
+        self.response_check = False
+        proposed_string = self.get_random_01_sequence(self.max_string_length)
+        message = "F" + proposed_string + "."
+        self.set_message(message)
+        self.set_response_string(flip_sequence(proposed_string), message)
 
 class RepeatNXTask(SeqManTask):
     def __init__(self, max_string_length=6, world=None, n_odd=None):
@@ -142,7 +160,7 @@ class RepeatNXTask(SeqManTask):
     def give_instructions(self, event):
         self.response_check = False
         proposed_string = self.get_random_01_sequence(self.max_string_length)
-        repetitions = random.randint(1, 5)
+        repetitions = 1
 
         if self.n_odd is not None:
             repetitions = int(to_odd(repetitions) if self.n_odd

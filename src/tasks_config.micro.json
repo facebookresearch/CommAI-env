@@ -24,6 +24,9 @@
     "Task11": {
       "type": "tasks.micro.nano.Task11"
     },
+    "Task10": {
+      "type": "tasks.micro.nano.Task10"
+    },
     "ReverseXTask_Short": {
       "type": "tasks.micro.small_comp.ReverseXTask",
       "args": {"max_string_length" : 5}
@@ -33,12 +36,19 @@
       "args": {"max_string_length" : 10}
     },
     "RepeatNXTask_Short": {
-      "type": "tasks.micro.small_comp.RepeatNXTask",
-      "args": {"max_string_length" : 5}
+      "type": "tasks.micro.small_comp.RepeatNXTask"
     },
     "RepeatNXTask_Long": {
       "type": "tasks.micro.small_comp.RepeatNXTask",
       "args": {"max_string_length" : 10}
+    },
+    "FlipXTask_Short1": {
+      "type": "tasks.micro.small_comp.FlipXTask",
+      "args": {"max_string_length" : 6}
+    },
+    "FlipXTask_Short2": {
+      "type": "tasks.micro.small_comp.FlipXTask",
+      "args": {"max_string_length" : 6}
     },
     "RotateRXTask_Short": {
       "type": "tasks.micro.small_comp.RotateRXTask",
@@ -94,10 +104,12 @@
     }
   },
   "scheduler":
-    {
-      "type": "core.scheduler.RandomTaskScheduler",
+  {
+      "type": "core.scheduler.NiterationTaskScheduler",
       "args": {
-          "tasks": ["ConcatenateXYTask_Long"]
-        }
-    }
+          "tasks": ["FlipXTask_Short2","RepeatNXTask_Short", "FlipXTask_Short1"],
+          "tasks_dependencies": [["FlipXTask_Short1", "RepeatNXTask_Short"],
+                                 ["RepeatNXTask_Short", "FlipXTask_Short2"]]
+      }
+  }
 }
