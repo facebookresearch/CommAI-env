@@ -63,6 +63,7 @@ class JSONConfigLoader:
         # map each task
         # instantiate the tasks with the world (if any)
         tasks = dict((task_id, self.instantiate_task(task_config['type'],
+                                                     task_config.get('args', {}),
                                                      worlds,
                                                      task_config.get(
                                                          'world', None)))
@@ -93,7 +94,7 @@ class JSONConfigLoader:
             raise RuntimeError("Failed to instantiate world {0} ({1})".format(
                 world_class, e))
 
-    def instantiate_task(self, task_class, worlds, world_id=None):
+    def instantiate_task(self, task_class, args, worlds, world_id=None):
         '''
         Returns a task object given the task class and the world where it
         runs (if any)
@@ -101,9 +102,8 @@ class JSONConfigLoader:
         C = get_class(task_class)
         try:
             if world_id:
-                return C(worlds[world_id])
-            else:
-                return C()
+                args['world'] = worlds[world_id]
+            return C(**args)
         except Exception as e:
             raise RuntimeError("Failed to instantiate task {0} ({1})".format(
                 task_class, e))

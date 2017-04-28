@@ -24,15 +24,80 @@
     "Task11": {
       "type": "tasks.micro.nano.Task11"
     },
-    "Task10": {
-      "type": "tasks.micro.nano.Task10"
+    "ReverseXTask_Short": {
+      "type": "tasks.micro.small_comp.ReverseXTask",
+      "args": {"max_string_length" : 5}
+    },
+    "ReverseXTask_Long": {
+      "type": "tasks.micro.small_comp.ReverseXTask",
+      "args": {"max_string_length" : 10}
+    },
+    "RepeatNXTask_Short": {
+      "type": "tasks.micro.small_comp.RepeatNXTask",
+      "args": {"max_string_length" : 5}
+    },
+    "RepeatNXTask_Long": {
+      "type": "tasks.micro.small_comp.RepeatNXTask",
+      "args": {"max_string_length" : 10}
+    },
+    "RotateRXTask_Short": {
+      "type": "tasks.micro.small_comp.RotateRXTask",
+      "args": {"max_string_length" : 5}
+    },
+    "RotateRXTask_Long": {
+      "type": "tasks.micro.small_comp.RotateRXTask",
+      "args": {"max_string_length" : 10}
+    },
+    "ConcatenateXYTask_Short": {
+      "type": "tasks.micro.small_comp.ConcatenateXYTask",
+      "args": {"max_string_length" : 5}
+    },
+    "ConcatenateXYTask_Long": {
+      "type": "tasks.micro.small_comp.ConcatenateXYTask",
+      "args": {"max_string_length" : 10}
+    },
+    "ReverseRepeatNXTask": {
+      "type": "tasks.micro.small_comp.ReverseRepeatNXTask"
+    },
+    "ReverseRotateRXTask": {
+      "type": "tasks.micro.small_comp.ReverseRotateRXTask"
+    },
+    "ReverseConcatenateXYTask": {
+      "type": "tasks.micro.small_comp.ReverseConcatenateXYTask"
+    },
+    "RepeatNReverseXTask": {
+      "type": "tasks.micro.small_comp.RepeatNReverseXTask"
+    },
+    "RepeatNRotateRXTask": {
+      "type": "tasks.micro.small_comp.RepeatNRotateRXTask"
+    },
+    "RepeatNConcatenateXYTask": {
+      "type": "tasks.micro.small_comp.RepeatNConcatenateXYTask"
+    },
+    "RotateRReverseXTask": {
+      "type": "tasks.micro.small_comp.RotateRReverseXTask"
+    },
+    "RotateRRepeatNXTask": {
+      "type": "tasks.micro.small_comp.RotateRRepeatNXTask"
+    },
+    "RotateRConcatenateXYTask": {
+      "type": "tasks.micro.small_comp.RotateRConcatenateXYTask"
+    },
+    "ConcatenateReverseXReverseYTask": {
+      "type": "tasks.micro.small_comp.ConcatenateReverseXReverseYTask"
+    },
+    "ConcatenateRepeatNXRepeatMYTask": {
+      "type": "tasks.micro.small_comp.ConcatenateRepeatNXRepeatMYTask"
+    },
+    "ConcatenateRotateRXRotateSYTask": {
+      "type": "tasks.micro.small_comp.ConcatenateRotateRXRotateSYTask"
     }
   },
   "scheduler":
     {
       "type": "core.scheduler.RandomTaskScheduler",
       "args": {
-          "tasks": ["Task0","Task1", "Task10", "Task11"]
+          "tasks": ["ConcatenateXYTask_Long"]
         }
     }
 }
