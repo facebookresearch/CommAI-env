@@ -16,7 +16,7 @@ import contextlib
 import re
 
 
-class EnvironmentMessenger:
+class EnvironmentMessenger(object):
     def __init__(self, env, serializer):
         self._env = env
         self._serializer = serializer
@@ -124,7 +124,7 @@ class EnvironmentMessenger:
         return self._env._task_time
 
 
-class SingleTaskScheduler():
+class SingleTaskScheduler(object):
     def __init__(self, task):
         self.task = task
 

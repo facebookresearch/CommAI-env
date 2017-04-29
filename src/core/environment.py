@@ -19,7 +19,7 @@ from collections import defaultdict
 import logging
 
 
-class Environment:
+class Environment(object):
     '''
     The Environment is the one that communicates with the Learner,
     interpreting its output and reacting to it. The interaction is governed

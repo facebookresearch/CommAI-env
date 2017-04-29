@@ -13,7 +13,7 @@ import json
 import os
 
 
-class JSONConfigLoader:
+class JSONConfigLoader(object):
     '''
     Loads a set of tasks and a schedule for them from a JSON file::
 
@@ -109,7 +109,7 @@ class JSONConfigLoader:
                 task_class, e))
 
 
-class PythonConfigLoader:
+class PythonConfigLoader(object):
     '''
         Loads a python file containing a stand-alone function called
         `create_tasks` that returns a TaskScheduler object.

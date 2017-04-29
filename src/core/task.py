@@ -39,7 +39,7 @@ class StateChanged(namedtuple('StateChanged', ('state', 'second_state'))):
 
 
 # helper methods for handling received messages
-class MessageReceived():
+class MessageReceived(object):
     '''A message received event. It has some useful helpers'''
     def __init__(self, message):
         self.message = message

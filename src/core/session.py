@@ -13,7 +13,7 @@ from core.obs.observer import Observable
 from collections import defaultdict
 import time
 
-class Session:
+class Session(object):
     def __init__(self, environment, learner,
                  default_sleep=0.01):
         # internal initialization

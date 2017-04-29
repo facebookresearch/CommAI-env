@@ -17,7 +17,7 @@ import re
 import math
 
 
-class IdentitySerializer:
+class IdentitySerializer(object):
     '''
     Skips the serialization and just returns the text as-is.
     '''
@@ -35,7 +35,7 @@ class IdentitySerializer:
         return data
 
 
-class ScramblingSerializerWrapper:
+class ScramblingSerializerWrapper(object):
     '''
     This is wrapper for any serializer that, on top of the serialization step,
     scrambles the words so they are unintelligible to human readers.
@@ -187,7 +187,7 @@ class ScramblingSerializerWrapper:
         return tokenized_message
 
 
-class StandardSerializer:
+class StandardSerializer(object):
     '''
     Transforms text into bits and back using UTF-8 format.
     '''
@@ -265,7 +265,7 @@ class StandardSerializer:
         return self.to_text(data) is not None
 
 
-class GeneralSerializer:
+class GeneralSerializer(object):
     '''
     Transforms text into bits and back using specified mapping.
     Expects an index to symbol mapping `i2s`.
@@ -332,7 +332,7 @@ class GeneralSerializer:
         return self.to_text(data) is not None
 
 
-class ASCIISerializer:
+class ASCIISerializer(object):
     '''
     Transforms text into bits and back according to ASCII format.
     '''

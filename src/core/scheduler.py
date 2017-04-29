@@ -13,7 +13,7 @@ from collections import defaultdict
 import random
 
 
-class RandomTaskScheduler:
+class RandomTaskScheduler(object):
     '''
     A Scheduler provides new tasks every time is asked.
     This is a random scheduler
@@ -30,7 +30,7 @@ class RandomTaskScheduler:
         pass
 
 
-class SequentialTaskScheduler:
+class SequentialTaskScheduler(object):
     '''
     A Scheduler provides new tasks every time is asked.
     This is a random scheduler
@@ -50,7 +50,7 @@ class SequentialTaskScheduler:
         pass
 
 
-class IncrementalTaskScheduler:
+class IncrementalTaskScheduler(object):
     '''
     Switches to the next task type sequentially
     After the current task was successfully learned N times
@@ -75,7 +75,7 @@ class IncrementalTaskScheduler:
 #       scheduler and just repeats the given tasks N times.
 
 
-class DependenciesTaskScheduler:
+class DependenciesTaskScheduler(object):
     '''
     Takes a dependency graph between the tasks and randomly allocates between
     the ones that are at the root, or are dependent on other tasks that

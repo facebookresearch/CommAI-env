@@ -93,7 +93,7 @@ class TestEvents(unittest.TestCase):
         triggers = []
         tt = TestTask(max_time=10)
 
-        class EnvironmentMock():
+        class EnvironmentMock(object):
             def __init__(self, triggers):
                 self.triggers = triggers
 
