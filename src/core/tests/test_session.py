@@ -49,7 +49,7 @@ class LearnerMock(object):
         pass
 
 
-class SingleTaskScheduler():
+class SingleTaskScheduler(object):
     def __init__(self, task):
         self.task = task
 

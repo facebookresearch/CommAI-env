@@ -13,7 +13,7 @@ from core.obs.observer import Observable
 import logging
 
 
-class InputChannel:
+class InputChannel(object):
 
     def __init__(self, serializer):
         self.serializer = serializer
@@ -93,7 +93,7 @@ class InputChannel:
             self.message_updated(self._deserialized_buffer)
 
 
-class OutputChannel:
+class OutputChannel(object):
 
     def __init__(self, serializer):
         self.serializer = serializer

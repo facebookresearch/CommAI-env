@@ -18,7 +18,7 @@ import logging
 Trigger = namedtuple('Trigger', ('type', 'condition', 'event_handler'))
 
 
-class EventManager:
+class EventManager(object):
     def __init__(self):
         self.triggers = {}
         self.logger = logging.getLogger(__name__)
