@@ -101,8 +101,7 @@ class SeqManTask(BaseTask):
     def set_response_string(self, rstr, msg):
         if not rstr.endswith('.'):
             rstr += '.'
-        print('message', msg)
-        print('response', rstr)
+
         self.response_string = rstr
         self._max_time = 8 * len(msg) + 8 * len(rstr) - 8
 
@@ -162,7 +161,7 @@ class RepeatNXTask(SeqManTask):
     def give_instructions(self, event):
         self.response_check = False
         proposed_string = self.get_random_01_sequence(self.max_string_length)
-        repetitions = 1
+        repetitions = random.randint(1,4)
 
         if self.n_odd is not None:
             repetitions = int(to_odd(repetitions) if self.n_odd

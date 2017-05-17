@@ -105,7 +105,7 @@
   },
   "scheduler":
   {
-      "type": "core.scheduler.NiterationTaskScheduler",
+      "type": "core.scheduler.DependenciesTaskScheduler",
       "args": {
           "tasks": ["FlipXTask_Short2","RepeatNXTask_Short", "FlipXTask_Short1"],
           "tasks_dependencies": [["FlipXTask_Short1", "RepeatNXTask_Short"],
