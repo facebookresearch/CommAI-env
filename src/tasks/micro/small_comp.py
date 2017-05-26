@@ -23,7 +23,7 @@ import math
 # 0/1 alphabet for argument strings
 
 # constant to keep same input string length across tasks
-max_string_length = 4
+max_string_length = 6
 
 
 def to_odd(n):
@@ -161,7 +161,7 @@ class RepeatNXTask(SeqManTask):
     def give_instructions(self, event):
         self.response_check = False
         proposed_string = self.get_random_01_sequence(self.max_string_length)
-        repetitions = random.randint(1,4)
+        repetitions = 1
 
         if self.n_odd is not None:
             repetitions = int(to_odd(repetitions) if self.n_odd
@@ -226,7 +226,7 @@ class RotateRXTask(SeqManTask):
 
     def initialize_instructions(self, task_code, direction, steps):
         self.response_check = False
-        proposed_string = self.get_random_01_sequence(max_string_length)
+        proposed_string = self.get_random_01_sequence(self.max_string_length)
 
         message = task_code + proposed_string + "."
         self.set_message(message)
@@ -239,8 +239,8 @@ class RotateRXTask(SeqManTask):
             message)
 
 class RotateR1Task(RotateRXTask):
-    def __init__(self, world=None, n_odd=None):
-        super(RotateR1Task, self).__init__(world=world)
+    def __init__(self, max_string_length=6, world=None, n_odd=None):
+        super(RotateR1Task, self).__init__(max_string_length=max_string_length, world=world)
         #        self.logger = logging.getLogger(__name__)
         self.n_odd = n_odd
 
@@ -249,8 +249,8 @@ class RotateR1Task(RotateRXTask):
         self.initialize_instructions("O","R",1)
 
 class RotateR2Task(RotateRXTask):
-    def __init__(self, world=None, n_odd=None):
-        super(RotateR2Task, self).__init__(world=world)
+    def __init__(self, max_string_length=6, world=None, n_odd=None):
+        super(RotateR2Task, self).__init__(max_string_length=max_string_length, world=world)
         #        self.logger = logging.getLogger(__name__)
         self.n_odd = n_odd
 
@@ -261,8 +261,8 @@ class RotateR2Task(RotateRXTask):
 
 
 class RotateL1Task(RotateRXTask):
-    def __init__(self, world=None, n_odd=None):
-        super(RotateL1Task, self).__init__(world=world)
+    def __init__(self, max_string_length=6, world=None, n_odd=None):
+        super(RotateL1Task, self).__init__(max_string_length=max_string_length, world=world)
         #        self.logger = logging.getLogger(__name__)
         self.n_odd = n_odd
 
@@ -271,8 +271,8 @@ class RotateL1Task(RotateRXTask):
         self.initialize_instructions("A","L",1)
 
 class RotateL2Task(RotateRXTask):
-    def __init__(self, world=None, n_odd=None):
-        super(RotateL2Task, self).__init__(world=world)
+    def __init__(self, max_string_length=6, world=None, n_odd=None):
+        super(RotateL2Task, self).__init__(max_string_length=max_string_length, world=world)
         #        self.logger = logging.getLogger(__name__)
         self.n_odd = n_odd
 

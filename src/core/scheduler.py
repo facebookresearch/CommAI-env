@@ -13,6 +13,17 @@ from collections import defaultdict
 import random
 
 
+def check_intervals(I_s, I_b):
+    """
+    check if the interval I_s is within I_b
+    """
+    smaller, bigger = I_s
+    if smaller >= I_b[0] and bigger <= I_b[1]:
+        return True
+    else:
+        return False
+
+
 class RandomTaskScheduler:
     '''
     A Scheduler provides new tasks every time is asked.
@@ -136,3 +147,59 @@ class DependenciesTaskScheduler:
 
     def pick_new_task(self):
         return random.sample(self.available_tasks, 1)[0]
+
+class IntervalTaskScheduler:
+    '''
+    Switches to the next task type sequentially
+    After the current task was successfully learned N times
+    '''
+
+    def __init__(self, tasks, intervals):
+        '''
+        Args:
+            tasks: a list of Task objects
+            intervals: list of intervals [i1...in] where ik = [jk1,jk2].
+        '''
+        # Create disjoint intervals (for each one we have a list of
+        # available tasks)
+        import itertools
+        import collections
+
+        self.tasks = tasks
+
+        flat_intervals = list(set(list(itertools.chain(*intervals))))
+        flat_intervals.sort()
+        assert flat_intervals[0] == 0
+        seperate_intervals = [[x, y] for x, y in itertools.izip(flat_intervals, flat_intervals[1:])]
+        task_intervals = collections.OrderedDict()
+        for I in seperate_intervals:
+            for count, task_interval in enumerate(intervals):
+                if check_intervals(I, task_interval):
+                    if str(I) in task_intervals:
+                        task_intervals[str(I)].append(tasks[count])
+                    else:
+                        task_intervals[str(I)] = [tasks[count]]
+
+        self.task_intervals = task_intervals
+        self.iterations = 0
+        self.num_interval = 0
+        self.find_available_tasks()
+
+    def get_next_task(self):
+        return random.choice(self.available_tasks)
+
+    def nb_iteration(self):
+        self.iterations += 1
+        self.find_available_tasks()
+
+    def find_available_tasks(self):
+        itrls = self.task_intervals.keys()
+        if self.iterations > eval(itrls[-1])[-1]:
+            exit()
+        else:
+            if self.iterations > eval(itrls[self.num_interval])[-1]:
+                self.num_interval += 1
+            self.available_tasks = self.task_intervals[itrls[self.num_interval]]
+
+    def reward(self, reward):
+        pass

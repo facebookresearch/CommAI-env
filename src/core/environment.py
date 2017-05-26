@@ -123,6 +123,8 @@ class Environment:
                 reward = self._allowable_reward(self._reward)
 
                 self._task_scheduler.reward(reward)
+                self._task_scheduler.nb_iteration()
+
                 self.reward_given(self._current_task, reward)
 
                 self._current_task_deinitialized = False
