@@ -36,7 +36,7 @@ class RandomTaskScheduler:
         # pick a random task
         return random.choice(self.tasks)
 
-    def reward(self, reward):
+    def step(self, reward):
         # whatever
         pass
 
@@ -56,7 +56,7 @@ class SequentialTaskScheduler:
         self.i = (self.i + 1) % len(self.tasks)
         return ret
 
-    def reward(self, reward):
+    def step(self, reward):
         # whatever
         pass
 
@@ -79,7 +79,7 @@ class IncrementalTaskScheduler:
             self.task_ptr = (self.task_ptr + 1) % len(self.tasks)
         return self.tasks[self.task_ptr]
 
-    def reward(self, reward):
+    def step(self, reward):
         self.reward_count += reward
 
 # TODO: Create a BatchedScheduler that takes as an argument another
@@ -119,7 +119,7 @@ class DependenciesTaskScheduler:
         self.last_task = self.pick_new_task()
         return self.last_task
 
-    def reward(self, reward):
+    def step(self, reward):
         # remember the amount of times we have solved the task
         # using the name of the class to have a hashable value
         task_name = self.get_task_id(self.last_task)
@@ -188,7 +188,7 @@ class IntervalTaskScheduler:
     def get_next_task(self):
         return random.choice(self.available_tasks)
 
-    def nb_iteration(self):
+    def step(self, reward):
         self.iterations += 1
         self.find_available_tasks()
 
@@ -200,6 +200,3 @@ class IntervalTaskScheduler:
             if self.iterations > eval(itrls[self.num_interval])[-1]:
                 self.num_interval += 1
             self.available_tasks = self.task_intervals[itrls[self.num_interval]]
-
-    def reward(self, reward):
-        pass

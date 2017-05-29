@@ -121,9 +121,7 @@ class Environment:
             if self._output_channel.is_empty():
                 self._reward = self._reward if self._reward is not None else 0
                 reward = self._allowable_reward(self._reward)
-
-                self._task_scheduler.reward(reward)
-                self._task_scheduler.nb_iteration()
+                self._task_scheduler.step(reward)
 
                 self.reward_given(self._current_task, reward)
 
