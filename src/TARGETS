@@ -36,6 +36,8 @@ python_library(
     external_deps = [
         ("pyzmq", "any"),
         ("numpy", "any"),
+        ("memory_profiler", "any"),
+        ("psutil", None),
     ],
 )
 
