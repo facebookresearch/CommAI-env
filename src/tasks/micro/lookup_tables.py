@@ -8,6 +8,8 @@ import random
 import math
 import string
 
+random.seed(1111)
+
 # This module instantiates a set of atomic and composed lookup table tasks.
 
 # Each atomic lookup table task maps a binary string of length L to
@@ -128,8 +130,8 @@ class SeqManTask(BaseTask):
     def set_response_string(self, rstr, msg):
         if not rstr.endswith('.'):
             rstr += '.'
-        print('message', msg)
-        print('response', rstr)
+        # print('message', msg)
+        # print('response', rstr)
         self.response_string = rstr
         self._max_time = 8 * len(msg) + 8 * len(rstr) - 8
 
@@ -137,6 +139,7 @@ class SeqManTask(BaseTask):
 class BaseLookupTask(SeqManTask):
     def __init__(self, world=None):
         super(BaseLookupTask, self).__init__(world=world, max_time=0)
+        random.seed()
 
     def generate_fixed_length_binary_string(self,fixed_length,input_integer):
         return bin(input_integer)[2:].zfill(fixed_length)
