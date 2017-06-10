@@ -13,6 +13,7 @@ python_binary(
     srcs = [
         "experimental/baselines/exp.py",
         "experimental/baselines/train.py",
+        "experimental/baselines/util.py",
     ],
     main_module = "experimental.germank.ai-challenge.src.experimental.baselines.train",
     py_version = "<3",
