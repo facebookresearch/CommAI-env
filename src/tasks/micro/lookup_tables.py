@@ -8,9 +8,17 @@ import random
 import math
 import string
 
+# NB: wit this random seed, always the same takss will be generated!
 random.seed(1111)
 
-# This module instantiates a set of atomic and composed lookup table tasks.
+# debug code sample (please leave this here, as we never know when we will need it)
+# if inside class, initilize to self.logger
+#logger = logging.getLogger(__name__)
+#logger.info("got here with task called" + name)
+
+
+# This module instantiates a set of atomic and composed lookup table
+# tasks.
 
 # Each atomic lookup table task maps a binary string of length L to
 # another string of the same length. The mappings are bijective, that
@@ -34,37 +42,56 @@ random.seed(1111)
 # From the point of view of the learner, tasks are letter-coded (with
 # the idea that letters are reserved for task descriptions, digits for
 # the actual task arguments). An atomic task begins with a task
-# description in the following format. The task string length is
-# denoted by a letter, starting at a for the minimum length of 2, b
-# for 3, etc. This is followed by a letter denoting the task number (a
-# for the first task, b for the second etc.). The description is ended
-# by a colon, followed by the actual input string. For example:
+# description in the following format. The task type is denoted by the
+# string n (for non-composed). The latter is followed by string length
+# which is denoted by a letter, starting with a for the minimum length
+# of 2, b for 3, etc. This is followed by a letter denoting the task
+# number (a for the first task, b for the second etc.). The
+# description is ended by a colon, followed by the actual input
+# string. For example:
 
-# bb:100
+# nbb:100
 
-# is an instance of the second task of string length 3.
+# is an instance of the second atomic task of string length 3.
 
-# Composed task naming follows similar conventions, with the string
-# length code followed by the codes of the sequence of tasks in the
-# composition. For example:
+# There are two kinds of composed tasks. In functionally composed
+# tasks, each lookup task in the specified sequence is applied to the
+# output of the previous task. In concatenative composition, each
+# lookup in the specified task sequence is applied to the task input,
+# and the outputs are concatenated.
 
-# aaba:01
+# Composed task naming follows similar conventions to those of atomic
+# tasks, with f and c as prefixes for functional and concatenative
+# tasks, respectively, and the string length code followed by the
+# codes of the sequence of tasks in the composition. For example:
 
-# is an instance of a length-2 task composed of the sequence of atomic
-# length-2 tasks 1, 2 and 1 again.
+# faaba:01
+
+# is an instance of a functional length-2 task composed of the
+# sequence of atomic length-2 tasks 1, 2 and 1 again.
+
+# caaba:01
+
+# is the corresponding concatenative task.
 
 # The tasks are given arguably more human-readabe names for listing
 # them in configuration files, according to the following conventions.
 
-# All task names are prefixed by the string "LookupTask" followed by
-# RL (where L stands for string length), followed by DT (where T is an
-# underscore-delimited sequence of tasks, in order of
-# application). For example, the second task of string length 2 is
+# Atomic task names are prefixed by the string "LookupTask" followed
+# by RL (where L stands for string length), followed by DT (where T is
+# the task code). For example, the second atomic task of string length 2 is
 # called LookupTaskR2D2 (incidentally, the possibility of naming a
 # task after R2D2 is what motivated the naming conventions).
-# LookupCompTaskR3D1_1_4 is the composed task of string length 3 given
-# by applying the length-3 task number 1, then again the same task,
-# and then the length-3 task number 4.
+
+# Composed tasks use the same naming conventions, except that now the
+# prefix will be FuncLookupTask or CatLookupTask (depending on the
+# type of composition), and that T will now be and
+# underscore-delimited sequence of tasks, in order of
+# application). For example, FuncLookupCompTaskR3D1_1_4 is the
+# functionally composed task of string length 3 given by applying the
+# length-3 task number 1 to the input, then again the same task, and
+# then the length-3 task number 4. The equivalent concatenative task
+# is named CatLookupCompTaskR3D1_1_4
 
 
 # what's the longest string length we will consider
@@ -151,23 +178,28 @@ class BaseLookupTask(SeqManTask):
         number_of_strings = 2**self.string_length
         # tasks_to_be_composed list assumed
         composition_count = len(self.tasks_to_be_composed)-1
-        task_name =  string.ascii_letters[self.string_length-2]
-        key_code = random.randint(0,number_of_strings-1)
-        next_key_code = key_code
-        key_string = self.generate_fixed_length_binary_string(self.string_length,key_code)
+        # comp_type is an assumed option that should be set to: none, functional or concatenation
+        task_name =  self.comp_type[0] + string.ascii_letters[self.string_length-2]
+        output_values = [random.randint(0,number_of_strings-1)]
+        key_string = self.generate_fixed_length_binary_string(self.string_length,output_values[0])
         for i in range(composition_count+1):
-            key_code = next_key_code
             task_number = self.tasks_to_be_composed[i]
             task_name += string.ascii_letters[task_number-1]
-            next_key_code = shuffled_index_repository[self.string_length][task_number][key_code]
-        value_string = self.generate_fixed_length_binary_string(self.string_length,next_key_code)
+            key_code = output_values[0]
+            if self.comp_type == "functional":
+                key_code = output_values[-1]
+            output_values.append(shuffled_index_repository[self.string_length][task_number][key_code])
+        value_string = ""
+        if self.comp_type == "functional":
+            value_string = self.generate_fixed_length_binary_string(self.string_length,output_values[-1])
+        else:
+            value_string = "".join([self.generate_fixed_length_binary_string(self.string_length,e) for e in output_values[1:]])
         task_name += ":"
-        # debug
-#        message = task_name + value_string + "_" + key_string + "."
+        # debug: peek at the solution
+        # message = task_name + value_string + "_" + key_string + "."
         message = task_name + key_string + "."
         self.set_message(message)
         self.set_response_string(value_string, message)
-
 
 # looping over compositions, tasks and string lengths
 task_combinations = []
@@ -184,7 +216,21 @@ while (i<=MAX_COMPOSITION_COUNT):
                 task_combinations[i].append(enlarged_task_combination)
     for task_combination in task_combinations[i]:
         for string_length in range(2,LONGEST_STRING_LENGTH+1):
-            name = "LookupTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
-            LookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length})
-            globals()[name]=LookupTask
+            if i==0:
+                # we generate the non-composed task
+                comp_type="none"
+                name = "LookupTaskR" + str(string_length) + "D" + str(task_combination[0])
+                LookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type})
+                globals()[name]=LookupTask
+            else:
+                # proper functional composition
+                comp_type="functional"
+                name = "FuncLookupTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
+                FuncLookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type})
+                globals()[name]=FuncLookupTask
+                # concatenation
+                comp_type="concatenation"
+                name = "CatLookupTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
+                CatLookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type})
+                globals()[name]=CatLookupTask
     i+=1
