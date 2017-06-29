@@ -120,9 +120,9 @@ LONGEST_STRING_LENGTH=8
 # (and we start counting from 2)
 
 # how many tasks do we want to generate for each string length
-NUMBER_OF_TASKS = 4
-# NB: value above cannot be larger than 24, or we won't be able to
-# generate enough distinct tasks for the 2-length case
+NUMBER_OF_TASKS = 20
+# NB: value above cannot be larger than 24, or we won't be able to generate enough distinct
+# tasks for the 2-length case
 # NB: a fortiori, it should not be larger than 52, but if the
 # constraint above becomes obsolete, still the value should not be
 # larger than 52, as we use the ASCII letters (lower and upper case)
@@ -191,8 +191,8 @@ class SeqManTask(BaseTask):
     def set_response_string(self, rstr, msg):
         if not rstr.endswith('.'):
             rstr += '.'
-        # print('message', msg)
-        # print('response', rstr)
+        #print('message', msg)
+        #print('response', rstr)
         self.response_string = rstr
         #        self._max_time = 8 * len(msg) + 8 * len(rstr) + 8 * MAX_PONDERING - 8
         self._max_time = len(msg) + len(rstr) + MAX_PONDERING
