@@ -11,8 +11,9 @@ import string
 # NB: wit this random seed, always the same takss will be generated!
 random.seed(1111)
 
-# debug code sample (please leave this here, as we never know when we will need it)
-# if inside class, initilize to self.logger
+# debug code sample (please leave this here, as we never know when we
+# might need it)
+# if inside class, initialize to self.logger
 #logger = logging.getLogger(__name__)
 #logger.info("got here with task called" + name)
 
@@ -48,9 +49,9 @@ random.seed(1111)
 # of 2, b for 3, etc. This is followed by a letter denoting the task
 # number (a for the first task, b for the second etc.). The
 # description is ended by a colon, followed by the actual input
-# string. For example:
+# string, and a period. For example:
 
-# nbb:100
+# nbb:100.
 
 # is an instance of the second atomic task of string length 3.
 
@@ -65,12 +66,12 @@ random.seed(1111)
 # tasks, respectively, and the string length code followed by the
 # codes of the sequence of tasks in the composition. For example:
 
-# faaba:01
+# faaba:01.
 
 # is an instance of a functional length-2 task composed of the
 # sequence of atomic length-2 tasks 1, 2 and 1 again.
 
-# caaba:01
+# caaba:01.
 
 # is the corresponding concatenative task.
 
@@ -93,6 +94,24 @@ random.seed(1111)
 # then the length-3 task number 4. The equivalent concatenative task
 # is named CatLookupCompTaskR3D1_1_4
 
+# Positive reward is passed to the learner when it finishes a task
+# successfully. As soon as the learner makes a mistake, it gets
+# negative reward and the task is ended.
+
+# More precisely, what the learner says while the environment/teacher
+# is presenting the task is ignored. As soon as the environment
+# produces the end-of-message symbol (period) the learner must produce
+# the response. The learner gets no reward at each step in which it
+# produces the right token, and +1 reward when it completes the right
+# response. If the learner produces a wrong token, it gets -1 reward
+# and the episode ends immediately. The learner can also "buy" time,
+# by producing a maximum of MAX_PONDERING PONDERING_TOKENs (see below
+# for how these variables are currently set and to change
+# them). During pondering, the learner gets no reward. Note that, as
+# soon as the learner produces a non-pondering token, it can no longer
+# revert to pondering.
+
+# CONSTANTS SET HERE
 
 # what's the longest string length we will consider
 LONGEST_STRING_LENGTH=8
@@ -102,8 +121,8 @@ LONGEST_STRING_LENGTH=8
 
 # how many tasks do we want to generate for each string length
 NUMBER_OF_TASKS = 4
-# NB: value above cannot be larger than 24, or we won't be able to generate enough distinct
-# tasks for the 2-length case
+# NB: value above cannot be larger than 24, or we won't be able to
+# generate enough distinct tasks for the 2-length case
 # NB: a fortiori, it should not be larger than 52, but if the
 # constraint above becomes obsolete, still the value should not be
 # larger than 52, as we use the ASCII letters (lower and upper case)
@@ -113,6 +132,12 @@ NUMBER_OF_TASKS = 4
 MAX_COMPOSITION_COUNT=2
 # note that a composition count of 0 corresponds to atomic tasks only,
 # 1 to compositions of two tasks, etc
+
+# the following constants regulate tolerance for a "pondering" phase
+# in which the learner is allowed to produce a "silence" token
+PONDERING_TOKEN="p"
+MAX_PONDERING = 5
+
 
 # generating a dictionary of distinct permutations for each possible
 # length--we do this before generating the tasks because the atomic
@@ -132,26 +157,38 @@ for string_length in range(2,LONGEST_STRING_LENGTH+1):
 
 
 # the following class is implementing the impatient teacher--it should
-# be moved somewhere else, as it shared with other tasks
+# be moved somewhere else, as it shared with other tasks (although for
+# the time being the pondering option is only considered for these
+# tasks)
 class SeqManTask(BaseTask):
     def __init__(self, world=None, max_time=0):
         super(SeqManTask, self).__init__(world=world, max_time=0)
+
+    @on_timeout()
+    def punish_timeout(self, event):
+        self.set_reward(-1)
 
     @on_message(r".$")
     def check_response(self, event):
         if (self.response_check):
 #            self.logger.info("current counter:" + str(self.response_counter))
+            if (event.is_message(PONDERING_TOKEN) and not self.produced_non_pondering_token):
+                if (self.produced_non_pondering_token):
+                    self.set_reward(-1)
             if (event.is_message(self.response_string[self.response_counter])):
                 if (self.response_counter == (len(self.response_string) - 1)):
                     self.set_reward(1)
                 else:
+                    self.produced_non_pondering_token = True
                     self.response_counter = self.response_counter + 1
             else:
-                self.set_reward(-1)
+                if (not (event.is_message(PONDERING_TOKEN) and not self.produced_non_pondering_token)):
+                    self.set_reward(-1)
 
     @on_output_message(r'\.$')
     def set_response_check(self, event):
         self.response_check = True
+        self.produced_non_pondering_token = False
         self.response_counter = 0
 
     def set_response_string(self, rstr, msg):
@@ -160,7 +197,10 @@ class SeqManTask(BaseTask):
         # print('message', msg)
         # print('response', rstr)
         self.response_string = rstr
-        self._max_time = 8 * len(msg) + 8 * len(rstr) - 8
+        #        self._max_time = 8 * len(msg) + 8 * len(rstr) + 8 * MAX_PONDERING - 8
+        self._max_time = len(msg) + len(rstr) + MAX_PONDERING
+
+
 
 # template for simple or composed lookup tasks
 class BaseLookupTask(SeqManTask):
