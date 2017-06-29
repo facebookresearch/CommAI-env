@@ -172,9 +172,6 @@ class SeqManTask(BaseTask):
     def check_response(self, event):
         if (self.response_check):
 #            self.logger.info("current counter:" + str(self.response_counter))
-            if (event.is_message(PONDERING_TOKEN) and not self.produced_non_pondering_token):
-                if (self.produced_non_pondering_token):
-                    self.set_reward(-1)
             if (event.is_message(self.response_string[self.response_counter])):
                 if (self.response_counter == (len(self.response_string) - 1)):
                     self.set_reward(1)
