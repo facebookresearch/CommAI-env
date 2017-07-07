@@ -62,6 +62,9 @@ class HumanLearner(BaseLearner):
     def ask_for_input(self):
         output = self._view.get_input()
         self.logger.debug("Received input from the human: '{0}'".format(output))
+        # by default just send a space
+        if not output:
+            output = ' '
         if output:
             self.speaking = True
             output = re.compile('\.+').sub('.', output)

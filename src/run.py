@@ -36,13 +36,13 @@ def main():
                   help='adds some delay between each timestep for easier'
                   ' visualization.')
     op.add_option('-l', '--learner',
-                  default='learners.human_learner.HumanLearner',
+                  default='learners.human_learner.ManualHumanLearner',
                   help='Defines the type of learner.')
     op.add_option('-v', '--view',
                   default='BaseView',
                   help='Viewing mode.')
     op.add_option('-s', '--serializer',
-                  default='core.serializer.StandardSerializer',
+                  default='core.serializer.IdentitySerializer',
                   help='Sets the encoding of characters into bits')
     op.add_option('--learner-cmd',
                   help='The cmd to run to launch RemoteLearner.')
