@@ -148,7 +148,8 @@ for string_length in range(2,LONGEST_STRING_LENGTH+1):
     list_of_seen_shuffles = []
     shuffled_index_repository[string_length] = {}
     temp_shuffle = range(number_of_strings)
-    for current_task_id in range(1,NUMBER_OF_TASKS+1):
+    max_tasks = min(math.factorial(number_of_strings), NUMBER_OF_TASKS)
+    for current_task_id in range(1,max_tasks+1):
         random.shuffle(temp_shuffle)
         while (temp_shuffle in list_of_seen_shuffles):
             random.shuffle(temp_shuffle)
@@ -216,7 +217,7 @@ class BaseLookupTask(SeqManTask):
         # tasks_to_be_composed list assumed
         composition_count = len(self.tasks_to_be_composed)-1
         # comp_type is an assumed option that should be set to: none, functional or concatenation
-        task_name =  self.comp_type[0] + string.ascii_letters[self.string_length-2]
+        task_name =  self.comp_type[0] + string.ascii_letters[self.string_length-1]
         output_values = [random.randint(0,number_of_strings-1)]
         key_string = self.generate_fixed_length_binary_string(self.string_length,output_values[0])
         for i in range(composition_count+1):
@@ -252,7 +253,7 @@ while (i<=MAX_COMPOSITION_COUNT):
                 enlarged_task_combination.append(current_task)
                 task_combinations[i].append(enlarged_task_combination)
     for task_combination in task_combinations[i]:
-        for string_length in range(2,LONGEST_STRING_LENGTH+1):
+        for string_length in range(1,LONGEST_STRING_LENGTH+1):
             if i==0:
                 # we generate the non-composed task
                 comp_type="none"
