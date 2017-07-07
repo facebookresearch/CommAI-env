@@ -42,7 +42,7 @@ class TestSmallCompTasks(unittest.TestCase):
         # function that reads the instructions and produces the correct answer
         def get_correct_answer(m):
             answer, = m.search_full_message(r"V([01]*)\.$")
-            return answer[::-1]
+            return answer[::-1] + '.'
 
         # function that reads the instructions and produces an incorrect answer
         def get_incorrect_answer_impatient(m):

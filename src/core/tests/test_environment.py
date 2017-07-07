@@ -25,7 +25,7 @@ class SingleTaskScheduler():
     def get_next_task(self):
         return self.task
 
-    def reward(self, reward):
+    def step(self, reward):
         pass
 
 
