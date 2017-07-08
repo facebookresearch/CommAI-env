@@ -29,7 +29,10 @@ disclosure of security bugs. In those cases, please go through the process
 outlined on that page and do not file a public issue.
 
 ## Coding Style
-Mainly follow the guidelines in PEP 8.
+We favor PEP8 style. However we are not so strict about it since the goal of this platform
+is to provide a rapid prototyping framework for communication-based AI research.
+With that in mind, we do appreciate good coding practices, but they are not necessarily
+a must.
 
 ## License
 By contributing to CommAI-env, you agree that your contributions will be
