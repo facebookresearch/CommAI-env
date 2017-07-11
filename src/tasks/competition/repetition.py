@@ -67,6 +67,43 @@ class BeSilentTask(Task):
         # over.
         self.set_reward(1, random.choice(msg.congratulations))
 
+class DoNotBeSilent(Task):
+    def __init__(self, world=None):
+        super(DoNotBeSilent, self).__init__(world=world,
+                                           max_time=random.randint(100, 1000))
+
+    # give instructions at the beginning of the task
+    @on_start()
+    def on_start(self, event):
+        # initialize a variable to keep track if the learner has been failed
+        self.flag_failed = True
+        self.set_message(random.choice(["do not be silent now.",
+                                        "say anything you want."]))
+
+    # silence is represented by the space character
+    # catch any non-space character
+    @on_message("[^ ]")
+    def on_message(self, event):
+        # if the learner produces anything but a space, it receives reward +1
+        # and the task is over. We need to make sure to do this only once so for
+        # every incoming 1 bit we don't start again sending the feedback
+        # message.
+        if self.flag_failed:
+            self.set_reward(1, random.choice(msg.congratulations))
+            # set the flag, so we don't
+            self.flag_failed = False
+
+    # when the maximum amount of time set for the task has elapsed
+    @on_timeout()
+    def on_timeout(self, event):
+        # if the learner has been silent, it receives reward 0 and the task is
+        # over.
+        if self.flag_failed:
+            self.set_reward(0, random.choice(msg.failed))
+
+
+
+
 
 class RepeatCharacterTask(BaseTask):
     def __init__(self, world=None):
