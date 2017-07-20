@@ -1,7 +1,7 @@
 python_binary(
     name = "run",
     srcs = ["run.py"],
-    main_module = "experimental.germank.ai-challenge.src.run",
+    main_module = "experimental.commai.env.src.run",
     py_version = "<3",
     deps = [
         ":aic",
@@ -11,11 +11,11 @@ python_binary(
 python_binary(
     name = "train",
     srcs = [
-        "experimental/baselines/exp.py",
-        "experimental/baselines/train.py",
-        "experimental/baselines/util.py",
+        "experimental/exp.py",
+        "experimental/train.py",
+        "experimental/util.py",
     ],
-    main_module = "experimental.germank.ai-challenge.src.experimental.baselines.train",
+    main_module = "experimental.commai.env.src.experimental.train",
     py_version = "<3",
     deps = [
         ":aic",
@@ -46,7 +46,7 @@ python_binary(
     name = "test_remote_learner",
     srcs = util.files("core/tests/test_remote_learner.py"),
     main_module =
-        "experimental.germank.ai-challenge.src.core.tests.test_remote_learner",
+        "experimental.commai.env.src.core.tests.test_remote_learner",
     py_version = "<3",
     external_deps = [
         ("pyzmq", "any"),
