@@ -12,6 +12,7 @@ python_binary(
     name = "train",
     srcs = [
         "experimental/exp.py",
+        "experimental/sync.py",
         "experimental/train.py",
         "experimental/util.py",
     ],
