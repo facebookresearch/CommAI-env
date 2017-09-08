@@ -49,7 +49,7 @@ class Session:
 
         while not self._stop:
             # first speaks the environment one token (one bit)
-            token, reward = self._env.next(token)
+            token, reward = self._env.next(token, test_mode=self._learner.test_mode)
             self.env_token_updated(token)
             # reward the learner if it has been set
             self._learner.try_reward(reward)

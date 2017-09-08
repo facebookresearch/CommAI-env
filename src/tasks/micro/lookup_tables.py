@@ -88,11 +88,11 @@ random.seed(1111)
 # prefix will be FuncLookupTask or CatLookupTask (depending on the
 # type of composition), and that T will now be and
 # underscore-delimited sequence of tasks, in order of
-# application). For example, FuncLookupCompTaskR3D1_1_4 is the
+# application). For example, FuncLookupTaskR3D1_1_4 is the
 # functionally composed task of string length 3 given by applying the
 # length-3 task number 1 to the input, then again the same task, and
 # then the length-3 task number 4. The equivalent concatenative task
-# is named CatLookupCompTaskR3D1_1_4
+# is named CatLookupTaskR3D1_1_4
 
 # Positive reward is passed to the learner when it finishes a task
 # successfully. As soon as the learner makes a mistake, it gets
@@ -114,13 +114,13 @@ random.seed(1111)
 # CONSTANTS SET HERE
 
 # what's the longest string length we will consider
-LONGEST_STRING_LENGTH=8
+LONGEST_STRING_LENGTH=2
 # the value above should not be larger than 53, as we are using the
 # ASCII letters (lower and upper case) to label the tasks by length
 # (and we start counting from 2)
 
 # how many tasks do we want to generate for each string length
-NUMBER_OF_TASKS = 20
+NUMBER_OF_TASKS = 8
 # NB: value above cannot be larger than 24, or we won't be able to generate enough distinct
 # tasks for the 2-length case
 # NB: a fortiori, it should not be larger than 52, but if the

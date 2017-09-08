@@ -84,12 +84,12 @@ class Environment:
         self._output_channel_listener.message_updated.register(
             self._on_output_message_updated)
 
-    def next(self, learner_input):
+    def next(self, learner_input, test_mode=False):
         '''Main loop of the Environment. Receives one bit from the learner and
         produces a response (also one bit)'''
         # Make sure we have a task
         if not self._current_task:
-            self._switch_new_task()
+            self._switch_new_task(train_mode=not(test_mode))
         # If the task has not reached the end by either Timeout or
         # achieving the goal
         if not self._current_task.has_ended():
@@ -121,12 +121,12 @@ class Environment:
             if self._output_channel.is_empty():
                 self._reward = self._reward if self._reward is not None else 0
                 reward = self._allowable_reward(self._reward)
-                self._task_scheduler.step(reward)
+                self._task_scheduler.step(reward, train_mode=not(test_mode))
 
                 self.reward_given(self._current_task, reward)
 
                 self._current_task_deinitialized = False
-                self._switch_new_task()
+                self._switch_new_task(train_mode=not(test_mode))
             else:
                 # Do Nothing until the output channel is empty
                 reward = None
@@ -248,13 +248,13 @@ class Environment:
         # when a task ends, it doesn't process any more events
         self._deregister_current_task()
 
-    def _switch_new_task(self):
+    def _switch_new_task(self, train_mode=True):
         '''
         Asks the task scheduler for a new task,
         reset buffers and time, and registers the event handlers
         '''
         # pick a new task
-        self._current_task = self._task_scheduler.get_next_task()
+        self._current_task = self._task_scheduler.get_next_task(train_mode=train_mode)
         # register to the ending event
         self._current_task.ended_updated.register(self._on_task_ended)
         try:
