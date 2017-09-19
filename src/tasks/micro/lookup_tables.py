@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from core.task import Task, on_start, on_message, on_timeout, on_output_message
+from core.task import on_start, on_message, on_timeout, on_output_message
 from tasks.competition.base import BaseTask
 import logging
 import random
@@ -9,7 +9,11 @@ import math
 import string
 
 # NB: wit this random seed, always the same takss will be generated!
-random.seed(1111)
+task_seed = 1111
+random.seed(task_seed)
+
+logger = logging.getLogger(__name__)
+logger.info("Lookup table task seed: {}".format(task_seed))
 
 # debug code sample (please leave this here, as we never know when we
 # might need it)

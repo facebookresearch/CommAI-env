@@ -1,21 +1,19 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from core.task import Task, on_start, on_message, on_timeout, on_output_message
+from core.task import on_start, on_message, on_timeout, on_output_message
 from tasks.competition.base import BaseTask
 import logging
 import random
 import math
 import string
 
-# NB: with this random seed, always the same takss will be generated!
-random.seed(2222)
+# NB: wit this random seed, always the same takss will be generated!
+task_seed = 2222
+random.seed(task_seed)
 
-# debug code sample (please leave this here, as we never know when we
-# might need it)
-# if inside class, initialize to self.logger
-#logger = logging.getLogger(__name__)
-#logger.info("got here with task called" + name)
+logger = logging.getLogger(__name__)
+logger.info("Lookup table task seed: {}".format(task_seed))
 
 
 # This module instantiates a set of atomic and composed lookup table
@@ -123,47 +121,47 @@ random.seed(2222)
 # CONSTANTS SET HERE
 
 # what's the longest string length we will consider
-LONGEST_STRING_LENGTH=3
+LONGEST_STRING_LENGTH = 3
 # the value above should not be larger than 53, as we are using the
 # ASCII letters (lower and upper case) to label the tasks by length
 # (and we start counting from 2)
 
 # how many tasks do we want to generate for each string length
 NUMBER_OF_TASKS = 16
-# NB: value above cannot be larger than 24, or we won't be able to generate enough distinct
-# tasks for the 2-length case
+# NB: value above cannot be larger than 24, or we won't be able to generate
+# enough distinct tasks for the 2-length case
 # NB: a fortiori, it should not be larger than 52, but if the
 # constraint above becomes obsolete, still the value should not be
 # larger than 52, as we use the ASCII letters (lower and upper case)
 # to label the task variants
 
 # how many compositions are going to be maximally performed
-MAX_COMPOSITION_COUNT=2
+MAX_COMPOSITION_COUNT = 2
 # note that a composition count of 0 corresponds to atomic tasks only,
 # 1 to compositions of two tasks, etc
 
 # the following constants regulate tolerance for a "pondering" phase
 # in which the learner is allowed to produce a "silence" token
-PONDERING_TOKEN="p"
+PONDERING_TOKEN = "p"
 MAX_PONDERING = 5
 
 
 # generating a dictionary of distinct permutations for each possible
 # length--we do this before generating the tasks because the atomic
 # and composed tasks should share the same permutations
-shuffled_index_repository={}
-for string_length in range(2,LONGEST_STRING_LENGTH+1):
-    number_of_strings=2**string_length
+shuffled_index_repository = {}
+for string_length in range(2, LONGEST_STRING_LENGTH + 1):
+    number_of_strings = 2**string_length
     list_of_seen_shuffles = []
     shuffled_index_repository[string_length] = {}
-    temp_shuffle = range(number_of_strings)
+    temp_shuffle = list(range(number_of_strings))
     max_tasks = min(math.factorial(number_of_strings), NUMBER_OF_TASKS)
-    for current_task_id in range(1,max_tasks+1):
+    for current_task_id in range(1, max_tasks + 1):
         random.shuffle(temp_shuffle)
         while (temp_shuffle in list_of_seen_shuffles):
             random.shuffle(temp_shuffle)
         list_of_seen_shuffles.append(temp_shuffle[:])
-        shuffled_index_repository[string_length][current_task_id]=temp_shuffle[:]
+        shuffled_index_repository[string_length][current_task_id] = temp_shuffle[:]
 
 
 # the following class is implementing the impatient teacher--it should
@@ -181,7 +179,7 @@ class SeqManTask(BaseTask):
     @on_message(r".$")
     def check_response(self, event):
         if (self.response_check):
-#            self.logger.info("current counter:" + str(self.response_counter))
+            # self.logger.info("current counter:" + str(self.response_counter))
             if (event.is_message(self.response_string[self.response_counter])):
                 if (self.response_counter == (len(self.response_string) - 1)):
                     self.set_reward(1)
@@ -189,7 +187,8 @@ class SeqManTask(BaseTask):
                     self.produced_non_pondering_token = True
                     self.response_counter = self.response_counter + 1
             else:
-                if (not (event.is_message(PONDERING_TOKEN) and not self.produced_non_pondering_token)):
+                if (not (event.is_message(PONDERING_TOKEN) and not
+                            self.produced_non_pondering_token)):
                     self.set_reward(-1)
 
     @on_output_message(r'\.$')
@@ -201,12 +200,11 @@ class SeqManTask(BaseTask):
     def set_response_string(self, rstr, msg):
         if not rstr.endswith('.'):
             rstr += '.'
-        #print('message', msg)
-        #print('response', rstr)
+        # print('message', msg)
+        # print('response', rstr)
         self.response_string = rstr
         #        self._max_time = 8 * len(msg) + 8 * len(rstr) + 8 * MAX_PONDERING - 8
         self._max_time = len(msg) + len(rstr) + MAX_PONDERING
-
 
 
 # template for simple or composed lookup tasks
@@ -215,44 +213,56 @@ class BaseLookupTask(SeqManTask):
         super(BaseLookupTask, self).__init__(world=world, max_time=0)
         random.seed()
 
-    def generate_fixed_length_binary_string(self,fixed_length,input_integer):
+    def generate_fixed_length_binary_string(self, fixed_length, input_integer):
         return bin(input_integer)[2:].zfill(fixed_length)
 
     @on_start()
-    def give_instructions(self,event):
+    def give_instructions(self, event):
         self.response_check = False
         # string_length assumed
         number_of_strings = 2**self.string_length
         # tasks_to_be_composed list assumed
-        composition_count = len(self.tasks_to_be_composed)-1
-        # comp_type is an assumed option that should be set to: none, functional or concatenation
-        task_name =  self.comp_type[0] + string.ascii_letters[self.string_length-1]
+        composition_count = len(self.tasks_to_be_composed) - 1
+        # comp_type is an assumed option that should be set to:
+        # none, functional, concatenation, or procedural
+        task_name = self.comp_type[0] + string.ascii_letters[self.string_length - 1]
         output_values = []
-        selected_index = random.randint(0,number_of_strings-1)
+        selected_index = random.randint(0, number_of_strings - 1)
         # debug: mark that this is a test case in task presentation
-        #if (self.test_case):
+        # if (self.test_case):
         #    task_name = task_name + "t"
         # debug to here
         while ((self.test_case and not(selected_index in self.test_index_set)) or
-        (not(self.test_case) and selected_index in self.test_index_set)):
-            selected_index = random.randint(0,number_of_strings-1)
+                (not(self.test_case) and selected_index in self.test_index_set)):
+            selected_index = random.randint(0, number_of_strings - 1)
         output_values.append(selected_index)
-        key_string = self.generate_fixed_length_binary_string(self.string_length,output_values[0])
-        for i in range(composition_count+1):
+        key_string = self.generate_fixed_length_binary_string(
+            self.string_length, output_values[0])
+        for i in range(composition_count + 1):
             task_number = self.tasks_to_be_composed[i]
-            task_name += string.ascii_letters[task_number-1]
-            key_code = output_values[0]
-            if self.comp_type == "functional":
+            task_name += string.ascii_letters[task_number - 1]
+            # If the compositiona type is functional or procedural, the key code
+            # for current task is the output of the last task, otherwise it's
+            # the selected_index.
+            if (self.comp_type == "functional" or
+                    self.comp_type == "procedural"):
                 key_code = output_values[-1]
-            output_values.append(shuffled_index_repository[self.string_length][task_number][key_code])
-        value_string = ""
+            else:
+                key_code = output_values[0]
+            output_values.append(
+                shuffled_index_repository[self.string_length][task_number][key_code])
+
+        # If the composition type is functional, the expected string is the last
+        # output value, otherwise it's a concatenation of all the output values.
         if self.comp_type == "functional":
-            value_string = self.generate_fixed_length_binary_string(self.string_length,output_values[-1])
+            value_string = self.generate_fixed_length_binary_string(
+                self.string_length, output_values[-1])
         else:
-            value_string = "".join([self.generate_fixed_length_binary_string(self.string_length,e) for e in output_values[1:]])
+            output_strings = [self.generate_fixed_length_binary_string(
+                self.string_length, e) for e in output_values[1:]]
+            value_string = "".join(output_strings)
         task_name += ":"
-        # debug: peek at the solution
-        #message = task_name + value_string + "_" + key_string + "."
+
         message = task_name + key_string + "."
         self.set_message(message)
         self.set_response_string(value_string, message)
@@ -260,45 +270,104 @@ class BaseLookupTask(SeqManTask):
 
 # looping over compositions, tasks and string lengths
 task_combinations = []
-i=0
-while (i<=MAX_COMPOSITION_COUNT):
+i = 0
+while (i <= MAX_COMPOSITION_COUNT):
+
+    # Generate all possible task combinations of a given length i
     task_combinations.append([])
-    for current_task in range(1,NUMBER_OF_TASKS+1):
-        if i==0:
+    for current_task in range(1, NUMBER_OF_TASKS + 1):
+        if i == 0:
             task_combinations[i].append([current_task])
         else:
-            for task_combination in task_combinations[i-1]:
+            for task_combination in task_combinations[i - 1]:
                 enlarged_task_combination = task_combination[:]
                 enlarged_task_combination.append(current_task)
                 task_combinations[i].append(enlarged_task_combination)
+
+    # For each task combination, generate the respective task classes
     for task_combination in task_combinations[i]:
-        for string_length in range(1,LONGEST_STRING_LENGTH+1):
-            if i==0:
+        for string_length in range(1, LONGEST_STRING_LENGTH + 1):
+            # For one task combinations, create an atomic lookup task
+            if i == 0:
                 # we generate the non-composed task
-                comp_type="none"
-                name = "LookupTaskR" + str(string_length) + "D" + str(task_combination[0])
-                LookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type,"test_case":False,"test_index_set":set()})
-                globals()[name]=LookupTask
+                comp_type = "none"
+                name = "LookupTaskR{}D{}".format(string_length, task_combination[0])
+                LookupTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": False,
+                    "test_index_set": set()})
+                globals()[name] = LookupTask
             else:
                 # the composed tasks
-                # picking two random indices that will be left out for the test version of the task
-                test_indices = range(2**string_length)
+                # picking two random indices that will be left out for the test
+                # version of the task
+                test_indices = list(range(2**string_length))
                 random.shuffle(test_indices)
                 test_index_set = set(test_indices[:2])
+
                 # proper functional composition
                 comp_type="functional"
-                name = "FuncLookupTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
-                FuncLookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type,"test_case":False,"test_index_set":test_index_set})
-                globals()[name]=FuncLookupTask
-                name = "FuncLookupTestTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
-                FuncLookupTestTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type,"test_case":True,"test_index_set":test_index_set})
-                globals()[name]=FuncLookupTestTask
+                name = "FuncLookupTaskR{}D{}".format(
+                    string_length, '_'.join(str(e) for e in task_combination))
+                FuncLookupTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": False,
+                    "test_index_set": test_index_set})
+                globals()[name] = FuncLookupTask
+                name = "FuncLookupTestTaskR{}D{}".format(
+                    string_length, '_'.join(str(e) for e in task_combination))
+                FuncLookupTestTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": True,
+                    "test_index_set": test_index_set})
+                globals()[name] = FuncLookupTestTask
+
                 # concatenation
                 comp_type="concatenation"
-                name = "CatLookupTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
-                CatLookupTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type,"test_case":False,"test_index_set":test_index_set})
-                globals()[name]=CatLookupTask
-                name = "CatLookupTestTaskR" + str(string_length) + "D" + '_'.join(str(e) for e in task_combination)
-                CatLookupTestTask = type(name,(BaseLookupTask,),{"tasks_to_be_composed":task_combination,"string_length":string_length,"comp_type":comp_type,"test_case":True,"test_index_set":test_index_set})
-                globals()[name]=CatLookupTestTask
-    i+=1
+                name = "CatLookupTaskR{}D{}".format(
+                    string_length, '_'.join(str(e) for e in task_combination))
+                CatLookupTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": False,
+                    "test_index_set": test_index_set})
+                globals()[name] = CatLookupTask
+                name = "CatLookupTestTaskR{}D{}".format(
+                    string_length, '_'.join(str(e) for e in task_combination))
+                CatLookupTestTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": True,
+                    "test_index_set": test_index_set})
+                globals()[name] = CatLookupTestTask
+
+                # functional composition with intermediate results
+                comp_type = "procedural"
+                name = "ProcLookupTaskR{}D{}".format(
+                    string_length, '_'.join(str(e) for e in task_combination))
+                ProcLookupTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": False,
+                    "test_index_set": test_index_set})
+                globals()[name] = ProcLookupTask
+                name = "ProcLookupTestTaskR{}D{}".format(
+                    string_length, '_'.join(str(e) for e in task_combination))
+                ProcLookupTestTask = type(name, (BaseLookupTask,), {
+                    "tasks_to_be_composed": task_combination,
+                    "string_length": string_length,
+                    "comp_type": comp_type,
+                    "test_case": True,
+                    "test_index_set": test_index_set})
+                globals()[name] = ProcLookupTestTask
+
+    i += 1
