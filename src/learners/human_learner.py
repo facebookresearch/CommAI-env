@@ -23,6 +23,7 @@ class HumanLearner(BaseLearner):
         self._input_channel = InputChannel(serializer)
         self._output_channel = OutputChannel(serializer)
         self._input_channel.message_updated.register(self.on_message)
+        self.test_mode = False
         self.logger = logging.getLogger(__name__)
         self.speaking = False
 

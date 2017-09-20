@@ -30,11 +30,12 @@ def check_continuity(Intvs):
     """
     I1 = Intvs[:-1]
     I2 = Intvs[1:]
+    continuous = True
     for (a, b) in zip(I1, I2):
-        boolean = (eval(a)[-1] + 1 == eval(b)[0])
-        if not(boolean):
+        continuous = (eval(a)[-1] + 1 == eval(b)[0])
+        if not(continuous):
             break
-    return boolean
+    return continuous
 
 
 def dic_interval_task(intervals, tasks):
