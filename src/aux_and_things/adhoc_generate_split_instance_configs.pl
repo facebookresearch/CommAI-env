@@ -2,6 +2,8 @@
 
 $name_string = shift;
 
+$num_bits = shift;
+
 $composition_type = shift;
 
 $lookup_table_name = shift;
@@ -43,8 +45,8 @@ print CONTROL $preamble;
 $i=1;
 while ($i<=$atomic_task_count) {
     $task_specification = << "END_TASK_SPECIFICATION";
-    "LookupTaskR2D$i": {
-      "type": "tasks.micro.$lookup_table_name.LookupTaskR2D$i"
+    "LookupTaskR${num_bits}D$i": {
+      "type": "tasks.micro.$lookup_table_name.LookupTaskR${num_bits}D$i"
     },
 END_TASK_SPECIFICATION
 
@@ -56,17 +58,17 @@ END_TASK_SPECIFICATION
     while ($j<=$atomic_task_count) {
         $control_j = $j + $atomic_task_count;
         $composed_task_specification = << "END_TASK_SPECIFICATION";
-    "${composition_type}LookupTaskR2D${i}_${j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTaskR2D${i}_${j}"
+    "${composition_type}LookupTaskR${num_bits}D${i}_${j}": {
+      "type": "tasks.micro.$lookup_table_name.FuncLookupTaskR${num_bits}D${i}_${j}"
     },
-    "${composition_type}LookupTaskR2D${control_i}_${control_j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTaskR2D${control_i}_${control_j}"
+    "${composition_type}LookupTaskR${num_bits}D${control_i}_${control_j}": {
+      "type": "tasks.micro.$lookup_table_name.FuncLookupTaskR${num_bits}D${control_i}_${control_j}"
     },
-    "${composition_type}LookupTestTaskR2D${i}_${j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTestTaskR2D${i}_${j}"
+    "${composition_type}LookupTestTaskR${num_bits}D${i}_${j}": {
+      "type": "tasks.micro.$lookup_table_name.FuncLookupTestTaskR${num_bits}D${i}_${j}"
     },
-    "${composition_type}LookupTestTaskR2D${control_i}_${control_j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTestTaskR2D${control_i}_${control_j}"
+    "${composition_type}LookupTestTaskR${num_bits}D${control_i}_${control_j}": {
+      "type": "tasks.micro.$lookup_table_name.FuncLookupTestTaskR${num_bits}D${control_i}_${control_j}"
     },
 END_TASK_SPECIFICATION
         if ($i==$atomic_task_count && $j==$atomic_task_count) {
@@ -93,13 +95,13 @@ print COMP $connector;
 print CONTROL $connector;
 
 foreach $i (1..$atomic_task_count) {
-    print COMP "\"LookupTaskR2D$i\", ";
-    print CONTROL "\"LookupTaskR2D$i\", ";
+    print COMP "\"LookupTaskR${num_bits}D$i\", ";
+    print CONTROL "\"LookupTaskR${num_bits}D$i\", ";
 }
 
 @composed_names = ();
 foreach $i_j (@combinations) {
-    $composed_name = "\"" . $composition_type . "LookupTaskR2D" . $i_j . "\"";
+    $composed_name = "\"" . $composition_type . "LookupTaskR${num_bits}D" . $i_j . "\"";
     push @composed_names,$composed_name;
 }
 print COMP join ", ", @composed_names;
@@ -112,10 +114,10 @@ print CONTROL ", ";
 @composed_test_names = ();
 @control_test_names = ();
 foreach $i_j (@combinations) {
-    $composed_test_name =  "\"" . $composition_type . "LookupTestTaskR2D" . $i_j . "\"";
+    $composed_test_name =  "\"" . $composition_type . "LookupTestTaskR${num_bits}D" . $i_j . "\"";
     ($i,$j) = split "_",$i_j;
     push @composed_test_names,$composed_test_name;
-    $control_test_name = "\"" . $composition_type . "LookupTestTaskR2D" . ($i+$atomic_task_count) . "_" .
+    $control_test_name = "\"" . $composition_type . "LookupTestTaskR${num_bits}D" . ($i+$atomic_task_count) . "_" .
         ($j+$atomic_task_count) . "\"";
     push @control_test_names,$control_test_name;
 }
