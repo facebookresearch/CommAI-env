@@ -124,7 +124,7 @@ LONGEST_STRING_LENGTH=2
 # (and we start counting from 2)
 
 # how many tasks do we want to generate for each string length
-NUMBER_OF_TASKS = 8
+NUMBER_OF_TASKS = 12
 # NB: value above cannot be larger than 24, or we won't be able to generate enough distinct
 # tasks for the 2-length case
 # NB: a fortiori, it should not be larger than 52, but if the
