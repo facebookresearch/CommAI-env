@@ -62,6 +62,7 @@ def dic_interval_task(intervals, tasks):
     assert check_continuity(task_intervals.keys())
     return task_intervals
 
+
 class RandomTaskScheduler:
     '''
     A Scheduler provides new tasks every time is asked.
@@ -185,6 +186,7 @@ class DependenciesTaskScheduler:
 
     def pick_new_task(self):
         return random.sample(self.available_tasks, 1)[0]
+
 
 class IntervalTaskScheduler:
     '''

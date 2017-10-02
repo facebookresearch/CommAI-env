@@ -59,16 +59,16 @@ END_TASK_SPECIFICATION
         $control_j = $j + $atomic_task_count;
         $composed_task_specification = << "END_TASK_SPECIFICATION";
     "${composition_type}LookupTaskR${num_bits}D${i}_${j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTaskR${num_bits}D${i}_${j}"
+      "type": "tasks.micro.$lookup_table_name.${composition_type}LookupTaskR${num_bits}D${i}_${j}"
     },
     "${composition_type}LookupTaskR${num_bits}D${control_i}_${control_j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTaskR${num_bits}D${control_i}_${control_j}"
+      "type": "tasks.micro.$lookup_table_name.${composition_type}LookupTaskR${num_bits}D${control_i}_${control_j}"
     },
     "${composition_type}LookupTestTaskR${num_bits}D${i}_${j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTestTaskR${num_bits}D${i}_${j}"
+      "type": "tasks.micro.$lookup_table_name.${composition_type}LookupTestTaskR${num_bits}D${i}_${j}"
     },
     "${composition_type}LookupTestTaskR${num_bits}D${control_i}_${control_j}": {
-      "type": "tasks.micro.$lookup_table_name.FuncLookupTestTaskR${num_bits}D${control_i}_${control_j}"
+      "type": "tasks.micro.$lookup_table_name.${composition_type}LookupTestTaskR${num_bits}D${control_i}_${control_j}"
     },
 END_TASK_SPECIFICATION
         if ($i==$atomic_task_count && $j==$atomic_task_count) {
