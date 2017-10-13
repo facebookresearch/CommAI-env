@@ -216,9 +216,7 @@ class BaseLookupTask(SeqManTask):
     def generate_fixed_length_binary_string(self, fixed_length, input_integer):
         return bin(input_integer)[2:].zfill(fixed_length)
 
-    @on_start()
-    def give_instructions(self, event):
-        self.response_check = False
+    def get_next_episode(self):
         # string_length assumed
         number_of_strings = 2**self.string_length
         # tasks_to_be_composed list assumed
@@ -264,6 +262,15 @@ class BaseLookupTask(SeqManTask):
         task_name += ":"
 
         message = task_name + key_string + "."
+
+        return message, value_string
+
+    @on_start()
+    def give_instructions(self, event):
+        self.response_check = False
+
+        message, value_string = self.get_next_episode()
+
         self.set_message(message)
         self.set_response_string(value_string, message)
 
