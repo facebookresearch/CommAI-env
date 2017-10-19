@@ -44,6 +44,8 @@ for input_json_file in args.input_json_files:
                 task_category = "ComposedTest"
             else:
                 task_category = "ComposedTrain"
+        else:
+            task_category = 'Atomic'
 
         cleaned_list = [x for x in raw_data['S'][task] if not math.isnan(x)]
         current_index = args.window - 1
