@@ -208,7 +208,7 @@ class StandardSerializer:
         data = []
         for c in message:
             # get the numeric value of the character
-            try: 
+            try:
                 c = ord(c)
             except TypeError:
                 # already an int (Python 3)
