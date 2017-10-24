@@ -8,6 +8,8 @@ This document describes the tasks that are currently implemented or about to be 
 
 **NB2: Not all tasks described here have already been implemented (those without a [CHK] or a [IMP] tag aren't), and not all tasks that have been implemented are implemented exactly as described here.**
 
+**NB3: Solving the tasks described below should not be taken as neither necessary nor sufficient requirement for any AI system. They simply demonstrate how different interesting problems can be encoded in the CommAI-env platform. Therefore, we highly encourage researchers to extend or replace these tasks with those that are most closely related to the learning skills they want to test an agent for.**
+
 
 
 # Repetition Tasks
