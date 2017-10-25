@@ -216,29 +216,14 @@ class BaseLookupTask(SeqManTask):
     def generate_fixed_length_binary_string(self, fixed_length, input_integer):
         return bin(input_integer)[2:].zfill(fixed_length)
 
-    def get_next_episode(self):
-        # string_length assumed
-        number_of_strings = 2**self.string_length
-        # tasks_to_be_composed list assumed
+    def get_value_string(self, key_code):
+        ''' Returns the target value string for the given key_code '''
+
+        output_values = [key_code]
         composition_count = len(self.tasks_to_be_composed) - 1
-        # comp_type is an assumed option that should be set to:
-        # none, functional, concatenation, or procedural
-        task_name = self.comp_type[0] + string.ascii_letters[self.string_length - 1]
-        output_values = []
-        selected_index = random.randint(0, number_of_strings - 1)
-        # debug: mark that this is a test case in task presentation
-        # if (self.test_case):
-        #    task_name = task_name + "t"
-        # debug to here
-        while ((self.test_case and not(selected_index in self.test_index_set)) or
-                (not(self.test_case) and selected_index in self.test_index_set)):
-            selected_index = random.randint(0, number_of_strings - 1)
-        output_values.append(selected_index)
-        key_string = self.generate_fixed_length_binary_string(
-            self.string_length, output_values[0])
+
         for i in range(composition_count + 1):
             task_number = self.tasks_to_be_composed[i]
-            task_name += string.ascii_letters[task_number - 1]
             # If the compositiona type is functional or procedural, the key code
             # for current task is the output of the last task, otherwise it's
             # the selected_index.
@@ -259,9 +244,41 @@ class BaseLookupTask(SeqManTask):
             output_strings = [self.generate_fixed_length_binary_string(
                 self.string_length, e) for e in output_values[1:]]
             value_string = "".join(output_strings)
-        task_name += ":"
 
-        message = task_name + key_string + "."
+        return value_string
+
+    def get_task_name(self):
+        ''' Returns the task name, e.g. "nba"'''
+
+        # Concatenate the task codes for a final task name.
+        composition_count = len(self.tasks_to_be_composed) - 1
+        task_name = self.comp_type[0] + string.ascii_letters[self.string_length - 1]
+        for i in range(composition_count + 1):
+            task_number = self.tasks_to_be_composed[i]
+            task_name += string.ascii_letters[task_number - 1]
+
+        return task_name
+
+    def get_next_episode(self):
+        # string_length assumed
+        number_of_strings = 2**self.string_length
+
+        # Select the index (row in the mapping table)
+        selected_index = random.randint(0, number_of_strings - 1)
+        while ((self.test_case and not(selected_index in self.test_index_set)) or
+                (not(self.test_case) and selected_index in self.test_index_set)):
+            selected_index = random.randint(0, number_of_strings - 1)
+
+        # Convert the selected index into a binary string
+        key_string = self.generate_fixed_length_binary_string(
+            self.string_length, selected_index)
+
+        # Generate the final message
+        message = self.get_task_name() + ':' + key_string + "."
+
+        # Lookup & generate (in case of compositions) the target value string
+        # for the selected index
+        value_string = self.get_value_string(selected_index)
 
         return message, value_string
 
