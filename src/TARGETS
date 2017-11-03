@@ -26,6 +26,18 @@ python_binary(
 )
 
 python_library(
+    name = "micro_tasks",
+    srcs = glob([
+        "tasks/micro/*.py",
+    ]),
+    main_module = "experimental.commai.env.src.tasks.micro",
+    py_version = "<3",
+    deps = [
+        ":aic",
+    ],
+)
+
+python_library(
     name = "aic",
     srcs = glob(
         ["**/*.py"],
