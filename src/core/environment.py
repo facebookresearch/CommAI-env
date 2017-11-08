@@ -254,6 +254,8 @@ class Environment:
         reset buffers and time, and registers the event handlers
         '''
         # pick a new task
+        # use of train_mode is not consistent in the head branch
+        # but in some experimental branches
         self._current_task = self._task_scheduler.get_next_task(train_mode=train_mode)
         # register to the ending event
         self._current_task.ended_updated.register(self._on_task_ended)
