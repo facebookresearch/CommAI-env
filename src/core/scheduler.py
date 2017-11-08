@@ -71,11 +71,11 @@ class RandomTaskScheduler:
     def __init__(self, tasks):
         self.tasks = tasks
 
-    def get_next_task(self):
+    def get_next_task(self, train_mode=True):
         # pick a random task
         return random.choice(self.tasks)
 
-    def step(self, reward):
+    def step(self, reward, train_mode=True):
         # whatever
         pass
 
@@ -89,13 +89,13 @@ class SequentialTaskScheduler:
         self.tasks = tasks
         self.i = 0
 
-    def get_next_task(self):
+    def get_next_task(self, train_mode=True):
         # pick a random task
         ret = self.tasks[self.i]
         self.i = (self.i + 1) % len(self.tasks)
         return ret
 
-    def step(self, reward):
+    def step(self, reward, train_mode=True):
         # whatever
         pass
 
@@ -112,13 +112,13 @@ class IncrementalTaskScheduler:
         self.reward_count = 0
         self.success_threshold = success_threshold
 
-    def get_next_task(self):
+    def get_next_task(self, train_mode=True):
         if self.reward_count == self.success_threshold:
             self.reward_count = 0
             self.task_ptr = (self.task_ptr + 1) % len(self.tasks)
         return self.tasks[self.task_ptr]
 
-    def step(self, reward):
+    def step(self, reward, train_mode=True):
         self.reward_count += reward
 
 # TODO: Create a BatchedScheduler that takes as an argument another
@@ -154,11 +154,11 @@ class DependenciesTaskScheduler:
         # initially these are the tasks that have no dependencies on them
         self.find_available_tasks()
 
-    def get_next_task(self):
+    def get_next_task(self, train_mode=True):
         self.last_task = self.pick_new_task()
         return self.last_task
 
-    def step(self, reward):
+    def step(self, reward, train_mode=True):
         # remember the amount of times we have solved the task
         # using the name of the class to have a hashable value
         task_name = self.get_task_id(self.last_task)
