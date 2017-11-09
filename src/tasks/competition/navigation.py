@@ -595,7 +595,7 @@ class FindObjectAroundTask(Task):
         self.add_handler(
             on_state_changed(
                 lambda ws, ts: ws.learner_inventory[self.obj] == obj_count + 1)
-            (self.on_object_picked.im_func)
+            (self.on_object_picked.__func__)
         )
 
     @on_ended()
