@@ -252,7 +252,8 @@ class BaseLookupTask(SeqManTask):
 
         # Concatenate the task codes for a final task name.
         composition_count = len(self.tasks_to_be_composed) - 1
-        task_name = self.comp_type[0] + string.ascii_letters[self.string_length - 1]
+        task_name = self.comp_type[0].upper() + \
+                    string.ascii_uppercase[self.string_length - 1]
         for i in range(composition_count + 1):
             task_number = self.tasks_to_be_composed[i]
             task_name += string.ascii_letters[task_number - 1]
