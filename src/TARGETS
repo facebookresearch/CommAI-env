@@ -25,6 +25,20 @@ python_binary(
     ],
 )
 
+python_binary(
+    name = "search",
+    srcs = [
+        "experimental/search.py",
+    ],
+    main_module = "experimental.commai.env.src.experimental.search",
+    py_version = "<3",
+    deps = [
+        ":aic",
+        "@/pytorch/pytorch:torch",
+        "@/visdom/py:visdom",
+    ],
+)
+
 python_library(
     name = "micro_tasks",
     srcs = glob([
