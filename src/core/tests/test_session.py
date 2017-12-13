@@ -42,6 +42,7 @@ class EnvironmentMock(object):
 
 
 class LearnerMock(object):
+    test_mode = False
     def next(self, token):
         return token
 
@@ -53,10 +54,10 @@ class SingleTaskScheduler():
     def __init__(self, task):
         self.task = task
 
-    def get_next_task(self):
+    def get_next_task(self, *kargs, **kwargs):
         return self.task
 
-    def step(self, reward):
+    def step(self, reward, *kargs, **kwargs):
         pass
 
 
