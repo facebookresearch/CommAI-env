@@ -28,7 +28,7 @@ python_library(
     ),
     base_module = "",
     deps = [
-        "@/pytorch/pytorch:torch",
+        "//pytorch/pytorch:torch",
     ],
     external_deps = [
         ("pyzmq", "any"),
@@ -66,6 +66,6 @@ lua_binary(
     ],
     main_module = "core.tests.test_torch_learner",
     deps = [
-        "@/deeplearning/torch:all_modules",
+        "//deeplearning/torch:all_modules",
     ],
 )
