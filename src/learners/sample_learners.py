@@ -15,6 +15,7 @@ from learners.base import BaseLearner
 
 
 class SampleRepeatingLearner(BaseLearner):
+    test_mode = False
     def reward(self, reward):
         # YEAH! Reward!!! Whatever...
         pass
@@ -26,6 +27,7 @@ class SampleRepeatingLearner(BaseLearner):
 
 
 class SampleSilentLearner(BaseLearner):
+    test_mode = False
     def __init__(self):
         self.serializer = StandardSerializer()
         self.silence_code = self.serializer.to_binary(' ')
@@ -42,6 +44,7 @@ class SampleSilentLearner(BaseLearner):
 
 
 class SampleMemorizingLearner(BaseLearner):
+    test_mode = False
     def __init__(self):
         self.memory = ''
         self.teacher_stopped_talking = False
