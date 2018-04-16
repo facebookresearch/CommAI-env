@@ -28,7 +28,7 @@ python_library(
     ),
     base_module = "",
     deps = [
-        "//pytorch/pytorch:torch",
+        "//caffe2:torch",
     ],
     external_deps = [
         ("pyzmq", "any"),
