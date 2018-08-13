@@ -40,7 +40,7 @@ python_library(
 
 python_binary(
     name = "test_remote_learner",
-    srcs = util.files("core/tests/test_remote_learner.py"),
+    srcs = glob(["core/tests/test_remote_learner.py"]),
     main_module =
         "experimental.commai.env.src.core.tests.test_remote_learner",
     py_version = "<3",
