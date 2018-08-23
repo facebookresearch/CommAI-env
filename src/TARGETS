@@ -24,7 +24,7 @@ python_library(
     name = "aic",
     srcs = glob(
         ["**/*.py"],
-        excludes = ["run_tournament.py"],
+        exclude = ["run_tournament.py"],
     ),
     base_module = "",
     deps = [
