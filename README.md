@@ -24,8 +24,6 @@ The following are some basic characteristics of CommAI-env that distinguish it f
 
   - On the other, just like humans, the Learner should be able to solve simple problems after just a few exposures: thus, speed of learning should be taken into account in the evaluation.
 
- - **We plan to run a competition based on CommAI-env when the platform is sufficiently mature. Given what we just said, the evaluation setup will feature a different set of tasks from the ones included in the development version. Examples of ways in which evaluation tasks might differ include: they might be cast in different (natural or artificial) languages, they might require learning about new objects and locations surrounding the Learner, they might require a new combination of the skills acquired during development, etc.**
-
 CommAI-env is currently in beta-testing stage, and we welcome your feedback and contributions!
 
 
