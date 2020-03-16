@@ -1,3 +1,9 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+
 from pool_metrics import PoolMetrics
 from json_reporter import JSONReporter
 from console_reporter import ConsoleReporter

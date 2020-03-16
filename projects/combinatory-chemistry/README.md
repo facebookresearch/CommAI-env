@@ -3,6 +3,14 @@
 This directory contains the code associated with the paper _Combinatory Chemistry:
 Towards a Simple Model of Emergent Evolution_.
 
+## Requirements
+
+The simulator requires the `lazy` library to run:
+
+```bash
+pip install lazy
+```
+
 ## Running the simulation
 
 Use `python main.py` with the following parameters:
