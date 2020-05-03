@@ -5,10 +5,10 @@ Towards a Simple Model of Emergent Evolution_.
 
 ## Requirements
 
-The simulator requires the `lazy` library to run:
+Install required libraries with:
 
 ```bash
-pip install lazy
+pip install -r requirements.txt
 ```
 
 ## Running the simulation

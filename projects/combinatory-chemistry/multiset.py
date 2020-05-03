@@ -5,19 +5,18 @@
 # LICENSE file in the root directory of this source tree.
 
 from collections import Counter
-from sampler import Sampler
+import itertools
+import bisect
+import random
 
 class Multiset(object):
     def __init__(self, N):
-        self.item2id = {}
-        self.id2item = []
         self.item_count = Counter()
         self.max_size = N
-        self.sampler = Sampler(N, N, 1)
         self.count = 0
 
     def __contains__(self, item):
-        return item in self.item2id
+        return item in self.item_count
 
     def has_all(self, items):
         items = Counter(items)
@@ -41,33 +40,21 @@ class Multiset(object):
         return self.item_count.items()
 
     def unique(self):
-        return iter(self.id2item)
+        return self.item_count.keys()
                 
     def __len__(self):
         return self.count
 
     def grow_capacity(self, n):
-        new_sampler = Sampler(self.max_size + n, self.max_size + n, 1)
-        for item, count in self.items():
-            item_id = self.item2id[item]
-            new_sampler.add(item_id, count)
-        self.sampler = new_sampler
         self.max_size += n
 
     def add(self, item, item_count=1):
         assert self.count < self.max_size
         if not item in self:
-            item_id = len(self.id2item)
-            self.item2id[item] = item_id
-            self.id2item.append(item)
             self.item_count[item] = item_count
-            self.sampler.add(item_id, item_count)
         else:
-            item_id = self.item2id[item]
             c = self.item_count[item]
             self.item_count[item] += item_count
-            self.sampler.remove(item_id, c)
-            self.sampler.add(item_id, c + item_count)
         self.count += item_count
 
     def remove_all(self, item):
@@ -81,32 +68,19 @@ class Multiset(object):
 
     def remove(self, item):
         assert item in self, item
-        item_id = self.item2id[item]
         c = self.item_count[item]
-        self.sampler.remove(item_id, c)
         if c == 1:
             del self.item_count[item]
-            del self.item2id[item]
-            # move another item to this id
-            last_item = self.id2item.pop()
-            last_item_id = len(self.id2item) 
-            # unless this was the last item
-            if last_item_id != item_id:
-                self.id2item[item_id] = last_item
-                self.item2id[last_item] = item_id
-                last_item_count = self.item_count[last_item]
-                self.sampler.remove(last_item_id, last_item_count)
-                self.sampler.add(item_id, last_item_count)
         else:
             self.item_count[item] -= 1
-            self.sampler.add(item_id, c - 1)
         self.count -= 1
 
 
     def sample(self):
-        assert self.count == self.sampler.total_weight
-        item_id = self.sampler.sample()
-        return self.id2item[item_id]
+        choices, weights = zip(*self.item_count.items())
+        cumdist = list(itertools.accumulate(weights))
+        x = random.random() * cumdist[-1]
+        return choices[bisect.bisect(cumdist, x)]
 
     def sample_without_replacement(self, n):
         ret = []

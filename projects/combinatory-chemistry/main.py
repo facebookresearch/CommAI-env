@@ -6,7 +6,6 @@
 
 print('Loading...')
 import argparse
-import plotille
 import os
 import time
 from collections import defaultdict, Counter
